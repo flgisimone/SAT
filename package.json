@@ -1,6 +1,6 @@
 {
   "name": "seo-accessibility-tool",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "A11y SEO Accessibility tool for React and Vue projects",
   "author": "Giulio Simone Floresta",
   "license": "MIT",
@@ -8,15 +8,15 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "types": "./dist/types/index.d.ts"
+      "types": "./dist/index.d.ts"
     },
     "./react": {
       "import": "./dist/react.js",
-      "types": "./dist/types/react/useHeadingOrder.d.ts"
+      "types": "./dist/react.d.ts"
     },
     "./vue": {
       "import": "./dist/vue.js",
-      "types": "./dist/types/vue/useHeadingOrder.d.ts"
+      "types": "./dist/vue.d.ts"
     }
   },
   "files": [
@@ -35,15 +35,15 @@
     "semantic"
   ],
   "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "test": "echo \"No tests yet!\""
+    "build": "rollup -c && rollup -c rollup.dts.config.cjs",
+    "dev": "rollup -c -w"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^12.1.2",
-    "@types/react": "^19.0.10",
     "rollup": "^4.35.0",
-    "typescript": "^5.8.2"
+    "rollup-plugin-dts": "^6.1.0",
+    "typescript": "^5.8.2",
+    "@types/react": "^19.0.10"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",

@@ -35,3 +35,4 @@ function checkHeadingOrder(options) {
 }
 
 export { checkHeadingOrder };
+//# sourceMappingURL=index.js.map
