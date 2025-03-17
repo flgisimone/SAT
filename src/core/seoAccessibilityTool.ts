@@ -96,6 +96,54 @@ function checkHeadingOrder(): void {
 }
 
 /**
+ * Checks for heading level jumps and regressions in the provided list of headings.
+ *
+ * - Level Jump: Skipping one or more heading levels in ascending order (e.g., H1 ➔ H4).
+ * - Regression: Moving back to a higher heading level unexpectedly (e.g., H4 ➔ H2).
+ *
+ * Logs warnings in the console when issues are detected.
+ *
+ * @returns {void}
+ */
+function checkJumpLevels(): void {
+    const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6')) as HTMLElement[];
+
+    let lastLevel = 0;
+
+    headings.forEach((heading) => {
+        const currentLevel = parseInt(heading.tagName.replace('H', ''), 10);
+        const text = heading.textContent?.trim() || '';
+        const message = {
+            levelJumpDetected:
+                `⚠️ Heading level jump detected: Found ${heading.tagName} ("${text}") skipping levels after H${lastLevel}.`,
+            regressionDetected:
+                `⚠️ Heading regression detected: Found ${heading.tagName} ("${text}") after a higher level heading (H${lastLevel}).`
+        }
+
+        // Skip the first heading (no previous level to compare)
+        if (lastLevel === 0) {
+            lastLevel = currentLevel;
+
+            return;
+        }
+
+        const levelDifference = currentLevel - lastLevel;
+
+        // Detect level jumps (skips intermediate levels)
+        if (levelDifference > 1) {
+            console.warn(message.levelJumpDetected);
+        }
+
+        // Detect regressions (heading level goes back unexpectedly)
+        if (levelDifference < -1) {
+            console.warn(message.regressionDetected);
+        }
+
+        lastLevel = currentLevel;
+    });
+}
+
+/**
  * Runs the complete SEO Accessibility Tool (SAT) checks:
  * - Checks heading order (`<h1>` to `<h6>`) for hierarchy issues.
  * - Checks the presence of `<h1>` tags (multiple or missing).
@@ -107,4 +155,5 @@ export function useSAT(): void {
     checkHeadingOrder();
     checkH1();
     checkH1Visible();
+    checkJumpLevels();
 }
