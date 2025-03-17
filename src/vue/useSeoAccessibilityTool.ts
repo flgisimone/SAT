@@ -1,18 +1,18 @@
 import { onMounted, onUnmounted } from 'vue';
-import { useSAT, HeadingOrderOptions } from "../core/seoAccessibilityTool";
+import { useSAT } from "../core/seoAccessibilityTool";
 
-export interface UseHeadingOrderOptions extends HeadingOrderOptions {
+export interface IProp {
     delay?: number;
 }
 
-export function useSATVue({ delay = 100, callback }: UseHeadingOrderOptions = {}) {
+export function useSATVue({ delay = 100 }: IProp = {}) {
     let timeout: number;
 
     onMounted(() => {
-        useSAT({ callback });
+        useSAT();
 
         timeout = window.setTimeout(() => {
-            useSAT({ callback });
+            useSAT();
         }, delay);
     });
 
