@@ -1,16 +1,16 @@
 import { useEffect } from 'react';
-import { useSAT, HeadingOrderOptions } from "../core/seoAccessibilityTool";
+import { useSAT } from "../core/seoAccessibilityTool";
 
-export interface UseHeadingOrderOptions extends HeadingOrderOptions {
+export interface IProp {
     delay?: number;
 }
 
-export const useSATReact = ({ delay = 100, callback }: UseHeadingOrderOptions = {}) => {
+export const useSATReact = ({ delay = 100 }: IProp = {}) => {
     useEffect(() => {
-        useSAT({ callback });
+        useSAT();
 
         const timeout = setTimeout(() => {
-            useSAT({ callback });
+            useSAT();
         }, delay);
 
         return () => clearTimeout(timeout);

@@ -1,20 +1,6 @@
-export interface HeadingOrderOptions {
-    callback?: (message: string, context: { tag: string; text: string; lastLevel: number }) => void;
-}
-
-export function useSAT(options: HeadingOrderOptions = {}) {
-    const { callback } = options;
+export function useSAT() {
     const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6'));
     let lastLevel = 0;
-
-    const tagColors: Record<string, { outline: string; background: string }> = {
-        H1: { outline: '2px solid #FF0000', background: 'rgba(255, 0, 0, 0.1)' },
-        H2: { outline: '2px solid #FF8000', background: 'rgba(255, 128, 0, 0.1)' },
-        H3: { outline: '2px solid #FFD700', background: 'rgba(255, 215, 0, 0.1)' },
-        H4: { outline: '2px solid #008000', background: 'rgba(0, 128, 0, 0.1)' },
-        H5: { outline: '2px solid #0000FF', background: 'rgba(0, 0, 255, 0.1)' },
-        H6: { outline: '2px solid #800080', background: 'rgba(128, 0, 128, 0.1)' },
-    };
 
     headings.forEach((heading) => {
         const htmlHeading = heading as HTMLElement;
@@ -34,39 +20,22 @@ export function useSAT(options: HeadingOrderOptions = {}) {
 
             console.warn(message);
 
-            if (callback) {
-                callback(message, {
-                    tag: htmlHeading.tagName,
-                    text,
-                    lastLevel
-                });
-            }
-
-            const colors = tagColors[htmlHeading.tagName] || {
-                outline: '2px solid black',
-                background: 'rgba(0, 0, 0, 0.1)',
-            };
-
-            htmlHeading.style.outline = colors.outline;
-            htmlHeading.style.backgroundColor = colors.background;
             htmlHeading.title = `Incorrect ${htmlHeading.tagName.toLowerCase()} order`;
         }
 
         lastLevel = currentLevel;
     });
 
+
     const h1Count = document.querySelectorAll('h1');
-    const message = `⚠️ Multiple h1 found`;
+    const message = {
+        messageMultipleH1: `⚠️ Multiple h1 found`,
+        messageH1NotFound: `⚠️ H1 not found`
+    }
 
     if (h1Count.length > 1) {
-        console.warn(message);
-
-        if (callback) {
-            callback(message, {
-                tag: 'H1',
-                text: `${h1Count.length} found`,
-                lastLevel: 1
-            });
-        }
+        console.warn(message.messageMultipleH1);
+    } else if (h1Count.length === 0) {
+        console.warn(message.messageH1NotFound);
     }
 }
