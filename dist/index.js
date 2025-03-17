@@ -1,4 +1,4 @@
-function checkHeadingOrder(options) {
+function useSAT(options) {
     const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6'));
     let lastLevel = 0;
     const tagColors = {
@@ -32,7 +32,12 @@ function checkHeadingOrder(options) {
         }
         lastLevel = currentLevel;
     });
+    const h1Count = document.querySelectorAll('h1');
+    const message = `⚠️ Multiple h1 found`;
+    if (h1Count.length > 1) {
+        console.warn(message);
+    }
 }
 
-export { checkHeadingOrder };
+export { useSAT };
 //# sourceMappingURL=index.js.map

@@ -1,6 +1,6 @@
 import { onMounted, onUnmounted } from 'vue';
 
-function checkHeadingOrder(options) {
+function useSAT(options) {
     const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6'));
     let lastLevel = 0;
     const tagColors = {
@@ -34,14 +34,19 @@ function checkHeadingOrder(options) {
         }
         lastLevel = currentLevel;
     });
+    const h1Count = document.querySelectorAll('h1');
+    const message = `⚠️ Multiple h1 found`;
+    if (h1Count.length > 1) {
+        console.warn(message);
+    }
 }
 
-function useHeadingOrder({ delay = 100, callback } = {}) {
+function seoAccessibilityTool({ delay = 100, callback } = {}) {
     let timeout;
     onMounted(() => {
-        checkHeadingOrder();
+        useSAT();
         timeout = window.setTimeout(() => {
-            checkHeadingOrder();
+            useSAT();
         }, delay);
     });
     onUnmounted(() => {
@@ -49,5 +54,5 @@ function useHeadingOrder({ delay = 100, callback } = {}) {
     });
 }
 
-export { useHeadingOrder };
+export { seoAccessibilityTool };
 //# sourceMappingURL=vue.js.map

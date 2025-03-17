@@ -1,18 +1,18 @@
 import { onMounted, onUnmounted } from 'vue';
-import { checkHeadingOrder, HeadingOrderOptions, h1Detected } from "../core/seoAccessibilityTool";
+import { useSAT, HeadingOrderOptions } from "../core/seoAccessibilityTool";
 
 export interface UseHeadingOrderOptions extends HeadingOrderOptions {
     delay?: number;
 }
 
-export function useSAT({ delay = 100, callback }: UseHeadingOrderOptions = {}) {
+export function seoAccessibilityTool({ delay = 100, callback }: UseHeadingOrderOptions = {}) {
     let timeout: number;
 
     onMounted(() => {
-        checkHeadingOrder({ callback });
+        useSAT({ callback });
 
         timeout = window.setTimeout(() => {
-            checkHeadingOrder({ callback });
+            useSAT({ callback });
         }, delay);
     });
 

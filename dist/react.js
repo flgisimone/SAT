@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-function checkHeadingOrder(options) {
+function useSAT(options) {
     const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6'));
     let lastLevel = 0;
     const tagColors = {
@@ -34,17 +34,22 @@ function checkHeadingOrder(options) {
         }
         lastLevel = currentLevel;
     });
+    const h1Count = document.querySelectorAll('h1');
+    const message = `⚠️ Multiple h1 found`;
+    if (h1Count.length > 1) {
+        console.warn(message);
+    }
 }
 
-const useHeadingOrder = ({ delay = 100, callback } = {}) => {
+const seoAccessibilityTool = ({ delay = 100, callback } = {}) => {
     useEffect(() => {
-        checkHeadingOrder();
+        useSAT();
         const timeout = setTimeout(() => {
-            checkHeadingOrder();
+            useSAT();
         }, delay);
         return () => clearTimeout(timeout);
     }, []);
 };
 
-export { useHeadingOrder };
+export { seoAccessibilityTool as default, seoAccessibilityTool };
 //# sourceMappingURL=react.js.map
