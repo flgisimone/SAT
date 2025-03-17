@@ -1,26 +1,24 @@
 {
   "name": "seo-accessibility-tool",
-  "version": "1.0.0",
-  "description": "A11y Seo Accessibility tool for React and Vue projects",
+  "version": "1.0.4",
+  "description": "A11y SEO Accessibility tool for React and Vue projects",
   "author": "Giulio Simone Floresta",
   "license": "MIT",
   "type": "module",
-  "main": "./dist/index.js",
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "types": "./dist/types/index.d.ts"
+      "types": "./dist/index.d.ts"
     },
     "./react": {
       "import": "./dist/react.js",
-      "types": "./dist/types/react/useHeadingOrder.d.ts"
+      "types": "./dist/react.d.ts"
     },
     "./vue": {
       "import": "./dist/vue.js",
-      "types": "./dist/types/vue/useHeadingOrder.d.ts"
+      "types": "./dist/vue.d.ts"
     }
   },
-  "types": "./dist/types/index.d.ts",
   "files": [
     "dist"
   ],
@@ -31,18 +29,21 @@
     "react",
     "vue",
     "lighthouse",
-    "a11y"
+    "a11y",
+    "aria",
+    "html5",
+    "semantic"
   ],
   "scripts": {
-    "build": "rollup -c",
-    "dev": "tsc -w",
-    "test": "echo \"No tests yet!\""
+    "build": "rollup -c && rollup -c rollup.dts.config.cjs",
+    "dev": "rollup -c -w"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^12.1.2",
-    "@types/react": "^19.0.10",
     "rollup": "^4.35.0",
-    "typescript": "^5.8.2"
+    "rollup-plugin-dts": "^6.1.0",
+    "typescript": "^5.8.2",
+    "@types/react": "^19.0.10"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
