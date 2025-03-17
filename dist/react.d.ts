@@ -9,6 +9,6 @@ interface HeadingOrderOptions {
 interface UseHeadingOrderOptions extends HeadingOrderOptions {
     delay?: number;
 }
-declare const seoAccessibilityTool: ({ delay, callback }?: UseHeadingOrderOptions) => void;
+declare const useSATReact: ({ delay, callback }?: UseHeadingOrderOptions) => void;
 
-export { type UseHeadingOrderOptions, seoAccessibilityTool as default, seoAccessibilityTool };
+export { type UseHeadingOrderOptions, useSATReact as default, useSATReact };

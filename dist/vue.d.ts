@@ -9,6 +9,6 @@ interface HeadingOrderOptions {
 interface UseHeadingOrderOptions extends HeadingOrderOptions {
     delay?: number;
 }
-declare function seoAccessibilityTool({ delay, callback }?: UseHeadingOrderOptions): void;
+declare function useSATVue({ delay, callback }?: UseHeadingOrderOptions): void;
 
-export { type UseHeadingOrderOptions, seoAccessibilityTool };
+export { type UseHeadingOrderOptions, useSATVue };

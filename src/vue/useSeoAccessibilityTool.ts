@@ -5,7 +5,7 @@ export interface UseHeadingOrderOptions extends HeadingOrderOptions {
     delay?: number;
 }
 
-export function seoAccessibilityTool({ delay = 100, callback }: UseHeadingOrderOptions = {}) {
+export function useSATVue({ delay = 100, callback }: UseHeadingOrderOptions = {}) {
     let timeout: number;
 
     onMounted(() => {

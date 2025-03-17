@@ -5,7 +5,7 @@ export interface UseHeadingOrderOptions extends HeadingOrderOptions {
     delay?: number;
 }
 
-export const seoAccessibilityTool = ({ delay = 100, callback }: UseHeadingOrderOptions = {}) => {
+export const useSATReact = ({ delay = 100, callback }: UseHeadingOrderOptions = {}) => {
     useEffect(() => {
         useSAT({ callback });
 
@@ -17,4 +17,4 @@ export const seoAccessibilityTool = ({ delay = 100, callback }: UseHeadingOrderO
     }, []);
 };
 
-export default seoAccessibilityTool;
+export default useSATReact;

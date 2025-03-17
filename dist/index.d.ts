@@ -5,6 +5,6 @@ interface HeadingOrderOptions {
         lastLevel: number;
     }) => void;
 }
-declare function useSAT(options: HeadingOrderOptions): void;
+declare function useSAT(options?: HeadingOrderOptions): void;
 
 export { type HeadingOrderOptions, useSAT };

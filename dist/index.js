@@ -1,4 +1,5 @@
-function useSAT(options) {
+function useSAT(options = {}) {
+    const { callback } = options;
     const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6'));
     let lastLevel = 0;
     const tagColors = {
@@ -22,6 +23,14 @@ function useSAT(options) {
         if (currentLevel < lastLevel) {
             const message = `⚠️ Heading order issue: Found a ${htmlHeading.tagName} ("${text}") after a heading of lower level (H${lastLevel}).`;
             console.warn(message);
+            // ➡️ Callback personalizzato (se presente)
+            if (callback) {
+                callback(message, {
+                    tag: htmlHeading.tagName,
+                    text,
+                    lastLevel
+                });
+            }
             const colors = tagColors[htmlHeading.tagName] || {
                 outline: '2px solid black',
                 background: 'rgba(0, 0, 0, 0.1)',
@@ -36,6 +45,13 @@ function useSAT(options) {
     const message = `⚠️ Multiple h1 found`;
     if (h1Count.length > 1) {
         console.warn(message);
+        if (callback) {
+            callback(message, {
+                tag: 'H1',
+                text: `${h1Count.length} found`,
+                lastLevel: 1
+            });
+        }
     }
 }
 
