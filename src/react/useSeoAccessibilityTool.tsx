@@ -5,7 +5,7 @@ export interface UseHeadingOrderOptions extends HeadingOrderOptions {
     delay?: number;
 }
 
-export const useHeadingOrder = ({ delay = 100, callback }: UseHeadingOrderOptions = {}) => {
+export const useSAT = ({ delay = 100, callback }: UseHeadingOrderOptions = {}) => {
     useEffect(() => {
         checkHeadingOrder({ callback });
 
@@ -16,3 +16,5 @@ export const useHeadingOrder = ({ delay = 100, callback }: UseHeadingOrderOption
         return () => clearTimeout(timeout);
     }, []);
 };
+
+export default useSAT;
