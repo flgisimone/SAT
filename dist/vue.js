@@ -25,7 +25,6 @@ function useSAT(options = {}) {
         if (currentLevel < lastLevel) {
             const message = `⚠️ Heading order issue: Found a ${htmlHeading.tagName} ("${text}") after a heading of lower level (H${lastLevel}).`;
             console.warn(message);
-            // ➡️ Callback personalizzato (se presente)
             if (callback) {
                 callback(message, {
                     tag: htmlHeading.tagName,
