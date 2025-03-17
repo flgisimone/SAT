@@ -1,14 +1,6 @@
-interface HeadingOrderOptions {
-    callback?: (message: string, context: {
-        tag: string;
-        text: string;
-        lastLevel: number;
-    }) => void;
-}
-
-interface UseHeadingOrderOptions extends HeadingOrderOptions {
+interface IProp {
     delay?: number;
 }
-declare const useSATReact: ({ delay, callback }?: UseHeadingOrderOptions) => void;
+declare const useSATReact: ({ delay }?: IProp) => void;
 
-export { type UseHeadingOrderOptions, useSATReact as default, useSATReact };
+export { type IProp, useSATReact as default, useSATReact };

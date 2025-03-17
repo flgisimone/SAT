@@ -1,14 +1,6 @@
-interface HeadingOrderOptions {
-    callback?: (message: string, context: {
-        tag: string;
-        text: string;
-        lastLevel: number;
-    }) => void;
-}
-
-interface UseHeadingOrderOptions extends HeadingOrderOptions {
+interface IProp {
     delay?: number;
 }
-declare function useSATVue({ delay, callback }?: UseHeadingOrderOptions): void;
+declare function useSATVue({ delay }?: IProp): void;
 
-export { type UseHeadingOrderOptions, useSATVue };
+export { type IProp, useSATVue };

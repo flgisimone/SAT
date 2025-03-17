@@ -1,10 +1,3 @@
-interface HeadingOrderOptions {
-    callback?: (message: string, context: {
-        tag: string;
-        text: string;
-        lastLevel: number;
-    }) => void;
-}
-declare function useSAT(options?: HeadingOrderOptions): void;
+declare function useSAT(): void;
 
-export { type HeadingOrderOptions, useSAT };
+export { useSAT };
