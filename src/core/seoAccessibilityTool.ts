@@ -1,5 +1,42 @@
-function isH1Visible(h1Tag: HTMLElement): boolean {
-    if (!h1Tag) return false;
+/**
+ * Checks for the presence of `<h1>` tags in the document.
+ * Logs a warning if:
+ * - There are **no** `<h1>` tags present.
+ * - There are **multiple** `<h1>` tags present.
+ *
+ * @returns {void}
+ */
+function checkH1(): void {
+    const h1Count = document.querySelectorAll('h1');
+
+    const message = {
+        messageMultipleH1: `⚠️ Multiple h1 found`,
+        messageH1NotFound: `⚠️ H1 not found`,
+    }
+
+    if (h1Count.length > 1) {
+        console.warn(message.messageMultipleH1);
+    } else if (h1Count.length === 0) {
+        console.warn(message.messageH1NotFound);
+    }
+}
+
+/**
+ * Checks if the first `<h1>` element in the document is visible.
+ * Visibility is determined by:
+ * - `display` is not `none`.
+ * - `visibility` is not `hidden`.
+ * - `opacity` is not `0`.
+ * - Element is within the viewport bounds.
+ *
+ * @returns {boolean} Returns `true` if the `<h1>` is visible and in the viewport, otherwise `false`.
+ */
+function checkH1Visible(): boolean {
+    const h1Tag: HTMLHeadingElement | null = document.querySelector('h1');
+
+    if (!h1Tag) {
+        return false;
+    }
 
     const style = window.getComputedStyle(h1Tag);
 
@@ -18,7 +55,17 @@ function isH1Visible(h1Tag: HTMLElement): boolean {
     return isDisplayed && inViewport;
 }
 
-export function useSAT() {
+/**
+ * Checks if the heading tags (`<h1>` to `<h6>`) are in sequential and descending order.
+ * Logs a warning when a heading appears after a lower level heading (e.g., `<h3>` after `<h1>` without a `<h2>`).
+ *
+ * Additionally, it:
+ * - Resets any previous visual warnings (outline, backgroundColor, title).
+ * - Highlights headings out of order with a title and optional styles.
+ *
+ * @returns {void}
+ */
+function checkHeadingOrder(): void {
     const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6'));
 
     let lastLevel = 0;
@@ -46,27 +93,18 @@ export function useSAT() {
 
         lastLevel = currentLevel;
     });
+}
 
-
-    const h1Tag = document.querySelector('h1');
-    const h1Count = document.querySelectorAll('h1');
-    const message = {
-        messageMultipleH1: `⚠️ Multiple h1 found`,
-        messageH1NotFound: `⚠️ H1 not found`,
-        messageH1Visible:`⚠️ H1 not visible`
-    }
-
-    if (h1Count.length > 1) {
-        console.warn(message.messageMultipleH1);
-    } else if (h1Count.length === 0) {
-        console.warn(message.messageH1NotFound);
-    }
-
-    if (h1Tag) {
-        const visible = isH1Visible(h1Tag);
-
-        if (!visible) {
-            console.warn(message.messageH1Visible);
-        }
-    }
+/**
+ * Runs the complete SEO Accessibility Tool (SAT) checks:
+ * - Checks heading order (`<h1>` to `<h6>`) for hierarchy issues.
+ * - Checks the presence of `<h1>` tags (multiple or missing).
+ * - Checks if the `<h1>` is visible in the viewport.
+ *
+ * @returns {void}
+ */
+export function useSAT(): void {
+    checkHeadingOrder();
+    checkH1();
+    checkH1Visible();
 }
