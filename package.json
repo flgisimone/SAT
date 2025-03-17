@@ -1,6 +1,6 @@
 {
   "name": "seo-accessibility-tool",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A11y SEO Accessibility tool for React and Vue projects",
   "author": "Giulio Simone Floresta",
   "license": "MIT",
