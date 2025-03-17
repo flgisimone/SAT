@@ -18,6 +18,7 @@ export function useSAT(options: HeadingOrderOptions = {}) {
 
     headings.forEach((heading) => {
         const htmlHeading = heading as HTMLElement;
+
         htmlHeading.style.outline = '';
         htmlHeading.style.backgroundColor = '';
         htmlHeading.removeAttribute('title');
@@ -33,7 +34,6 @@ export function useSAT(options: HeadingOrderOptions = {}) {
 
             console.warn(message);
 
-            // ➡️ Callback personalizzato (se presente)
             if (callback) {
                 callback(message, {
                     tag: htmlHeading.tagName,
@@ -60,6 +60,7 @@ export function useSAT(options: HeadingOrderOptions = {}) {
 
     if (h1Count.length > 1) {
         console.warn(message);
+
         if (callback) {
             callback(message, {
                 tag: 'H1',
