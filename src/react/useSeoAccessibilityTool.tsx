@@ -1,18 +1,20 @@
 import { useEffect } from 'react';
-import { checkHeadingOrder, HeadingOrderOptions } from "../core/seoAccessibilityTool";
+import { useSAT, HeadingOrderOptions } from "../core/seoAccessibilityTool";
 
 export interface UseHeadingOrderOptions extends HeadingOrderOptions {
     delay?: number;
 }
 
-export const useHeadingOrder = ({ delay = 100, callback }: UseHeadingOrderOptions = {}) => {
+export const seoAccessibilityTool = ({ delay = 100, callback }: UseHeadingOrderOptions = {}) => {
     useEffect(() => {
-        checkHeadingOrder({ callback });
+        useSAT({ callback });
 
         const timeout = setTimeout(() => {
-            checkHeadingOrder({ callback });
+            useSAT({ callback });
         }, delay);
 
         return () => clearTimeout(timeout);
     }, []);
 };
+
+export default seoAccessibilityTool;
