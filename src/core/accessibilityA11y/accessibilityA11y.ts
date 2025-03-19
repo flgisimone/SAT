@@ -7,7 +7,7 @@ type RGB = [number, number, number];
  * @param {string} color - The color string (e.g., 'rgb(255, 255, 255)', '#ffffff', 'red').
  * @returns {RGB} A tuple of RGB values [r, g, b].
  */
-function colorToRgbArray(color: string): RGB {
+export function colorToRgbArray(color: string): RGB {
     // 1. Check if color is rgb() or rgba()
     if (color.startsWith('rgb')) {
         const rgbValues = color.match(/\d+/g);
@@ -43,7 +43,7 @@ function colorToRgbArray(color: string): RGB {
  * @param {string} hex - The hex color string (e.g., '#ffffff').
  * @returns {RGB} A tuple of RGB values [r, g, b].
  */
-function hexToRgb(hex: string): RGB {
+export function hexToRgb(hex: string): RGB {
     const parsed = hex.replace('#', '');
     const bigint = parseInt(parsed, 16);
     const r = (bigint >> 16) & 255;
@@ -60,7 +60,7 @@ function hexToRgb(hex: string): RGB {
  * @param {number} b - Blue value (0-255).
  * @returns {number} The relative luminance (0.0 - 1.0).
  */
-function luminance(r: number, g: number, b: number): number {
+export function luminance(r: number, g: number, b: number): number {
     const a = [r, g, b].map((v) => {
         v /= 255;
         return v <= 0.03928
@@ -77,7 +77,7 @@ function luminance(r: number, g: number, b: number): number {
  * @param {RGB} rgb2 - The second RGB color tuple.
  * @returns {number} The contrast ratio.
  */
-function contrast(rgb1: RGB, rgb2: RGB): number {
+export function contrast(rgb1: RGB, rgb2: RGB): number {
     const lum1 = luminance(...rgb1);
     const lum2 = luminance(...rgb2);
     const brightest = Math.max(lum1, lum2);
@@ -92,7 +92,7 @@ function contrast(rgb1: RGB, rgb2: RGB): number {
  * @param {HTMLElement} el - The element to check.
  * @returns {string} A CSS color string.
  */
-function getEffectiveBackground(el: HTMLElement): string {
+export function getEffectiveBackground(el: HTMLElement): string {
     let current: HTMLElement | null = el;
 
     while (current && current !== document.body) {
@@ -116,7 +116,7 @@ function getEffectiveBackground(el: HTMLElement): string {
  *
  * @returns {void}
  */
-function checkTextElementContrast(): void {
+export function checkTextElementContrast(): void {
     const selectors = 'h1, h2, h3, h4, h5, h6, span, a, button';
     const elements = Array.from(document.querySelectorAll(selectors)) as HTMLElement[];
 
@@ -147,8 +147,4 @@ function checkTextElementContrast(): void {
             console.log(`✅ Contrast on ${el.tagName} ("${text}") is ${contrastRatio.toFixed(2)}. Meets AAA standards.`);
         }
     });
-}
-
-export function accessibilityA11y(): void {
-    checkTextElementContrast();
 }

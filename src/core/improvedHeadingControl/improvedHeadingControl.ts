@@ -6,7 +6,7 @@
  *
  * @returns {void}
  */
-function checkH1(): void {
+export function checkH1(): void {
     const h1Count = document.querySelectorAll('h1');
 
     const message = {
@@ -31,7 +31,7 @@ function checkH1(): void {
  *
  * @returns {boolean} Returns `true` if the `<h1>` is visible and in the viewport, otherwise `false`.
  */
-function checkH1Visible(): boolean {
+export function checkH1Visible(): boolean {
     const h1Tag: HTMLHeadingElement | null = document.querySelector('h1');
 
     if (!h1Tag) {
@@ -65,7 +65,7 @@ function checkH1Visible(): boolean {
  *
  * @returns {void}
  */
-function checkHeadingOrder(): void {
+export function checkHeadingOrder(): void {
     const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6'));
 
     let lastLevel = 0;
@@ -105,7 +105,7 @@ function checkHeadingOrder(): void {
  *
  * @returns {void}
  */
-function checkJumpLevels(): void {
+export function checkJumpLevels(): void {
     const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6')) as HTMLElement[];
 
     let lastLevel = 0;
@@ -141,11 +141,4 @@ function checkJumpLevels(): void {
 
         lastLevel = currentLevel;
     });
-}
-
-export function improvedHeadingControl(): void {
-    checkHeadingOrder();
-    checkH1();
-    checkH1Visible();
-    checkJumpLevels();
 }

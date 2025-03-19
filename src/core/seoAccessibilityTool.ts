@@ -1,15 +1,19 @@
-import {improvedHeadingControl} from "./improvedHeadingControl /improvedHeadingControl";
-import {accessibilityA11y} from "./accessibilityA11y/accessibilityA11y";
+import {
+    checkH1,
+    checkH1Visible,
+    checkHeadingOrder,
+    checkJumpLevels
+} from './improvedHeadingControl/improvedHeadingControl';
+import {checkTextElementContrast} from "./accessibilityA11y/accessibilityA11y";
 
 /**
- * Runs the complete SEO Accessibility Tool (SAT) checks:
- * - Checks heading order (`<h1>` to `<h6>`) for hierarchy issues.
- * - Checks the presence of `<h1>` tags (multiple or missing).
- * - Checks if the `<h1>` is visible in the viewport.
- *
- * @returns {void}
+ * Runs the Universal Accessibility Checker (A11y)
+ * Runs heading checks, contrast validation, ARIA label checks.
  */
 export function useSAT(): void {
-    improvedHeadingControl();
-    accessibilityA11y()
+    checkH1();
+    checkH1Visible();
+    checkHeadingOrder();
+    checkJumpLevels();
+    checkTextElementContrast();
 }
