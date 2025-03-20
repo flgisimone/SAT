@@ -137,14 +137,12 @@ export function checkTextElementContrast(): void {
         const text = el.textContent?.trim() || '';
 
         if (contrastRatio < 4.5) {
-            console.warn(`⚠️ Insufficient contrast on ${el.tagName} ("${text}"): contrast ratio ${contrastRatio.toFixed(2)}. Minimum AA requirement is 4.5.`);
+            console.error(`❌️️ Insufficient contrast on ${el.tagName} ("${text}"): contrast ratio ${contrastRatio.toFixed(2)}. Minimum AA requirement is 4.5.`);
 
             el.title = `Insufficient contrast (${contrastRatio.toFixed(2)})`;
             el.style.outline = '2px dashed red';
         } else if (contrastRatio < 7) {
-            console.info(`ℹ️ Contrast on ${el.tagName} ("${text}") is ${contrastRatio.toFixed(2)}. Meets AA but not AAA standards.`);
-        } else {
-            console.log(`✅ Contrast on ${el.tagName} ("${text}") is ${contrastRatio.toFixed(2)}. Meets AAA standards.`);
+            console.info(`⚠️ Contrast on ${el.tagName} ("${text}") is ${contrastRatio.toFixed(2)}. Meets AA but not AAA standards.`);
         }
     });
 }

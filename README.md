@@ -11,10 +11,10 @@
   <li>✅ Checks if the first <code>&lt;h1&gt;</code> is <strong>visible</strong> in the viewport</li>
   <li>✅ Detects <strong>level jumps</strong> and <strong>regressions</strong> (e.g., H1 ➔ H4 without H2/H3)</li>
   <li>✅ Validates accessible <strong>ARIA labels</strong> on interactive elements (e.g., <code>&lt;button&gt;</code>, <code>&lt;a&gt;</code>, <code>&lt;input&gt;</code>, <code>&lt;svg&gt;</code>)</li>
-  <li>✅ Detects missing <strong>ARIA labels</strong> or descriptive text where required</li>
   <li>✅ Checks <strong>color contrast</strong> ratios for text readability and WCAG compliance (AA/AAA)</li>
   <li>✅ Logs clear and actionable warnings in the browser console</li>
   <li>✅ Framework-agnostic core logic (works in <strong>React</strong> or <strong>Vue</strong>)</li>
+  <li>✅ Detects missing <strong>ARIA labels</strong> or descriptive text where required</li>
 </ul>
 
   <hr>

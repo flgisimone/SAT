@@ -1,36 +1,24 @@
-/**
- * Checks for the presence of `<h1>` tags in the document.
- * Logs a warning if:
- * - There are **no** `<h1>` tags present.
- * - There are **multiple** `<h1>` tags present.
- *
- * @returns {void}
- */
 export function checkH1(): void {
     const h1Count = document.querySelectorAll('h1');
 
     const message = {
-        messageMultipleH1: `⚠️ Multiple h1 found`,
-        messageH1NotFound: `⚠️ H1 not found`,
+        messageMultipleH1: `❌ Multiple h1 found`,
+        messageH1NotFound: `❌ H1 not found`,
     }
 
     if (h1Count.length > 1) {
-        console.warn(message.messageMultipleH1);
+        console.error(message.messageMultipleH1);
     } else if (h1Count.length === 0) {
-        console.warn(message.messageH1NotFound);
+        console.error(message.messageH1NotFound);
     }
+
+    h1Count.forEach(h1 => {
+        const el = h1 as HTMLElement;
+        el.style.backgroundColor = 'rgba(255, 0, 0, 0.1)'; // light red
+        el.style.outline = '2px solid red';
+    });
 }
 
-/**
- * Checks if the first `<h1>` element in the document is visible.
- * Visibility is determined by:
- * - `display` is not `none`.
- * - `visibility` is not `hidden`.
- * - `opacity` is not `0`.
- * - Element is within the viewport bounds.
- *
- * @returns {boolean} Returns `true` if the `<h1>` is visible and in the viewport, otherwise `false`.
- */
 export function checkH1Visible(): boolean {
     const h1Tag: HTMLHeadingElement | null = document.querySelector('h1');
 
@@ -55,56 +43,63 @@ export function checkH1Visible(): boolean {
     return isDisplayed && inViewport;
 }
 
-/**
- * Checks if the heading tags (`<h1>` to `<h6>`) are in sequential and descending order.
- * Logs a warning when a heading appears after a lower level heading (e.g., `<h3>` after `<h1>` without a `<h2>`).
- *
- * Additionally, it:
- * - Resets any previous visual warnings (outline, backgroundColor, title).
- * - Highlights headings out of order with a title and optional styles.
- *
- * @returns {void}
- */
 export function checkHeadingOrder(): void {
     const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6'));
 
     let lastLevel = 0;
 
+    // Reset styles before new check
     headings.forEach((heading) => {
-        const htmlHeading = heading as HTMLElement;
-
-        htmlHeading.style.outline = '';
-        htmlHeading.style.backgroundColor = '';
-        htmlHeading.removeAttribute('title');
+        const el = heading as HTMLElement;
+        el.style.outline = '';
+        el.style.backgroundColor = '';
+        el.removeAttribute('title');
     });
 
     headings.forEach((heading) => {
-        const htmlHeading = heading as HTMLElement;
-        const currentLevel = parseInt(htmlHeading.tagName.replace('H', ''), 10);
-        const text = htmlHeading.textContent?.trim() || '';
+        const el = heading as HTMLElement;
+        const currentLevel = parseInt(el.tagName.replace('H', ''), 10);
+        const text = el.textContent?.trim() || '';
 
         if (currentLevel < lastLevel) {
-            const message = `⚠️ Heading order issue: Found a ${htmlHeading.tagName} ("${text}") after a heading of lower level (H${lastLevel}).`;
+            const message = `❌ Heading order issue: Found a ${el.tagName} ("${text}") after a heading of lower level (H${lastLevel}).`;
 
-            console.warn(message);
+            console.error(message);
 
-            htmlHeading.title = `Incorrect ${htmlHeading.tagName.toLowerCase()} order`;
+            el.title = `Incorrect ${el.tagName.toLowerCase()} order`;
+        }
+
+        switch (el.tagName.toLowerCase()) {
+            case 'h1':
+                el.style.backgroundColor = 'rgba(255, 0, 0, 0.1)'; // red
+                el.style.outline = '2px solid red';
+                break;
+            case 'h2':
+                el.style.backgroundColor = 'rgba(255, 165, 0, 0.1)'; // orange
+                el.style.outline = '2px solid orange';
+                break;
+            case 'h3':
+                el.style.backgroundColor = 'rgba(255, 255, 0, 0.1)'; // yellow
+                el.style.outline = '2px solid yellow';
+                break;
+            case 'h4':
+                el.style.backgroundColor = 'rgba(0, 128, 0, 0.1)'; // green
+                el.style.outline = '2px solid green';
+                break;
+            case 'h5':
+                el.style.backgroundColor = 'rgba(0, 0, 255, 0.1)'; // blue
+                el.style.outline = '2px solid blue';
+                break;
+            case 'h6':
+                el.style.backgroundColor = 'rgba(128, 0, 128, 0.1)'; // purple
+                el.style.outline = '2px solid purple';
+                break;
         }
 
         lastLevel = currentLevel;
     });
 }
 
-/**
- * Checks for heading level jumps and regressions in the provided list of headings.
- *
- * - Level Jump: Skipping one or more heading levels in ascending order (e.g., H1 ➔ H4).
- * - Regression: Moving back to a higher heading level unexpectedly (e.g., H4 ➔ H2).
- *
- * Logs warnings in the console when issues are detected.
- *
- * @returns {void}
- */
 export function checkJumpLevels(): void {
     const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6')) as HTMLElement[];
 
@@ -115,12 +110,11 @@ export function checkJumpLevels(): void {
         const text = heading.textContent?.trim() || '';
         const message = {
             levelJumpDetected:
-                `⚠️ Heading level jump detected: Found ${heading.tagName} ("${text}") skipping levels after H${lastLevel}.`,
+                `❌ Heading level jump detected: Found ${heading.tagName} ("${text}") skipping levels after H${lastLevel}.`,
             regressionDetected:
-                `⚠️ Heading regression detected: Found ${heading.tagName} ("${text}") after a higher level heading (H${lastLevel}).`
+                `❌ Heading regression detected: Found ${heading.tagName} ("${text}") after a higher level heading (H${lastLevel}).`
         }
 
-        // Skip the first heading (no previous level to compare)
         if (lastLevel === 0) {
             lastLevel = currentLevel;
 
@@ -129,14 +123,12 @@ export function checkJumpLevels(): void {
 
         const levelDifference = currentLevel - lastLevel;
 
-        // Detect level jumps (skips intermediate levels)
         if (levelDifference > 1) {
-            console.warn(message.levelJumpDetected);
+            console.error('❌' + message.levelJumpDetected);
         }
 
-        // Detect regressions (heading level goes back unexpectedly)
         if (levelDifference < -1) {
-            console.warn(message.regressionDetected);
+            console.error('❌' + message.regressionDetected);
         }
 
         lastLevel = currentLevel;
