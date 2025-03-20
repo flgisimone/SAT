@@ -4,7 +4,8 @@ import {
     checkHeadingOrder,
     checkJumpLevels
 } from './improvedHeadingControl/improvedHeadingControl';
-import {checkTextElementContrast} from "./accessibilityA11y/accessibilityA11y";
+import {checkTextElementContrast} from "./accessibilityA11y/colorContrastChecker";
+import ariaLabelChecker from "./accessibilityA11y/ariaLabelChecker";
 
 /**
  * Runs the Universal Accessibility Checker (A11y)
@@ -16,4 +17,5 @@ export function useSAT(): void {
     checkHeadingOrder();
     checkJumpLevels();
     checkTextElementContrast();
+    ariaLabelChecker()
 }
