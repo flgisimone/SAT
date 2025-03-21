@@ -6,7 +6,7 @@ export interface IProp {
     enable: boolean;
 }
 
-export const useSATReact = (delay = 100, enable = false) => {
+export const useSATReact = ({delay = 100, enable = false}: IProp) => {
     useEffect(() => {
         useSAT(enable);
 

@@ -6,7 +6,7 @@ export interface IProp {
     enable: boolean;
 }
 
-export function useSATVue(delay = 100, enable = false) {
+export function useSATVue({delay = 100, enable = false}: IProp) {
     let timeout: number;
 
     onMounted(() => {
