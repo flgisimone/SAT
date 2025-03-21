@@ -24,6 +24,26 @@
   <pre><code>npm install seo-accessibility-tool</code></pre>
 
   <hr>
+<h2>⚙️ Configuration & Environment Notes</h2>
+<h3>➡️ How to Enable It</h3>
+You must pass the prop mode to activate the tool:
+<pre><code>useSATReact({ enable: true });
+</code></pre>
+<pre><code>useSATVue({ enable: true });</code></pre>
+<ul>
+<li>enable: true ➔ Enables SAT</li>
+<li>enable: false ➔ Disables SAT</li>
+<li>Optional prop delay (number, in ms): Debounces validations (default: 100)</li>
+</ul>
+
+<h3>➡️ Behavior in Production</h3>
+We recommend activating SAT only in development, for debugging accessibility and SEO during the build process.
+
+Example conditional activation in Vue:
+<pre><code>if (process.env.NODE_ENV !== 'production') {
+  useSATVue({ mode: true });
+}</code></pre>
+<hr>
 
 <h2>📝 Example Usage</h2>
 
@@ -32,14 +52,14 @@
 import {useSATReact} from 'seo-accessibility-tool/react';
 
 export default function App() {
-    useSATReact();
+    useSATVue({enable: true});
 }</code></pre>
 
 <h3>Vue 3 / Nuxt</h3>
   <pre><code>&lt;script setup&gt;
 import {useSATVue} from 'seo-accessibility-tool/vue';
 
-useSATVue();
+    useSATVue({enable: true});
 &lt;/script&gt;
 
 &lt;template&gt;

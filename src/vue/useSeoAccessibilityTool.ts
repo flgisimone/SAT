@@ -3,16 +3,17 @@ import { useSAT } from "../core/seoAccessibilityTool";
 
 export interface IProp {
     delay?: number;
+    enable: boolean;
 }
 
-export function useSATVue({ delay = 100 }: IProp = {}) {
+export function useSATVue(delay = 100, enable = false) {
     let timeout: number;
 
     onMounted(() => {
-        useSAT();
+        useSAT(enable);
 
         timeout = window.setTimeout(() => {
-            useSAT();
+            useSAT(enable);
         }, delay);
     });
 

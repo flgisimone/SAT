@@ -3,14 +3,15 @@ import { useSAT } from "../core/seoAccessibilityTool";
 
 export interface IProp {
     delay?: number;
+    enable: boolean;
 }
 
-export const useSATReact = ({ delay = 100 }: IProp = {}) => {
+export const useSATReact = (delay = 100, enable = false) => {
     useEffect(() => {
-        useSAT();
+        useSAT(enable);
 
         const timeout = setTimeout(() => {
-            useSAT();
+            useSAT(enable);
         }, delay);
 
         return () => clearTimeout(timeout);

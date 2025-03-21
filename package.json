@@ -1,6 +1,6 @@
 {
   "name": "seo-accessibility-tool",
-  "version": "1.1.7",
+  "version": "1.2.0",
   "description": "A11y SEO Accessibility tool for React and Vue projects",
   "author": "Giulio Simone Floresta",
   "license": "MIT",
@@ -40,10 +40,11 @@
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^12.1.2",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
     "rollup": "^4.35.0",
     "rollup-plugin-dts": "^6.1.0",
-    "typescript": "^5.8.2",
-    "@types/react": "^19.0.10"
+    "typescript": "^5.8.2"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",

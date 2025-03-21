@@ -84,6 +84,8 @@ export default function ariaLabelChecker() {
             (el as HTMLElement).style.outline = '2px solid red';
             (el as HTMLElement).style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
             (el as HTMLElement).title = '❌️️ Missing accessible label';
+        } else {
+            console.info('✅ All tags have accessible label');
         }
     });
 }
