@@ -143,8 +143,6 @@ export function checkTextElementContrast(): void {
             el.style.outline = '2px dashed red';
         } else if (contrastRatio < 7) {
             console.info(`⚠️ Contrast on ${el.tagName} ("${text}") is ${contrastRatio.toFixed(2)}. Meets AA but not AAA standards.`);
-        } else {
-            console.info('✅ All elements contrast are OK');
         }
     });
 }
