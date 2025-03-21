@@ -69,6 +69,8 @@ export function checkAriaRolesWithSuggestions(): void {
 
                 el.style.outline = '2px dashed turquoise';
                 el.title = `Recommended role(s): ${recommendedRoles.join(', ')}`;
+            } else {
+                console.info('✅ All elements have a role');
             }
 
             return;
@@ -87,6 +89,8 @@ export function checkAriaRolesWithSuggestions(): void {
 
             el.style.outline = '2px dashed purple';
             el.title = `Consider using: ${recommendedRoles.join(', ')}`;
+        } else {
+            console.info('✅ All elements have correct role');
         }
     });
 }
@@ -145,5 +149,7 @@ export function checkUniqueLandmarks(): void {
         } else {
             console.warn(`❌ Missing <${selector}> landmark role: ${role}`);
         }
+
+        return console.info('✅ All tags have unique role');
     });
 }

@@ -10,6 +10,8 @@ export function checkH1(): void {
         console.error(message.messageMultipleH1);
     } else if (h1Count.length === 0) {
         console.error(message.messageH1NotFound);
+    } else {
+        console.info('✅ Only one H1 tag is present');
     }
 
     h1Count.forEach(h1 => {
@@ -40,7 +42,13 @@ export function checkH1Visible(): boolean {
         rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
         rect.left <= (window.innerWidth || document.documentElement.clientWidth);
 
-    return isDisplayed && inViewport;
+    const isVisible = isDisplayed && inViewport;
+
+    if (isVisible) {
+        console.info('✅ H1 tag is displayed and is in viewport');
+    }
+
+    return isVisible;
 }
 
 export function checkHeadingOrder(): void {
@@ -67,6 +75,8 @@ export function checkHeadingOrder(): void {
             console.error(message);
 
             el.title = `Incorrect ${el.tagName.toLowerCase()} order`;
+        } else {
+            console.info('✅ Heading order is correct');
         }
 
         switch (el.tagName.toLowerCase()) {
@@ -125,10 +135,10 @@ export function checkJumpLevels(): void {
 
         if (levelDifference > 1) {
             console.error('❌' + message.levelJumpDetected);
-        }
-
-        if (levelDifference < -1) {
+        } else if (levelDifference < -1) {
             console.error('❌' + message.regressionDetected);
+        } else {
+            console.info('✅ There are no jumps between heading tags');
         }
 
         lastLevel = currentLevel;
