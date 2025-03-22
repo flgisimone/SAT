@@ -40,9 +40,7 @@ export function checkH1Visible(): boolean {
         rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
         rect.left <= (window.innerWidth || document.documentElement.clientWidth);
 
-    const isVisible = isDisplayed && inViewport;
-
-    return isVisible;
+    return isDisplayed && inViewport;
 }
 
 export function checkHeadingOrder(): void {
