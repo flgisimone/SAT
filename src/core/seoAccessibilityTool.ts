@@ -10,8 +10,8 @@ import { checkAriaRolesWithSuggestions, checkUniqueLandmarks } from './accessibi
 import { checkAriaLabel}  from "./accessibilityA11y/ariaLabelChecker";
 import { checkInputLabels } from "./accessibilityA11y/inputLabelChecker";
 import { checkFocusManagement } from "./accessibilityA11y/focusManagementChecker";
-import {checkEmptyLinks} from "./improvedLinksControl/emptyLinksChecker";
-
+import { checkEmptyLinks } from "./improvedLinksControl/emptyLinksChecker";
+import { checkTabindexNegativeOne } from "./improvedLinksControl/tabIndexNegativeOneChecker";
 
 /**
  * Runs the Universal Accessibility Checker (A11y).
@@ -46,6 +46,7 @@ export function useSAT(enable: boolean): void {
         checkInputLabels();
         checkFocusManagement();
         checkEmptyLinks();
+        checkTabindexNegativeOne();
 
         console.log('🔍✅ [A11y] Accessibility checks completed.');
     }
