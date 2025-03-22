@@ -15,6 +15,8 @@
   <li>✅ Checks <strong>color contrast</strong> ratios for text readability and WCAG 2.1 compliance (AA/AAA)</li>
   <li>✅ Ensures <strong>input fields</strong> are properly associated with a <code>&lt;label&gt;</code> for better accessibility and screen reader support</li>
   <li>✅ Validates <strong>focus management</strong> on interactive elements (proper <code>tabindex</code> usage and accessibility focus order)</li>
+  <li>✅ Detects <strong>empty or invalid links</strong> (e.g., <code>&lt;a href="#"&gt;</code> or no <code>href</code>) and suggests better alternatives</li>
+  <li>✅ Detects empty or invalid <code>href="#"</code> links without a meaningful destination</li>
   <li>✅ Logs clear and actionable warnings in the browser console</li>
   <li>✅ Framework-agnostic core logic (works in <strong>React</strong> and <strong>Vue</strong>)</li>
 </ul>
