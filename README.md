@@ -56,14 +56,14 @@ Example conditional activation in Vue:
 import {useSATReact} from 'seo-accessibility-tool/react';
 
 export default function App() {
-    useSATVue({enable: true});
+    useSATVue(enable);
 }</code></pre>
 
 <h3>Vue 3 / Nuxt</h3>
   <pre><code>&lt;script setup&gt;
 import {useSATVue} from 'seo-accessibility-tool/vue';
 
-    useSATVue({enable: true});
+    useSATVue(enable);
 &lt;/script&gt;
 
 &lt;template&gt;
