@@ -1,18 +1,13 @@
 import { useEffect } from 'react';
 import { useSAT } from "../core/seoAccessibilityTool";
 
-export interface IProp {
-    delay?: number;
-    enable: boolean;
-}
-
-export const useSATReact = ({delay = 100, enable = false}: IProp) => {
+export const useSATReact = (enable = false) => {
     useEffect(() => {
         useSAT(enable);
 
         const timeout = setTimeout(() => {
             useSAT(enable);
-        }, delay);
+        }, 100);
 
         return () => clearTimeout(timeout);
     }, []);
