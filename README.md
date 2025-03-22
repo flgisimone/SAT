@@ -32,9 +32,9 @@
 <h2>⚙️ Configuration & Environment Notes</h2>
 <h3>➡️ How to Enable It</h3>
 You must pass the prop mode to activate the tool:
-<pre><code>useSATReact({ enable: true });
+<pre><code>useSATReact(enable);
 </code></pre>
-<pre><code>useSATVue({ enable: true });</code></pre>
+<pre><code>useSATVue(enable);</code></pre>
 <ul>
 <li>enable: true ➔ Enables SAT</li>
 <li>enable: false ➔ Disables SAT</li>
