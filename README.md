@@ -17,6 +17,7 @@
   <li>✅ Validates <strong>focus management</strong> on interactive elements (proper <code>tabindex</code> usage and accessibility focus order)</li>
   <li>✅ Detects <strong>empty or invalid links</strong> (e.g., <code>&lt;a href="#"&gt;</code> or no <code>href</code>) and suggests better alternatives</li>
   <li>✅ Detects empty or invalid <code>href="#"</code> links without a meaningful destination</li>
+  <li>✅ Checks external links (<code>target="_blank"</code>) for missing <code>rel="noopener noreferrer"</code> to prevent tabnabbing attacks</li>
   <li>✅ Logs clear and actionable warnings in the browser console</li>
   <li>✅ Framework-agnostic core logic (works in <strong>React</strong> and <strong>Vue</strong>)</li>
 </ul>
@@ -43,9 +44,9 @@ You must pass the prop mode to activate the tool:
 <h3>➡️ Behavior in Production</h3>
 We recommend activating SAT only in development, for debugging accessibility and SEO during the build process.
 
-Example conditional activation in Vue:
+Example conditional activation in vue:
 <pre><code>if (process.env.NODE_ENV !== 'production') {
-  useSATVue({ mode: true });
+  useSATVue(enable);
 }</code></pre>
 <hr>
 
