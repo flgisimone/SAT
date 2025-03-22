@@ -7,8 +7,10 @@ import {
 
 import { checkTextElementContrast } from './accessibilityA11y/colorContrastChecker';
 import { checkAriaRolesWithSuggestions, checkUniqueLandmarks } from './accessibilityA11y/ariaRolesChecker';
-import ariaLabelChecker from './accessibilityA11y/ariaLabelChecker';
-import {checkInputLabels} from "./accessibilityA11y/inputLabelChecker";
+import { checkAriaLabel}  from "./accessibilityA11y/ariaLabelChecker";
+import { checkInputLabels } from "./accessibilityA11y/inputLabelChecker";
+import { checkFocusManagement } from "./accessibilityA11y/focusManagementChecker";
+
 
 /**
  * Runs the Universal Accessibility Checker (A11y).
@@ -37,10 +39,11 @@ export function useSAT(enable: boolean): void {
         checkHeadingOrder();
         checkJumpLevels();
         checkTextElementContrast();
-        ariaLabelChecker();
+        checkAriaLabel();
         checkAriaRolesWithSuggestions();
         checkUniqueLandmarks();
         checkInputLabels();
+        checkFocusManagement();
 
         console.log('🔍✅ [A11y] Accessibility checks completed.');
     }
