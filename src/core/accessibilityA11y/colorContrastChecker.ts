@@ -142,7 +142,7 @@ export function checkTextElementContrast(): void {
             el.title = `Insufficient contrast (${contrastRatio.toFixed(2)})`;
             el.style.outline = '2px dashed red';
         } else if (contrastRatio < 7) {
-            console.info(`⚠️ Contrast on ${el.tagName} ("${text}") is ${contrastRatio.toFixed(2)}. Meets AA but not AAA standards.`);
+            console.warn(`⚠️ Contrast on ${el.tagName} ("${text}") is ${contrastRatio.toFixed(2)}. Meets AA but not AAA standards.`);
         }
     });
 }
