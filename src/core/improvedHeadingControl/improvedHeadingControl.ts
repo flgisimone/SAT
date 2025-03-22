@@ -51,6 +51,7 @@ export function checkHeadingOrder(): void {
     // Reset styles before new check
     headings.forEach((heading) => {
         const el = heading as HTMLElement;
+
         el.style.outline = '';
         el.style.backgroundColor = '';
         el.removeAttribute('title');
