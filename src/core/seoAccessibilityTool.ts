@@ -8,6 +8,7 @@ import {
 import { checkTextElementContrast } from './accessibilityA11y/colorContrastChecker';
 import { checkAriaRolesWithSuggestions, checkUniqueLandmarks } from './accessibilityA11y/ariaRolesChecker';
 import ariaLabelChecker from './accessibilityA11y/ariaLabelChecker';
+import {checkInputLabels} from "./accessibilityA11y/inputLabelChecker";
 
 /**
  * Runs the Universal Accessibility Checker (A11y).
@@ -30,6 +31,7 @@ import ariaLabelChecker from './accessibilityA11y/ariaLabelChecker';
 
 export function useSAT(enable: boolean): void {
     if (process.env.NODE_ENV !== 'production' && enable) {
+
         checkH1();
         checkH1Visible();
         checkHeadingOrder();
@@ -38,6 +40,7 @@ export function useSAT(enable: boolean): void {
         ariaLabelChecker();
         checkAriaRolesWithSuggestions();
         checkUniqueLandmarks();
+        checkInputLabels();
 
         console.log('🔍✅ [A11y] Accessibility checks completed.');
     }

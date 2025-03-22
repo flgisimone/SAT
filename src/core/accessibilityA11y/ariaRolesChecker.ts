@@ -65,7 +65,7 @@ export function checkAriaRolesWithSuggestions(): void {
 
         if (!roleAttr) {
             if (recommendedRoles.length > 0) {
-                console.warn(`❌ <${tagName}> is missing a 'role' attribute. Recommended role(s): [${recommendedRoles.join(', ')}].`);
+                console.error(`❌ <${tagName}> is missing a 'role' attribute. Recommended role(s): [${recommendedRoles.join(', ')}].`);
 
                 el.style.outline = '2px dashed turquoise';
                 el.title = `Recommended role(s): ${recommendedRoles.join(', ')}`;
@@ -129,7 +129,7 @@ export function checkUniqueLandmarks(): void {
                     el.hasAttribute('aria-label') || el.hasAttribute('aria-labelledby');
 
                 if (!hasAriaLabel) {
-                    console.warn(
+                    console.error(
                         `❌ Multiple <${selector}> elements found (${elements.length}). Element ${
                             index + 1
                         } is missing aria-label or aria-labelledby. Role: ${role}`
@@ -143,7 +143,7 @@ export function checkUniqueLandmarks(): void {
                 }
             });
         } else {
-            console.warn(`❌ Missing <${selector}> landmark role: ${role}`);
+            console.error(`❌ Missing <${selector}> landmark role: ${role}`);
         }
     });
 }
