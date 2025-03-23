@@ -1,16 +1,20 @@
 import { useEffect } from 'react';
-import { useSAT } from "../core/seoAccessibilityTool";
+import { useSAT } from '../core/seoAccessibilityTool';
+import { SATOptions } from "../satOptions";
 
-export function useSATReact(enable = false):void {
+export interface UseSATReactProps {
+    enable?: boolean;
+    options?: Partial<SATOptions>;
+}
+
+export const useSATReact = ({ enable = true, options = {} }: UseSATReactProps) => {
     useEffect(() => {
-        useSAT(enable);
+        useSAT(enable, options);
 
         const timeout = setTimeout(() => {
-            useSAT(enable);
+            useSAT(enable, options);
         }, 100);
 
         return () => clearTimeout(timeout);
-    }, []);
+    }, [enable, options]);
 };
-
-export default useSATReact;

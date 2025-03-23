@@ -25,8 +25,11 @@ import {checkExternalLinksRel} from "./improvedLinksControl/externalLinksRelChec
 export function useSAT(enable: boolean, customOptions?: Partial<SATOptions>): void {
 
     if (!enable || process.env.NODE_ENV === 'production') {
+        console.warn('🚫 SAT checks are disabled or running in production.');
+        
         return;
     }
+
 
     const options = { ...satOptions, ...customOptions };
 
