@@ -1,5 +1,8 @@
   <h1>SEO Accessibility Tool (SAT) 🕵️‍♂️ for Developer</h1>
-  <p>An accessibility and SEO validation tool for detects common mistakes in accessibility and SEO performance.</p>
+  An accessibility and SEO validation tool focused on <strong>heading structure best practices</strong> 
+  and <strong>universal accessibility compliance</strong>.  
+  Detects common mistakes in heading usage (h1-h6), ARIA, color contrast, and more to ensure semantic hierarchy for better accessibility and SEO performance.
+</p>
 
   <hr>
 
@@ -18,6 +21,7 @@
   <li>✅ Detects <strong>empty or invalid links</strong> (e.g., <code>&lt;a href="#"&gt;</code> or no <code>href</code>) and suggests better alternatives</li>
   <li>✅ Detects empty or invalid <code>href="#"</code> links without a meaningful destination</li>
   <li>✅ Checks external links (<code>target="_blank"</code>) for missing <code>rel="noopener noreferrer"</code> to prevent tabnabbing attacks</li>
+  <li>✅ Supports <strong>custom allowed link texts</strong> to skip warnings (e.g., "read more")</li>
   <li>✅ Logs clear and actionable warnings in the browser console</li>
   <li>✅ Framework-agnostic core logic (works in <strong>React</strong> and <strong>Vue</strong>)</li>
 </ul>
@@ -100,13 +104,9 @@ const satOptions = {
 import { useSATReact } from 'seo-accessibility-tool/react';
 
 export default function App() {
-  useSATReact({
-    enable: true,
-    options: {
-      enableCheckH1: true,
-      enableCheckAriaRolesWithSuggestions: false,
-      enableCheckColorContrast: true
-    }
+  useSATReact(true, {
+    allowedLinkTexts: ['read more', 'discover more'],
+    enableCheckNonDescriptiveLinks: true
   });
 
   return ();
@@ -118,20 +118,16 @@ export default function App() {
 &lt;script setup lang="ts"&gt;
 import { useSATVue } from 'seo-accessibility-tool/vue';
 
-useSATVue({
-  enable: true,
-  options: {
-    enableCheckH1: true,
-    enableCheckFocusManagement: true,
-    enableCheckExternalLinksRel: true
-  }
+useSATVue(true, {
+  allowedLinkTexts: ['read more', 'click here'],
+  enableCheckNonDescriptiveLinks: true
 });
 &lt;/script&gt;
 
 &lt;template&gt;
-  &lt;NuxtLayout&gt;
-    &lt;NuxtPage /&gt;
-  &lt;/NuxtLayout&gt;
+  &lt;div&gt;
+    &lt;h1&gt;Main Page&lt;/h1&gt;
+  &lt;/div&gt;
 &lt;/template&gt;
 </code></pre>
 
@@ -141,76 +137,81 @@ useSATVue({
 <table>
   <thead>
     <tr>
-      <th>Check Description</th>
-      <th>Status</th>
-      <th>Tag/Element Involved</th>
+      <th>Option</th>
+      <th>Description</th>
+      <th>Default</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>Validates correct order of headings (&lt;h1&gt; to &lt;h6&gt;)</td>
-      <td>✅</td>
-      <td>h1 - h6</td>
+      <td><code>enableCheckH1</code></td>
+      <td>Check for missing/multiple H1 tags</td>
+      <td><code>true</code></td>
     </tr>
     <tr>
-      <td>Detects missing or multiple &lt;h1&gt; tags</td>
-      <td>✅</td>
-      <td>h1</td>
+      <td><code>enableCheckH1Visible</code></td>
+      <td>Check if H1 is visible in viewport</td>
+      <td><code>true</code></td>
     </tr>
     <tr>
-      <td>Checks if the first &lt;h1&gt; is visible in the viewport</td>
-      <td>✅</td>
-      <td>h1</td>
+      <td><code>enableCheckHeadingOrder</code></td>
+      <td>Validate heading order hierarchy</td>
+      <td><code>true</code></td>
     </tr>
     <tr>
-      <td>Detects heading level jumps or regressions (e.g., H1 ➔ H4)</td>
-      <td>✅</td>
-      <td>h1 - h6</td>
+      <td><code>enableCheckJumpLevels</code></td>
+      <td>Detect heading level jumps/regressions</td>
+      <td><code>true</code></td>
     </tr>
     <tr>
-      <td>Validates accessible <strong>ARIA labels</strong> on interactive elements</td>
-      <td>✅</td>
-      <td>button, a, input, svg</td>
+      <td><code>enableCheckAriaLabel</code></td>
+      <td>Validate ARIA labels on interactive elements</td>
+      <td><code>true</code></td>
     </tr>
     <tr>
-      <td>Checks <strong>ARIA roles</strong> for correctness and provides suggestions</td>
-      <td>✅</td>
-      <td>Elements with role attributes</td>
+      <td><code>enableCheckAriaRolesWithSuggestions</code></td>
+      <td>Check ARIA roles and suggest improvements</td>
+      <td><code>true</code></td>
     </tr>
     <tr>
-      <td>Verifies landmark elements are unique (e.g., &lt;main&gt;, &lt;nav&gt;)</td>
-      <td>✅</td>
-      <td>main, nav, header, footer</td>
+      <td><code>enableCheckUniqueLandmarks</code></td>
+      <td>Ensure unique landmark elements (main, nav, etc.)</td>
+      <td><code>true</code></td>
     </tr>
     <tr>
-      <td>Checks color contrast ratios for WCAG 2.1 AA/AAA compliance</td>
-      <td>✅</td>
-      <td>h1-h6, span, a, button</td>
+      <td><code>enableCheckTextElementContrast</code></td>
+      <td>Check color contrast of text for WCAG compliance</td>
+      <td><code>true</code></td>
     </tr>
     <tr>
-      <td>Verifies input fields have associated labels</td>
-      <td>✅</td>
-      <td>input, textarea, select</td>
+      <td><code>enableCheckInputLabel</code></td>
+      <td>Verify input fields have associated labels</td>
+      <td><code>true</code></td>
     </tr>
     <tr>
-      <td>Checks focus management and tabindex usage</td>
-      <td>✅</td>
-      <td>Interactive elements</td>
+      <td><code>enableCheckFocusManagement</code></td>
+      <td>Validate focus and tabindex management</td>
+      <td><code>true</code></td>
     </tr>
     <tr>
-      <td>Warns about links with empty or non-descriptive text</td>
-      <td>✅</td>
-      <td>a</td>
+      <td><code>enableCheckEmptyLinks</code></td>
+      <td>Detect links without destinations (empty href or #)</td>
+      <td><code>true</code></td>
     </tr>
     <tr>
-      <td>Detects links with href="#" or empty href</td>
-      <td>✅</td>
-      <td>a</td>
+      <td><code>enableCheckExternalLinksRel</code></td>
+      <td>Check external links for missing rel="noopener noreferrer"</td>
+      <td><code>true</code></td>
     </tr>
     <tr>
-      <td>Ensures external links (target="_blank") have rel="noopener noreferrer"</td>
-      <td>✅</td>
-      <td>a (target="_blank")</td>
+      <td><code>enableCheckNonDescriptiveLinks</code></td>
+      <td>Warn on links with nondescriptive text</td>
+      <td><code>true</code></td>
+    </tr>
+    <tr>
+      <td><code>allowedLinkTexts</code></td>
+      <td>Allowed link texts (skip warnings on these)</td>
+      <td><code>[]</code></td>
     </tr>
   </tbody>
 </table>

@@ -14,6 +14,8 @@ export interface SATOptions {
     enableCheckEmptyLinks: boolean;
     enableCheckExternalLinksRel: boolean;
     enableCheckTabindexNegativeOne: boolean;
+    enableCheckNonDescriptiveLinks: boolean;
+    allowedLinkTexts: string[];
 }
 
 export const satOptions: SATOptions = {
@@ -29,5 +31,7 @@ export const satOptions: SATOptions = {
     enableCheckFocusManagement: true,
     enableCheckEmptyLinks: true,
     enableCheckExternalLinksRel: true,
-    enableCheckTabindexNegativeOne: true
+    enableCheckTabindexNegativeOne: true,
+    enableCheckNonDescriptiveLinks: true,
+    allowedLinkTexts: []
 }

@@ -14,7 +14,8 @@ import { checkEmptyLinks } from "./improvedLinksControl/emptyLinksChecker";
 import { checkTabindexNegativeOne } from "./improvedLinksControl/tabIndexNegativeOneChecker";
 
 import { SATOptions, satOptions } from "../satOptions";
-import {checkExternalLinksRel} from "./improvedLinksControl/externalLinksRelChecker";
+import { checkExternalLinksRel } from "./improvedLinksControl/externalLinksRelChecker";
+import { checkNonDescriptiveLinks } from "./improvedLinksControl/nonDescriptiveLinksChecker";
 
 /**
  * Runs the Universal Accessibility Checker (A11y).
@@ -26,10 +27,9 @@ export function useSAT(enable: boolean, customOptions?: Partial<SATOptions>): vo
 
     if (!enable || process.env.NODE_ENV === 'production') {
         console.warn('🚫 SAT checks are disabled or running in production.');
-        
+
         return;
     }
-
 
     const options = { ...satOptions, ...customOptions };
 
@@ -46,6 +46,10 @@ export function useSAT(enable: boolean, customOptions?: Partial<SATOptions>): vo
     checkEmptyLinks(options.enableCheckEmptyLinks);
     checkExternalLinksRel(options.enableCheckExternalLinksRel)
     checkTabindexNegativeOne(options.enableCheckTabindexNegativeOne);
+    checkNonDescriptiveLinks(
+        options.enableCheckNonDescriptiveLinks,
+        options.allowedLinkTexts
+    );
 
     console.log('🔍✅ [A11y] Accessibility checks completed.');
 }

@@ -85,7 +85,7 @@ export function checkAriaRolesWithSuggestions(enableCheckAriaRolesWithSuggestion
             el.style.outline = '2px dashed magenta';
             el.title = `Invalid ARIA role(s): ${invalidRoles.join(', ')}. Recommended: ${recommendedRoles.join(', ')}`;
         } else if (recommendedRoles.length && !roles.some(role => recommendedRoles.includes(role))) {
-            console.warn(`ℹ️ <${tagName}> has a valid role but not the recommended one. Recommended role(s): [${recommendedRoles.join(', ')}]. Current role(s): [${roles.join(', ')}]`);
+            console.info(`ℹ️ <${tagName}> has a valid role but not the recommended one. Recommended role(s): [${recommendedRoles.join(', ')}]. Current role(s): [${roles.join(', ')}]`);
 
             el.style.outline = '2px dashed purple';
             el.title = `Consider using: ${recommendedRoles.join(', ')}`;
@@ -141,7 +141,7 @@ export function checkUniqueLandmarks(enableCheckUniqueLandmarks?: boolean): void
                     el.style.outline = '2px dashed orange';
                     el.title = `❌ Duplicate <${selector}> without aria-label`;
                 } else {
-                    console.warn(
+                    console.info(
                         `ℹ️ Duplicate <${selector}> with aria-label or aria-labelledby: OK`
                     );
                 }
