@@ -50,6 +50,56 @@ Example conditional activation in vue:
 }</code></pre>
 <hr>
 
+<h2>⚙️ Advanced Usage with SAT Options</h2>
+You can selectively enable or disable specific checks using the SATOptions interface.
+
+<h3>Example with Custom Options (React/Vue/Vanilla)</h3>
+<pre><code>
+import { useSAT } from 'seo-accessibility-tool';
+
+// You can pass a second parameter as custom options
+useSAT(true, {
+  enableCheckH1: true,
+  enableCheckH1Visible: false, // disable H1 visibility check
+  enableCheckHeadingOrder: true,
+  enableCheckJumpLevels: false, // disable heading jumps check
+  enableCheckTextElementContrast: true,
+  enableCheckAriaLabel: true,
+  enableCheckAriaRolesWithSuggestions: true,
+  enableCheckUniqueLandmarks: true,
+  enableCheckInputLabel: true,
+  enableCheckFocusManagement: true,
+  enableCheckEmptyLinks: true,
+  enableCheckTabindexNegativeOne: true
+});
+
+</code></pre>
+
+<h3>SATOptions (Defaults)</h3>
+<pre><code>
+const satOptions = {
+  enableCheckH1: true,
+  enableCheckH1Visible: true,
+  enableCheckHeadingOrder: true,
+  enableCheckJumpLevels: true,
+  enableCheckTextElementContrast: true,
+  enableCheckAriaLabel: true,
+  enableCheckAriaRolesWithSuggestions: true,
+  enableCheckUniqueLandmarks: true,
+  enableCheckInputLabel: true,
+  enableCheckFocusManagement: true,
+  enableCheckEmptyLinks: true,
+  enableCheckTabindexNegativeOne: true
+};
+</code></pre>
+
+<h4>When to Use Custom Options?</h4>
+<li>If you want to fix one issue at a time, you can enable only the relevant checks</li>
+<li>Helps in progressive debugging without cluttering the console with multiple warnings</li>
+<ul>
+</ul>
+<hr>
+
 <h2>📝 Example Usage</h2>
 
 <h3>React</h3>
@@ -64,7 +114,7 @@ export default function App() {
   <pre><code>&lt;script setup&gt;
 import {useSATVue} from 'seo-accessibility-tool/vue';
 
-    useSATVue(enable);
+useSATVue(enable);
 &lt;/script&gt;
 
 &lt;template&gt;

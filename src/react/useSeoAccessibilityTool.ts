@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSAT } from "../core/seoAccessibilityTool";
 
-export const useSATReact = (enable = false) => {
+export function useSATReact(enable = false):void {
     useEffect(() => {
         useSAT(enable);
 

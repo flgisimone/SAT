@@ -52,7 +52,9 @@ const recommendedRolesMap: Record<string, string[]> = {
  *
  * @returns {void}
  */
-export function checkAriaRolesWithSuggestions(): void {
+export function checkAriaRolesWithSuggestions(enableCheckAriaRolesWithSuggestions: boolean): void {
+    if (!enableCheckAriaRolesWithSuggestions) return;
+
     const elementsWithRoles = Array.from(document.querySelectorAll<HTMLElement>(`
     [role], header, footer, nav, main, aside, section, form, button, a, ul, ol, li, article, table, tr, td, th, input, textarea, select
   `));
@@ -112,7 +114,9 @@ export function checkAriaRolesWithSuggestions(): void {
  *
  * @returns {void}
  */
-export function checkUniqueLandmarks(): void {
+export function checkUniqueLandmarks(enableCheckUniqueLandmarks?: boolean): void {
+    if (!enableCheckUniqueLandmarks) return;
+
     const landmarksToCheck = [
         { role: 'banner', selector: 'header' },
         { role: 'navigation', selector: 'nav' },

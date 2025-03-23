@@ -4,7 +4,9 @@
  *
  * @returns {void}
  */
-export function checkInputLabels(): void {
+export function checkInputLabels(enableCheckInputLabel?: boolean): void {
+    if (!enableCheckInputLabel) return;
+
     const inputs = Array.from(document.querySelectorAll('input, textarea, select')) as HTMLElement[];
 
     inputs.forEach((el) => {

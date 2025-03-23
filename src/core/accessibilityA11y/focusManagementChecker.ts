@@ -4,7 +4,9 @@
  * - Warns about improper use of tabindex.
  * - Highlights potential focus issues.
  */
-export function checkFocusManagement(): void {
+export function checkFocusManagement(enableCheckFocusManagement?: boolean): void {
+    if (!enableCheckFocusManagement) return;
+
     const focusableSelectors = [
         'a[href]', 'button', 'input', 'textarea', 'select',
         '[tabindex]', '[contenteditable="true"]'

@@ -15,7 +15,9 @@
  * @function checkTabindexNegativeOne
  * @returns {void}
  */
-export function checkTabindexNegativeOne(): void {
+export function checkTabindexNegativeOne(enableCheckTabindexNegativeOne?: boolean): void {
+    if (!enableCheckTabindexNegativeOne) return;
+
     const elements = document.querySelectorAll('[tabindex="-1"]');
 
     elements.forEach((el) => {

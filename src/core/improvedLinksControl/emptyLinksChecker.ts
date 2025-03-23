@@ -5,7 +5,9 @@
  * - href="#" or href=""
  * Suggests replacing with a <button> if it acts as an action trigger.
  */
-export function checkEmptyLinks(): void {
+export function checkEmptyLinks(enableCheckEmptyLinks?: boolean): void {
+    if (!enableCheckEmptyLinks) return;
+
     const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('a'));
 
     links.forEach(link => {
