@@ -22,6 +22,7 @@
   <li>✅ Detects empty or invalid <code>href="#"</code> links without a meaningful destination</li>
   <li>✅ Checks external links (<code>target="_blank"</code>) for missing <code>rel="noopener noreferrer"</code> to prevent tabnabbing attacks</li>
   <li>✅ Supports <strong>custom allowed link texts</strong> to skip warnings (e.g., "read more")</li>
+  <li>✅ Detects <strong>broken internal links</strong> (404/500 errors)</li> 
   <li>✅ Logs clear and actionable warnings in the browser console</li>
   <li>✅ Framework-agnostic core logic (works in <strong>React</strong> and <strong>Vue</strong>)</li>
 </ul>
@@ -206,7 +207,7 @@ useSATVue(true, {
     <tr>
       <td><code>enableCheckNonDescriptiveLinks</code></td>
       <td>Warn on links with nondescriptive text</td>
-      <td><code>true</code></td>
+      <td><code>false</code></td>
     </tr>
     <tr>
       <td><code>allowedLinkTexts</code></td>
@@ -292,6 +293,11 @@ useSATVue(true, {
       <td>Check for misuse of tabindex="-1" in focusable elements</td>
       <td>true</td>
     </tr>
+<tr>
+  <td>enableCheckBrokenInternalLinks</td>
+  <td>Detect internal links that return 404/500 (Broken Links)</td>
+  <td>true</td>
+</tr>
   </tbody>
 </table>
 

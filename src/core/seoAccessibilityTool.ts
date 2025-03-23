@@ -16,6 +16,7 @@ import { checkTabindexNegativeOne } from "./improvedLinksControl/tabIndexNegativ
 import { SATOptions, satOptions } from "../satOptions";
 import { checkExternalLinksRel } from "./improvedLinksControl/externalLinksRelChecker";
 import { checkNonDescriptiveLinks } from "./improvedLinksControl/nonDescriptiveLinksChecker";
+import { checkBrokenInternalLinks } from "./improvedLinksControl/brokenInternalLinksChecker";
 
 /**
  * Runs the Universal Accessibility Checker (A11y).
@@ -23,7 +24,7 @@ import { checkNonDescriptiveLinks } from "./improvedLinksControl/nonDescriptiveL
  * @param enable - Enable or disable all accessibility checks globally.
  * @param customOptions - (Optional) Override default options for individual checks.
  */
-export function useSAT(enable: boolean, customOptions?: Partial<SATOptions>): void {
+export async function useSAT(enable: boolean, customOptions?: Partial<SATOptions>): Promise<void> {
 
     if (!enable || process.env.NODE_ENV === 'production') {
         console.warn('🚫 SAT checks are disabled or running in production.');
@@ -33,6 +34,7 @@ export function useSAT(enable: boolean, customOptions?: Partial<SATOptions>): vo
 
     const options = { ...satOptions, ...customOptions };
 
+    // Synchronous checks
     checkH1(options.enableCheckH1);
     checkH1Visible(options.enableCheckH1Visible);
     checkHeadingOrder(options.enableCheckHeadingOrder);
@@ -50,6 +52,15 @@ export function useSAT(enable: boolean, customOptions?: Partial<SATOptions>): vo
         options.enableCheckNonDescriptiveLinks,
         options.allowedLinkTexts
     );
+
+    // Asynchronous check for broken internal links
+    if (options.enableCheckBrokenInternalLinks) {
+        try {
+            await checkBrokenInternalLinks(true);
+        } catch (error) {
+            console.error('❌ Error during broken link checking:', error);
+        }
+    }
 
     console.log('🔍✅ [A11y] Accessibility checks completed.');
 }
