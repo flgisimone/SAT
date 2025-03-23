@@ -8,14 +8,26 @@ export interface UseSATVueProps {
 }
 
 export function useSATVue({ enable = true, options = {} }: UseSATVueProps) {
-    let timeout: number;
+    let timeout: ReturnType<typeof setTimeout>;
+
+    const runSAT = async () => {
+        try {
+            await useSAT(enable, options);
+
+            timeout = setTimeout(async () => {
+                try {
+                    await useSAT(enable, options);
+                } catch (error) {
+                    console.error('❌ Error during SAT re-run:', error);
+                }
+            }, 100);
+        } catch (error) {
+            console.error('❌ Error during SAT run:', error);
+        }
+    };
 
     onMounted(() => {
-        useSAT(enable, options);
-
-        timeout = window.setTimeout(() => {
-            useSAT(enable, options);
-        }, 100);
+        runSAT();
     });
 
     onUnmounted(() => {

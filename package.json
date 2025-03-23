@@ -1,14 +1,18 @@
 {
   "name": "seo-accessibility-tool",
-  "version": "1.3.2",
-  "description": "A11y SEO Accessibility tool for React and Vue projects",
+  "version": "1.3.4",
   "author": "Giulio Simone Floresta",
   "license": "MIT",
   "type": "module",
+  "description": "Universal Accessibility & SEO Checker (React, Vue, Vanilla)",
   "repository": {
     "type": "git",
-    "url": "git+hhttps://github.com/flgisimone/SAT"
+    "url": "https://github.com/flgisimone/sat"
   },
+  "bugs": {
+    "url": "https://github.com/flgisimone/SAT/issues"
+  },
+  "homepage": "https://github.com/flgisimone/sat",
   "exports": {
     ".": {
       "import": "./dist/index.js",

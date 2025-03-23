@@ -7,14 +7,30 @@ export interface UseSATReactProps {
     options?: Partial<SATOptions>;
 }
 
-export const useSATReact = ({ enable = true, options = {} }: UseSATReactProps) => {
+export function useSATReact({ enable = true, options = {} }: UseSATReactProps):void{
     useEffect(() => {
-        useSAT(enable, options);
+        let timeout: ReturnType<typeof setTimeout>;
 
-        const timeout = setTimeout(() => {
-            useSAT(enable, options);
-        }, 100);
+        const runSAT = async () => {
+            try {
+                await useSAT(enable, options);
 
-        return () => clearTimeout(timeout);
+                timeout = setTimeout(async () => {
+                    try {
+                        await useSAT(enable, options);
+                    } catch (error) {
+                        console.error("❌ Error during SAT re-run:", error);
+                    }
+                }, 100);
+            } catch (error) {
+                console.error("❌ Error during SAT run:", error);
+            }
+        };
+
+        runSAT();
+
+        return () => {
+            clearTimeout(timeout);
+        };
     }, [enable, options]);
-};
+}
