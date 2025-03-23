@@ -110,10 +110,22 @@ export function getEffectiveBackground(el: HTMLElement): string {
 
 /**
  * Checks contrast ratio for text elements according to WCAG 2.1 standards.
- * Targets: headings (`h1`-`h6`), `span`, `a`, `button`.
- * Logs warnings when contrast is below AA (4.5) or AAA (7.0) thresholds.
- * Highlights elements with insufficient contrast (adds red dashed outline).
  *
+ * ✅ Targets:
+ * - Headings (`h1`-`h6`)
+ * - `span`
+ * - `a`
+ * - `button`
+ *
+ * ✅ Logs:
+ * - Warnings when contrast is below AA (4.5)
+ * - Info when contrast is below AAA (7.0)
+ * - Success messages when contrast is AAA-compliant
+ *
+ * ✅ Tooltips:
+ * - Descriptive tooltips indicating the contrast issues or compliance
+ *
+ * @param enableCheckTextElementContrast - Boolean to enable/disable the checker
  * @returns {void}
  */
 export function checkTextElementContrast(enableCheckTextElementContrast?: boolean): void {
@@ -122,12 +134,16 @@ export function checkTextElementContrast(enableCheckTextElementContrast?: boolea
     const selectors = 'h1, h2, h3, h4, h5, h6, span, a, button';
     const elements = Array.from(document.querySelectorAll(selectors)) as HTMLElement[];
 
-    elements.forEach((el) => {
+    let insufficientContrastCount = 0;
+    let aaOnlyContrastCount = 0;
+    let aaaCompliantCount = 0;
+
+    elements.forEach((el, index) => {
         const computedStyle = window.getComputedStyle(el);
         const color = computedStyle.color;
         let backgroundColor = computedStyle.backgroundColor;
 
-        // If background is transparent, get effective background from parent elements
+        // Fallback background if transparent
         if (backgroundColor === 'rgba(0, 0, 0, 0)' || backgroundColor === 'transparent') {
             backgroundColor = getEffectiveBackground(el);
         }
@@ -136,15 +152,45 @@ export function checkTextElementContrast(enableCheckTextElementContrast?: boolea
         const rgbBackground = colorToRgbArray(backgroundColor);
 
         const contrastRatio = contrast(rgbText, rgbBackground);
-        const text = el.textContent?.trim() || '';
+        const text = el.textContent?.trim() || '[no text]';
 
         if (contrastRatio < 4.5) {
-            console.error(`❌️️ Insufficient contrast on ${el.tagName} ("${text}"): contrast ratio ${contrastRatio.toFixed(2)}. Minimum AA requirement is 4.5.`);
+            insufficientContrastCount++;
 
-            el.title = `Insufficient contrast (${contrastRatio.toFixed(2)})`;
-            el.style.outline = '2px dashed red';
+            console.error(
+                `❌ [${index + 1}] ${el.tagName} ("${text}") has insufficient contrast: ${contrastRatio.toFixed(2)}.` +
+                ` Minimum WCAG AA requirement is 4.5.`
+            );
+
+            el.title = `❌ Insufficient contrast (${contrastRatio.toFixed(2)}). Minimum AA is 4.5.`;
         } else if (contrastRatio < 7) {
-            console.warn(`⚠️ Contrast on ${el.tagName} ("${text}") is ${contrastRatio.toFixed(2)}. Meets AA but not AAA standards.`);
+            aaOnlyContrastCount++;
+
+            console.warn(
+                `⚠️ [${index + 1}] ${el.tagName} ("${text}") contrast is ${contrastRatio.toFixed(2)}.` +
+                ` Meets AA but not AAA standards (7.0).`
+            );
+
+            el.title = `⚠️ Contrast ${contrastRatio.toFixed(2)}: AA compliant but not AAA.`;
+        } else {
+            aaaCompliantCount++;
+
+            console.info(
+                `✅ [${index + 1}] ${el.tagName} ("${text}") contrast is ${contrastRatio.toFixed(2)}.` +
+                ` Meets AAA standards!`
+            );
+
+            el.title = `✅ Contrast ${contrastRatio.toFixed(2)}: AAA compliant.`;
         }
     });
+
+    if (insufficientContrastCount === 0 && aaOnlyContrastCount === 0) {
+        console.log('🎉✅ All text elements have AAA-level contrast ratios!');
+    } else {
+        console.log(`🔍 Contrast check completed:`);
+        console.log(`❌ ${insufficientContrastCount} element(s) with insufficient contrast (below AA 4.5).`);
+        console.log(`⚠️ ${aaOnlyContrastCount} element(s) meet AA but not AAA (below 7.0).`);
+        console.log(`✅ ${aaaCompliantCount} element(s) meet AAA (7.0 or above).`);
+    }
 }
+

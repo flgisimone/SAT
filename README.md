@@ -2,8 +2,9 @@
   An accessibility and SEO validation tool focused on <strong>heading structure best practices</strong> 
   and <strong>universal accessibility compliance</strong>.  
   Detects common mistakes in heading usage (h1-h6), ARIA, color contrast, and more to ensure semantic hierarchy for better accessibility and SEO performance.
-</p>
 
+<h3>‼️ WORK ONLY ON DEV ENVIRONMENT ‼️</h3>
+<h3>✅ Logs clear and actionable warnings in the browser console</h3>
   <hr>
 
 <h2>🚀 Features</h2>
@@ -22,8 +23,7 @@
   <li>✅ Detects empty or invalid <code>href="#"</code> links without a meaningful destination</li>
   <li>✅ Checks external links (<code>target="_blank"</code>) for missing <code>rel="noopener noreferrer"</code> to prevent tabnabbing attacks</li>
   <li>✅ Supports <strong>custom allowed link texts</strong> to skip warnings (e.g., "read more")</li>
-  <li>✅ Detects <strong>broken internal links</strong> (404/500 errors)</li> 
-  <li>✅ Logs clear and actionable warnings in the browser console</li>
+  <li>✅ Detects <strong>broken internal links</strong> (404/500 errors)</li>
   <li>✅ Framework-agnostic core logic (works in <strong>React</strong> and <strong>Vue</strong>)</li>
 </ul>
 

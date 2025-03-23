@@ -27,20 +27,30 @@ export function checkNonDescriptiveLinks(
         'link'
     ];
 
-    links.forEach((link) => {
-        const text = link.textContent?.trim().toLowerCase() || '';
+    let totalIssues = 0;
 
-        const isAllowed = allowedTexts.includes(text);
+    links.forEach((link, index) => {
+        const text = link.textContent?.trim().toLowerCase() || '';
+        const href = link.getAttribute('href') || '[no href]';
+
+        const isAllowed = allowedTexts.map(t => t.toLowerCase()).includes(text);
         const isTooShort = text.length < 4;
         const isNonDescriptive = NON_DESCRIPTIVE_LINK_TEXTS.includes(text);
 
         if ((isTooShort || isNonDescriptive) && !isAllowed) {
+            totalIssues++;
+
             console.error(
-                `❌ Non-descriptive link text found: "${link.textContent?.trim()}" in <a href="${link.href}">`
+                `❌ [${index + 1}] Non-descriptive link text found: "${link.textContent?.trim()}" in <a href="${href}">`
             );
 
-            link.style.outline = '2px dashed orange';
             link.title = '⚠️ Non-descriptive link text';
         }
     });
+
+    if (totalIssues === 0) {
+        console.log('✅ All <a> links have descriptive text.');
+    } else {
+        console.warn(`⚠️ Found ${totalIssues} <a> links with non-descriptive or too short text. Review the warnings above.`);
+    }
 }

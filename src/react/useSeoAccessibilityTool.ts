@@ -7,30 +7,34 @@ export interface UseSATReactProps {
     options?: Partial<SATOptions>;
 }
 
-export function useSATReact({ enable = true, options = {} }: UseSATReactProps):void{
+export function useSATReact({enable = true, options = {}}: UseSATReactProps): void {
     useEffect(() => {
-        let timeout: ReturnType<typeof setTimeout>;
+        if (!enable) return;
 
         const runSAT = async () => {
             try {
                 await useSAT(enable, options);
-
-                timeout = setTimeout(async () => {
-                    try {
-                        await useSAT(enable, options);
-                    } catch (error) {
-                        console.error("❌ Error during SAT re-run:", error);
-                    }
-                }, 100);
             } catch (error) {
                 console.error("❌ Error during SAT run:", error);
             }
         };
 
+        // Initial run
         runSAT();
 
+        // Observe DOM mutations
+        const observer = new MutationObserver(() => {
+            runSAT();
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+        });
+
         return () => {
-            clearTimeout(timeout);
+            observer.disconnect();
         };
     }, [enable, options]);
 }

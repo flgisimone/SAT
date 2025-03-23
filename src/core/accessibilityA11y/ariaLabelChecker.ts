@@ -18,6 +18,8 @@ const hasHeadingTags = ['nav', 'header', 'footer', 'aside', 'section', 'main', '
 export function checkAriaLabel(enableCheckAriaLabel?: boolean) {
     if (!enableCheckAriaLabel) return;
 
+    let issueCount = 0;
+
     tags.forEach(tag => {
         const elements = document.querySelectorAll(tag);
 
@@ -26,7 +28,7 @@ export function checkAriaLabel(enableCheckAriaLabel?: boolean) {
                 el.hasAttribute('aria-label') || el.hasAttribute('aria-labelledby');
 
             if (!hasAriaLabel) {
-                console.error(`❌ Missing ARIA label on <${tag}>`, el);
+                console.warn(`⚠️ Missing ARIA label on <${tag}>`, el);
             }
         });
     });
@@ -67,6 +69,7 @@ export function checkAriaLabel(enableCheckAriaLabel?: boolean) {
         }
 
         if (!isAccessible) {
+            issueCount++;
             const elInfo = {
                 index: index + 1,
                 tag,
@@ -83,9 +86,13 @@ export function checkAriaLabel(enableCheckAriaLabel?: boolean) {
                 el
             );
 
-            (el as HTMLElement).style.outline = '2px solid red';
-            (el as HTMLElement).style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
             (el as HTMLElement).title = '❌️️ Missing accessible label';
         }
     });
+
+    if (issueCount === 0) {
+        console.log('🎉✅ All elements have accessible labels!');
+    } else {
+        console.warn(`⚠️ Found ${issueCount} elements missing accessible labels.`);
+    }
 }

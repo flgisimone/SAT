@@ -2,6 +2,7 @@
  * Checks all input fields for associated labels.
  * Logs warnings if an input is missing an accessible label.
  *
+ * @param enableCheckInputLabel - Enables or disables this check.
  * @returns {void}
  */
 export function checkInputLabels(enableCheckInputLabel?: boolean): void {
@@ -9,26 +10,38 @@ export function checkInputLabels(enableCheckInputLabel?: boolean): void {
 
     const inputs = Array.from(document.querySelectorAll('input, textarea, select')) as HTMLElement[];
 
-    inputs.forEach((el) => {
+    let missingLabelsCount = 0;
+
+    inputs.forEach((el, index) => {
         const hasId = el.hasAttribute('id');
         const id = el.getAttribute('id');
         const hasAriaLabel = el.hasAttribute('aria-label');
         const hasAriaLabelledBy = el.hasAttribute('aria-labelledby');
 
-        // Check if there's a label with "for" that matches the id
+        // Explicit label with "for"
         const labelFor = hasId ? document.querySelector(`label[for="${id}"]`) : null;
 
-        // Check if the element is wrapped by a label (implicit association)
+        // Implicit label by wrapping
         const isWrappedInLabel = el.closest('label');
 
-        const text = el.getAttribute('name') || el.getAttribute('placeholder') || el.getAttribute('id') || 'Unknown input';
+        const text = el.getAttribute('name') ||
+            el.getAttribute('placeholder') ||
+            el.getAttribute('id') ||
+            `Input #${index + 1}`;
 
+        // Condition: Missing any form of label association
         if (!labelFor && !isWrappedInLabel && !hasAriaLabel && !hasAriaLabelledBy) {
-            console.error(`❌ Missing accessible label for input: ${text}`);
+            console.error(`❌ Missing accessible label for <${el.tagName.toLowerCase()}>: "${text}"`, el);
 
-            // Optional: highlight the element visually
-            el.style.outline = '2px dashed green';
-            el.title = 'This input field is missing an accessible label';
+            el.title = '❌ Missing accessible label';
+
+            missingLabelsCount++;
         }
     });
+
+    if (missingLabelsCount === 0) {
+        console.log('🎉✅ All input, textarea, and select fields have accessible labels!');
+    } else {
+        console.warn(`⚠️ ${missingLabelsCount} input fields are missing accessible labels!`);
+    }
 }

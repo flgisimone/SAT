@@ -44,11 +44,6 @@ const recommendedRolesMap: Record<string, string[]> = {
  * ✔️ Validates if elements have valid ARIA roles (according to the ARIA specification).
  * ✔️ Recommends appropriate roles based on the element type.
  * ✔️ Logs issues and suggestions in the browser console.
- * ✔️ Visually highlights problematic elements with different outline colors:
- *
- *   - 🔴 Magenta dashed outline for **invalid roles**
- *   - 🔵 Turquoise dashed outline for **missing recommended roles**
- *   - 🟣 Purple dashed outline for **non-recommended roles**
  *
  * @returns {void}
  */
@@ -56,8 +51,11 @@ export function checkAriaRolesWithSuggestions(enableCheckAriaRolesWithSuggestion
     if (!enableCheckAriaRolesWithSuggestions) return;
 
     const elementsWithRoles = Array.from(document.querySelectorAll<HTMLElement>(`
-    [role], header, footer, nav, main, aside, section, form, button, a, ul, ol, li, article, table, tr, td, th, input, textarea, select
-  `));
+        [role], header, footer, nav, main, aside, section, form, button, a, ul, ol, li, article, table, tr, td, th, input, textarea, select
+    `));
+
+    let invalidRolesCount = 0;
+    let missingRoleSuggestionsCount = 0;
 
     elementsWithRoles.forEach((el) => {
         const roleAttr = el.getAttribute('role');
@@ -67,12 +65,11 @@ export function checkAriaRolesWithSuggestions(enableCheckAriaRolesWithSuggestion
 
         if (!roleAttr) {
             if (recommendedRoles.length > 0) {
-                console.error(`❌ <${tagName}> is missing a 'role' attribute. Recommended role(s): [${recommendedRoles.join(', ')}].`);
+                console.warn(`⚠️ <${tagName}> is missing a 'role' attribute. Recommended role(s): [${recommendedRoles.join(', ')}].`);
 
-                el.style.outline = '2px dashed turquoise';
                 el.title = `Recommended role(s): ${recommendedRoles.join(', ')}`;
+                missingRoleSuggestionsCount++;
             }
-
             return;
         }
 
@@ -82,15 +79,21 @@ export function checkAriaRolesWithSuggestions(enableCheckAriaRolesWithSuggestion
         if (invalidRoles.length > 0) {
             console.error(`❌ <${tagName}> has invalid role(s): [${invalidRoles.join(', ')}]. Recommended: ${recommendedRoles.length ? recommendedRoles.join(', ') : 'None'}`);
 
-            el.style.outline = '2px dashed magenta';
             el.title = `Invalid ARIA role(s): ${invalidRoles.join(', ')}. Recommended: ${recommendedRoles.join(', ')}`;
+            invalidRolesCount++;
         } else if (recommendedRoles.length && !roles.some(role => recommendedRoles.includes(role))) {
             console.info(`ℹ️ <${tagName}> has a valid role but not the recommended one. Recommended role(s): [${recommendedRoles.join(', ')}]. Current role(s): [${roles.join(', ')}]`);
 
-            el.style.outline = '2px dashed purple';
             el.title = `Consider using: ${recommendedRoles.join(', ')}`;
+            missingRoleSuggestionsCount++;
         }
     });
+
+    if (invalidRolesCount === 0 && missingRoleSuggestionsCount === 0) {
+        console.log('🎉✅ All ARIA roles are valid and recommended roles are in place!');
+    } else {
+        console.warn(`⚠️ Found ${invalidRolesCount} invalid roles and ${missingRoleSuggestionsCount} elements with missing or non-recommended roles.`);
+    }
 }
 
 /**
@@ -124,8 +127,16 @@ export function checkUniqueLandmarks(enableCheckUniqueLandmarks?: boolean): void
         { role: 'contentinfo', selector: 'footer' },
     ];
 
+    let missingLandmarks = 0;
+    let duplicateWithoutLabels = 0;
+
     landmarksToCheck.forEach(({ role, selector }) => {
         const elements = Array.from(document.querySelectorAll(selector)) as HTMLElement[];
+
+        if (elements.length === 0) {
+            console.error(`❌ Missing <${selector}> landmark role: ${role}`);
+            missingLandmarks++;
+        }
 
         if (elements.length > 1) {
             elements.forEach((el, index) => {
@@ -138,16 +149,21 @@ export function checkUniqueLandmarks(enableCheckUniqueLandmarks?: boolean): void
                             index + 1
                         } is missing aria-label or aria-labelledby. Role: ${role}`
                     );
-                    el.style.outline = '2px dashed orange';
+
                     el.title = `❌ Duplicate <${selector}> without aria-label`;
+                    duplicateWithoutLabels++;
                 } else {
                     console.info(
                         `ℹ️ Duplicate <${selector}> with aria-label or aria-labelledby: OK`
                     );
                 }
             });
-        } else {
-            console.error(`❌ Missing <${selector}> landmark role: ${role}`);
         }
     });
+
+    if (missingLandmarks === 0 && duplicateWithoutLabels === 0) {
+        console.log('🎉✅ All landmark elements are unique and properly labeled!');
+    } else {
+        console.warn(`⚠️ Landmark check: ${missingLandmarks} missing landmarks and ${duplicateWithoutLabels} duplicate landmarks without labels.`);
+    }
 }

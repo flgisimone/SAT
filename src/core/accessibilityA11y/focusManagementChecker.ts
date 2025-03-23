@@ -3,6 +3,9 @@
  * - Ensures focusable elements are reachable via keyboard.
  * - Warns about improper use of tabindex.
  * - Highlights potential focus issues.
+ *
+ * @param enableCheckFocusManagement - Enables or disables the focus management checker.
+ * @returns {void}
  */
 export function checkFocusManagement(enableCheckFocusManagement?: boolean): void {
     if (!enableCheckFocusManagement) return;
@@ -14,29 +17,36 @@ export function checkFocusManagement(enableCheckFocusManagement?: boolean): void
 
     const elements = Array.from(document.querySelectorAll<HTMLElement>(focusableSelectors.join(',')));
 
-    elements.forEach((el) => {
-        const computedStyle = window.getComputedStyle(el);
-        const isVisible = computedStyle.display !== 'none' && computedStyle.visibility !== 'hidden' && el.offsetParent !== null;
-        const isDisabled = (el as HTMLInputElement).disabled;
+    let focusIssuesCount = 0;
+    let tabindexWarningsCount = 0;
 
+    elements.forEach((el, index) => {
+        const computedStyle = window.getComputedStyle(el);
+        const isVisible = computedStyle.display !== 'none' &&
+            computedStyle.visibility !== 'hidden' &&
+            el.offsetParent !== null;
+
+        const isDisabled = (el as HTMLInputElement).disabled;
         const tabIndex = el.getAttribute('tabindex');
         const role = el.getAttribute('role') || '';
+
+        const elInfo = `[${index + 1}] <${el.tagName.toLowerCase()}> ID: ${el.id || 'none'} CLASS: ${el.className || 'none'}`;
 
         // 1. Should not be focusable if hidden or disabled
         if (!isVisible || isDisabled) {
             if (tabIndex !== null && parseInt(tabIndex) >= 0) {
-                console.info(`❌ ${el.tagName} element should not be focusable because it's hidden or disabled.`);
-                el.style.outline = '2px dashed orange';
+                console.error(`❌ ${elInfo} should NOT be focusable because it's hidden or disabled.`);
+
+                focusIssuesCount++;
             }
 
             return;
         }
 
-        // 2. Warn if tabindex is > 0 (manual tab order can break accessibility)
         if (tabIndex !== null && parseInt(tabIndex) > 0) {
-            console.warn(`⚠️ ${el.tagName} has tabindex="${tabIndex}". Manual tab order can be confusing for keyboard users.`);
+            console.warn(`⚠️ ${elInfo} has tabindex="${tabIndex}". Manual tab order can confuse keyboard users.`);
 
-            el.style.outline = '2px dashed blue';
+            tabindexWarningsCount++;
         }
 
         // 3. Non-interactive elements with tabindex but no role or interactivity
@@ -44,9 +54,15 @@ export function checkFocusManagement(enableCheckFocusManagement?: boolean): void
         const isExplicitlyInteractive = role !== '' || el.hasAttribute('onclick');
 
         if (!isSemanticallyInteractive && !isExplicitlyInteractive && tabIndex !== null) {
-            console.info(`❌ ${el.tagName} has tabindex but is not a semantic or role-based interactive element. Consider adding role or removing tabindex.`);
+            console.warn(`⚠️ ${elInfo} has tabindex but isn't a semantic or role-based interactive element. Consider adding a role or removing tabindex.`);
 
-            el.style.outline = '2px dashed yellow';
+            tabindexWarningsCount++;
         }
     });
+
+    if (focusIssuesCount === 0 && tabindexWarningsCount === 0) {
+        console.log('🎉✅ All focusable elements have correct focus management!');
+    } else {
+        console.warn(`⚠️ Focus Management Summary: ${focusIssuesCount} focus issues and ${tabindexWarningsCount} tabindex warnings found.`);
+    }
 }

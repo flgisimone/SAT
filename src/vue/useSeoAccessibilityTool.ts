@@ -8,29 +8,38 @@ export interface UseSATVueProps {
 }
 
 export function useSATVue({ enable = true, options = {} }: UseSATVueProps) {
-    let timeout: ReturnType<typeof setTimeout>;
+    let observer: MutationObserver | null = null;
 
     const runSAT = async () => {
         try {
             await useSAT(enable, options);
-
-            timeout = setTimeout(async () => {
-                try {
-                    await useSAT(enable, options);
-                } catch (error) {
-                    console.error('❌ Error during SAT re-run:', error);
-                }
-            }, 100);
         } catch (error) {
             console.error('❌ Error during SAT run:', error);
         }
     };
 
     onMounted(() => {
+        if (!enable) return;
+
+        // Run immediately on mount
         runSAT();
+
+        // Create a MutationObserver for DOM changes
+        observer = new MutationObserver(() => {
+            runSAT();
+        });
+
+        // Start observing the DOM
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+        });
     });
 
     onUnmounted(() => {
-        clearTimeout(timeout);
+        if (observer) {
+            observer.disconnect();
+        }
     });
 }
