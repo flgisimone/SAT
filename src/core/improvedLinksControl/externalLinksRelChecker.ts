@@ -4,7 +4,9 @@
  *
  * @returns {void}
  */
-export function checkExternalLinksRel(): void {
+export function checkExternalLinksRel(enableCheckExternalLinksRel?: boolean): void {
+    if (!enableCheckExternalLinksRel) return;
+
     const links = Array.from(document.querySelectorAll('a[target="_blank"]')) as HTMLAnchorElement[];
 
     links.forEach((link) => {

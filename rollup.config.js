@@ -17,7 +17,7 @@ export default [
         ],
     },
     {
-        input: 'src/react/useSeoAccessibilityTool.tsx',
+        input: 'src/react/useSeoAccessibilityTool.ts',
         output: {
             file: 'dist/react.js',
             format: 'esm',

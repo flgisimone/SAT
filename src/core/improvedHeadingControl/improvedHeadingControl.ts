@@ -1,4 +1,6 @@
-export function checkH1(): void {
+export function checkH1(enableCheckH1?: boolean): void {
+    if (!enableCheckH1) return;
+
     const h1Count = document.querySelectorAll('h1');
 
     const message = {
@@ -19,7 +21,9 @@ export function checkH1(): void {
     });
 }
 
-export function checkH1Visible(): boolean {
+export function checkH1Visible(enableCheckH1Visible: boolean): boolean {
+    if (!enableCheckH1Visible) return false;
+
     const h1Tag: HTMLHeadingElement | null = document.querySelector('h1');
 
     if (!h1Tag) {
@@ -43,7 +47,9 @@ export function checkH1Visible(): boolean {
     return isDisplayed && inViewport;
 }
 
-export function checkHeadingOrder(): void {
+export function checkHeadingOrder(enableCheckHeadingOrder: boolean): void {
+    if (!enableCheckHeadingOrder) return;
+
     const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6'));
 
     let lastLevel = 0;
@@ -101,7 +107,9 @@ export function checkHeadingOrder(): void {
     });
 }
 
-export function checkJumpLevels(): void {
+export function checkJumpLevels(enableCheckJumpLevels: boolean): void {
+    if (!enableCheckJumpLevels) return;
+
     const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6')) as HTMLElement[];
 
     let lastLevel = 0;

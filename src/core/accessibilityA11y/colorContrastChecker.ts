@@ -116,7 +116,9 @@ export function getEffectiveBackground(el: HTMLElement): string {
  *
  * @returns {void}
  */
-export function checkTextElementContrast(): void {
+export function checkTextElementContrast(enableCheckTextElementContrast?: boolean): void {
+    if (!enableCheckTextElementContrast) return;
+
     const selectors = 'h1, h2, h3, h4, h5, h6, span, a, button';
     const elements = Array.from(document.querySelectorAll(selectors)) as HTMLElement[];
 

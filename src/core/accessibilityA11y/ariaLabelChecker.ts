@@ -15,7 +15,9 @@ const tags = [
 
 const hasHeadingTags = ['nav', 'header', 'footer', 'aside', 'section', 'main', 'form'];
 
-export function checkAriaLabel() {
+export function checkAriaLabel(enableCheckAriaLabel?: boolean) {
+    if (!enableCheckAriaLabel) return;
+
     tags.forEach(tag => {
         const elements = document.querySelectorAll(tag);
 

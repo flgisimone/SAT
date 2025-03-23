@@ -10,7 +10,7 @@ module.exports = [
         plugins: [dts()],
     },
     {
-        input: 'src/react/useSeoAccessibilityTool.tsx',
+        input: 'src/react/useSeoAccessibilityTool.ts',
         output: {
             file: 'dist/react.d.ts',
             format: 'es',
