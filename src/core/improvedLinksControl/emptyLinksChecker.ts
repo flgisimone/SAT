@@ -31,7 +31,7 @@ export function checkEmptyLinks(enableCheckEmptyLinks?: boolean): void {
             if (!hasOnClick && !isProperRole) {
                 console.error(`<a href="${href}"> without event handling: "${text}". Add preventDefault or consider a <button> instead.`);
             } else {
-                console.warn(`❌ <a href="${href}"> found with onclick, but consider using a <button> for better semantics: "${text}".`);
+                console.error(`❌ <a href="${href}"> found with onclick, but consider using a <button> for better semantics: "${text}".`);
             }
 
             link.style.outline = '2px dashed brown';
