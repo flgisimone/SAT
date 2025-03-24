@@ -26,9 +26,13 @@ import { checkBrokenInternalLinks } from "./improvedLinksControl/brokenInternalL
  */
 export async function useSAT(enable: boolean, customOptions?: Partial<SATOptions>): Promise<void> {
 
-    if (!enable || process.env.NODE_ENV === 'production') {
-        console.warn('🚫 SAT checks are disabled or running in production.');
+    if (!enable) {
+        console.warn('🚫 SAT checks are disabled');
 
+        return;
+    }
+
+    if (process.env.NODE_ENV !== 'development') {
         return;
     }
 
