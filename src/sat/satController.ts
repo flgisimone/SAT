@@ -3,6 +3,10 @@ import { SATOptions } from "../satOptions";
 import { resetSATStyles } from "./resetSATStyles";
 
 export function useSATController(customOptions?: Partial<SATOptions>): void {
+    if (process.env.NODE_ENV !== 'development') {
+        return;
+    }
+
     const isDesktop = window.innerWidth >= 1024;
 
     if (!isDesktop) {
@@ -13,35 +17,60 @@ export function useSATController(customOptions?: Partial<SATOptions>): void {
 
     if (document.getElementById('sat-inject-button')) return;
 
-    const button = document.createElement('button');
+    const wrapper = document.createElement("div");
 
-    button.id = 'sat-inject-button';
-    button.textContent = 'Run SAT';
-    button.role = 'button';
-    button.ariaLabel = 'active-seo-accessibility-tool';
-    button.ariaBrailleLabel = 'active-seo-accessibility-tool';
-    button.setAttribute('data-sat-ignore', 'true');
+    wrapper.style.position = "fixed";
+    wrapper.style.top = '35%';
+    wrapper.style.left = '2px';
+    wrapper.style.zIndex = '10000';
+    wrapper.setAttribute('data-sat-ignore', 'true');
 
-    button.style.position = 'fixed';
-    button.style.top = '35%';
-    button.style.left = '2px';
-    button.style.padding = '10px 16px';
-    button.style.backgroundColor = 'rgba(0, 66, 128, 0.65)';
-    button.style.color = '#fff';
-    button.style.border = 'none';
-    button.style.borderRadius = '5px';
-    button.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
-    button.style.cursor = 'pointer';
-    button.style.zIndex = '10000';
-    button.style.fontSize = '14px';
+    const runButton = document.createElement('button');
+
+    runButton.id = 'sat-run-button';
+    runButton.textContent = 'Run SAT';
+    runButton.role = 'button';
+    runButton.ariaLabel = 'active-seo-accessibility-tool';
+    runButton.ariaBrailleLabel = 'active-seo-accessibility-tool';
+    runButton.setAttribute('data-sat-ignore', 'true');
+
+    runButton.style.padding = '10px 16px';
+    runButton.style.backgroundColor = 'rgba(0, 66, 128, 0.65)';
+    runButton.style.color = '#fff';
+    runButton.style.border = 'none';
+    runButton.style.borderRadius = '5px';
+    runButton.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+    runButton.style.cursor = 'pointer';
+    runButton.style.zIndex = '10000';
+    runButton.style.fontSize = '14px';
+
+    const reloadButton = document.createElement('button');
+
+    reloadButton.id = 'sat-reload-button';
+    reloadButton.textContent = 'Reload 🔃';
+    reloadButton.role = 'button';
+    reloadButton.ariaLabel = 'reload-seo-accessibility-tool';
+    reloadButton.ariaBrailleLabel = 'reload-seo-accessibility-tool';
+    reloadButton.setAttribute('data-sat-ignore', 'true');
+
+    reloadButton.style.marginTop = '8px';
+    reloadButton.style.padding = '10px 16px';
+    reloadButton.style.backgroundColor = '#575757';
+    reloadButton.style.color = '#fff';
+    reloadButton.style.border = 'none';
+    reloadButton.style.borderRadius = '5px';
+    reloadButton.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+    reloadButton.style.cursor = 'pointer';
+    reloadButton.style.zIndex = '10000';
+    reloadButton.style.fontSize = '14px';
 
     let satEnabled = false;
 
-    button.addEventListener('click', async () => {
+    runButton.addEventListener('click', async () => {
         satEnabled = !satEnabled;
 
-        button.textContent = satEnabled ? 'SAT: ON' : 'SAT: OFF';
-        button.style.backgroundColor = satEnabled ? '#006106' : '#AD0000';
+        runButton.textContent = satEnabled ? 'SAT: ON' : 'SAT: OFF';
+        runButton.style.backgroundColor = satEnabled ? '#006106' : '#AD0000';
 
         if (satEnabled) {
             console.log('🔍 SAT Enabled!');
@@ -59,5 +88,11 @@ export function useSATController(customOptions?: Partial<SATOptions>): void {
         }
     });
 
-    document.body.appendChild(button);
+    reloadButton.addEventListener('click',  () => {
+        window.location.reload();
+    })
+
+    wrapper.append(runButton);
+    wrapper.append(reloadButton);
+    document.body.appendChild(wrapper);
 }

@@ -24,10 +24,6 @@ import { checkBrokenInternalLinks } from "./improvedLinksControl/brokenInternalL
  * @param customOptions - (Optional) Override default options for individual checks.
  */
 export async function useSAT(customOptions?: Partial<SATOptions>): Promise<void> {
-    if (process.env.NODE_ENV !== 'development') {
-        return;
-    }
-
     const options = { ...satOptions, ...customOptions };
 
     console.clear();
