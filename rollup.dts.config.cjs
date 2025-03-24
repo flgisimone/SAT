@@ -10,17 +10,9 @@ module.exports = [
         plugins: [dts()],
     },
     {
-        input: 'src/react/useSeoAccessibilityTool.ts',
+        input: 'src/sat/satController.ts',
         output: {
-            file: 'dist/react.d.ts',
-            format: 'es',
-        },
-        plugins: [dts()],
-    },
-    {
-        input: 'src/vue/useSeoAccessibilityTool.ts',
-        output: {
-            file: 'dist/vue.d.ts',
+            file: 'dist/sat-controller.d.ts',
             format: 'es',
         },
         plugins: [dts()],

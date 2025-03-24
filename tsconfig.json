@@ -2,9 +2,7 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "declarationDir": "./dist/types",
+    "declaration": false,
     "outDir": "./dist",
     "strict": true,
     "jsx": "react",

@@ -21,22 +21,16 @@ import { checkBrokenInternalLinks } from "./improvedLinksControl/brokenInternalL
 /**
  * Runs the Universal Accessibility Checker (A11y).
  *
- * @param enable - Enable or disable all accessibility checks globally.
  * @param customOptions - (Optional) Override default options for individual checks.
  */
-export async function useSAT(enable: boolean, customOptions?: Partial<SATOptions>): Promise<void> {
-
-    if (!enable) {
-        console.warn('🚫 SAT checks are disabled');
-
-        return;
-    }
-
+export async function useSAT(customOptions?: Partial<SATOptions>): Promise<void> {
     if (process.env.NODE_ENV !== 'development') {
         return;
     }
 
     const options = { ...satOptions, ...customOptions };
+
+    console.clear();
 
     // Synchronous checks
     checkH1(options.enableCheckH1);

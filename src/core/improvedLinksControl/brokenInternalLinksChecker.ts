@@ -32,8 +32,6 @@ export async function checkBrokenInternalLinks(enable: boolean): Promise<void> {
 
                 link.style.outline = '2px solid red';
                 link.title = `Broken link (Status: ${response.status})`;
-            } else {
-                console.log(`✅ Link OK: ${href}`);
             }
         } catch (error) {
             console.error(`❌ Error checking link: ${href}`, error);

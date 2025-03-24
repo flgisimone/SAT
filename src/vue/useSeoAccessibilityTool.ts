@@ -3,20 +3,19 @@ import { useSAT } from '../core/seoAccessibilityTool';
 import { SATOptions } from "../satOptions";
 
 export interface UseSATVueProps {
-    enable?: boolean;
     options?: Partial<SATOptions>;
 }
 
-export function useSATVue({ enable = true, options = {} }: UseSATVueProps) {
+export function useSATVue({ options = {} }: UseSATVueProps) {
     let timeout: ReturnType<typeof setTimeout>;
 
     const runSAT = async () => {
         try {
-            await useSAT(enable, options);
+            await useSAT(options);
 
             timeout = setTimeout(async () => {
                 try {
-                    await useSAT(enable, options);
+                    await useSAT(options);
                 } catch (error) {
                     console.error('❌ Error during SAT re-run:', error);
                 }

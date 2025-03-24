@@ -2,7 +2,6 @@
   An accessibility and SEO validation tool focused on <strong>heading structure best practices</strong> 
   and <strong>universal accessibility compliance</strong>.  
   Detects common mistakes in heading usage (h1-h6), ARIA, color contrast, and more to ensure semantic hierarchy for better accessibility and SEO performance.
-</p>
 
   <hr>
 
@@ -22,7 +21,8 @@
   <li>✅ Detects empty or invalid <code>href="#"</code> links without a meaningful destination</li>
   <li>✅ Checks external links (<code>target="_blank"</code>) for missing <code>rel="noopener noreferrer"</code> to prevent tabnabbing attacks</li>
   <li>✅ Supports <strong>custom allowed link texts</strong> to skip warnings (e.g., "read more")</li>
-  <li>✅ Detects <strong>broken internal links</strong> (404/500 errors)</li> 
+  <li>✅ Detects <strong>broken internal links</strong> (404/500 errors)</li>
+  <li>✅ Universal Toggle Button: Inject a button into any page (React, Vue, Vanilla) to enable/disable SAT at runtime</li>
   <li>✅ Logs clear and actionable warnings in the browser console</li>
   <li>✅ Framework-agnostic core logic (works in <strong>React</strong> and <strong>Vue</strong>)</li>
 </ul>
@@ -34,44 +34,9 @@
   <pre><code>npm install seo-accessibility-tool</code></pre>
 
   <hr>
-<h2>⚙️ Configuration & Environment Notes</h2>
-<h3>➡️ How to Enable It</h3>
-You must pass the prop mode to activate the tool:
-<pre><code>useSATReact(enable);
-</code></pre>
-<pre><code>useSATVue(enable);</code></pre>
-<ul>
-<li>enable: true ➔ Enables SAT</li>
-<li>enable: false ➔ Disables SAT</li>
-<li>Optional prop delay (number, in ms): Debounces validations (default: 100)</li>
-</ul>
-
-<hr>
 
 <h2>⚙️ Advanced Usage with SAT Options</h2>
 You can selectively enable or disable specific checks using the SATOptions interface.
-
-<h3>Example with Custom Options (Vanilla)</h3>
-<pre><code>
-import { useSAT } from 'seo-accessibility-tool';
-
-// You can pass a second parameter as custom options
-useSAT(true, {
-  enableCheckH1: true,
-  enableCheckH1Visible: false, // disable H1 visibility check
-  enableCheckHeadingOrder: true,
-  enableCheckJumpLevels: false, // disable heading jumps check
-  enableCheckTextElementContrast: true,
-  enableCheckAriaLabel: true,
-  enableCheckAriaRolesWithSuggestions: true,
-  enableCheckUniqueLandmarks: true,
-  enableCheckInputLabel: true,
-  enableCheckFocusManagement: true,
-  enableCheckEmptyLinks: true,
-  enableCheckTabindexNegativeOne: true
-});
-
-</code></pre>
 
 <h3>SATOptions (Defaults)</h3>
 <pre><code>
@@ -101,36 +66,39 @@ const satOptions = {
 <h2>📝 Example Usage</h2>
 
 <h3>React</h3>
-<pre><code>
-import { useSATReact } from 'seo-accessibility-tool/react';
+<pre><code>import {useSATController} from 'seo-accessibility-tool/sat-controller';
 
-export default function App() {
-  useSATReact(true, {
-    allowedLinkTexts: ['read more', 'discover more'],
-    enableCheckNonDescriptiveLinks: true
-  });
-
-  return ();
-}};
+useEffect(() => {
+  useSATController({
+        // custom options...
+    });
+}, []);
 </code></pre>
 
-<h3>Vue 3 / Nuxt</h3>
-<pre><code>
-&lt;script setup lang="ts"&gt;
-import { useSATVue } from 'seo-accessibility-tool/vue';
+<h3>Vue</h3>
+<pre><code>import {useSATController} from 'seo-accessibility-tool/sat-controller';
 
-useSATVue(true, {
-  allowedLinkTexts: ['read more', 'click here'],
-  enableCheckNonDescriptiveLinks: true
-});
-&lt;/script&gt;
-
-&lt;template&gt;
-  &lt;div&gt;
-    &lt;h1&gt;Main Page&lt;/h1&gt;
-  &lt;/div&gt;
-&lt;/template&gt;
+onMounted(() => {
+	useSATController({
+            // custom options...
+        });
 </code></pre>
+
+
+<ul>
+  <li>🖱️ A floating button will appear on Desktop screens.</li>
+  <li>✅ Clicking <strong>SAT: ON</strong> runs the accessibility checks.</li>
+  <li>❌ Clicking <strong>SAT: OFF</strong> resets and clears highlights & console logs.</li>
+</ul>
+
+<hr>
+
+## 🖥️ SAT Button Behavior
+
+- Appears on Desktop (screens wider than 1024px).
+- Defaults to `OFF`. You click to turn it `ON`.
+- Custom options can be passed during injection.
+- Works in **React**, and **Vue** projects.
 
 <hr>
 <h2>✅ Accessibility Checks Summary</h2>

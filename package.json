@@ -1,6 +1,6 @@
 {
   "name": "seo-accessibility-tool",
-  "version": "1.4.2",
+  "version": "1.5.5",
   "author": "Giulio Simone Floresta",
   "license": "MIT",
   "type": "module",
@@ -25,6 +25,10 @@
     "./vue": {
       "import": "./dist/vue.js",
       "types": "./dist/vue.d.ts"
+    },
+    "./sat-controller": {
+      "import": "./dist/sat-controller.js",
+      "types": "./dist/sat-controller.d.ts"
     }
   },
   "files": [
