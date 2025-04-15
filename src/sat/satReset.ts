@@ -1,4 +1,4 @@
-export function resetSATStyles(): void {
+export function satReset(): void {
     const elements = Array.from(document.querySelectorAll<HTMLElement>('body *'));
 
     elements.forEach(el => {

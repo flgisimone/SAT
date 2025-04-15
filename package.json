@@ -1,18 +1,12 @@
 {
   "name": "seo-accessibility-tool",
-  "version": "1.5.6",
+  "version": "1.5.7",
   "author": "Giulio Simone Floresta",
   "license": "MIT",
   "type": "module",
   "description": "Universal Accessibility & SEO Checker (React, Vue, Vanilla)",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/flgisimone/sat"
-  },
-  "bugs": {
-    "url": "https://github.com/flgisimone/SAT/issues"
-  },
-  "homepage": "https://github.com/flgisimone/sat",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -31,38 +25,52 @@
       "types": "./dist/sat-controller.d.ts"
     }
   },
+  "typesVersions": {
+    "*": {
+      "*": ["dist/*"]
+    }
+  },
   "files": [
     "dist"
   ],
   "keywords": [
     "accessibility",
     "seo",
-    "heading",
+    "a11y",
     "react",
     "vue",
     "lighthouse",
-    "a11y",
-    "aria",
     "html5",
-    "semantic"
+    "semantic",
+    "aria",
+    "checker",
+    "devtools"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/flgisimone/sat"
+  },
+  "bugs": {
+    "url": "https://github.com/flgisimone/SAT/issues"
+  },
+  "homepage": "https://github.com/flgisimone/sat",
   "scripts": {
     "build": "rollup -c && rollup -c rollup.dts.config.cjs",
     "dev": "rollup -c -w"
   },
-  "devDependencies": {
-    "@rollup/plugin-typescript": "^12.1.2",
-    "@types/node": "^22.13.10",
-    "@types/react": "^19.0.12",
-    "rollup": "^4.35.0",
-    "rollup-plugin-dts": "^6.1.0",
-    "typescript": "^5.8.2"
-  },
   "peerDependencies": {
-    "react": "^19.0.0",
-    "vue": "^3.5.13"
+    "react": "^18.0.0 || ^19.0.0",
+    "vue": "^3.0.0"
   },
   "dependencies": {
     "tslib": "^2.8.1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/node": "^22.13.10",
+    "@types/react": "^18.2.14",
+    "rollup": "^4.35.0",
+    "rollup-plugin-dts": "^6.1.0",
+    "typescript": "^5.8.2"
   }
 }

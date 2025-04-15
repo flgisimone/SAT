@@ -1,3 +1,5 @@
+import {logError, logWarning} from "../../sat/satLogger";
+
 /**
  * Checks focus management on interactive elements:
  * - Ensures focusable elements are reachable via keyboard.
@@ -16,37 +18,47 @@ export function checkFocusManagement(enableCheckFocusManagement?: boolean): void
 
     elements.forEach((el) => {
         const computedStyle = window.getComputedStyle(el);
-        const isVisible = computedStyle.display !== 'none' && computedStyle.visibility !== 'hidden' && el.offsetParent !== null;
-        const isDisabled = (el as HTMLInputElement).disabled;
+        const isVisible = computedStyle.display !== 'none' &&
+            computedStyle.visibility !== 'hidden' &&
+            el.offsetParent !== null;
 
+        const isDisabled = (el as HTMLInputElement).disabled;
         const tabIndex = el.getAttribute('tabindex');
         const role = el.getAttribute('role') || '';
+        const tag = el.tagName;
+        const text = el.textContent?.trim() || '[no text]';
 
-        // 1. Should not be focusable if hidden or disabled
+        // ❌ 1. Focusable but hidden or disabled
         if (!isVisible || isDisabled) {
             if (tabIndex !== null && parseInt(tabIndex) >= 0) {
-                console.info(`❌ ${el.tagName} element should not be focusable because it's hidden or disabled.`);
-                el.style.outline = '2px dashed orange';
-            }
+                const msg = `${tag} "${text}" is hidden or disabled but has tabindex="${tabIndex}". It should not be focusable.`;
+                logError(msg);
 
+                el.style.outline = '2px dashed orange';
+                el.title = msg;
+            }
             return;
         }
 
-        // 2. Warn if tabindex is > 0 (manual tab order can break accessibility)
+        // ⚠️ 2. Tabindex > 0
         if (tabIndex !== null && parseInt(tabIndex) > 0) {
-            console.warn(`⚠️ ${el.tagName} has tabindex="${tabIndex}". Manual tab order can be confusing for keyboard users.`);
+            const msg = `${tag} "${text}" has tabindex="${tabIndex}". Manual tab order can confuse keyboard users.`;
+            logWarning(msg);
 
             el.style.outline = '2px dashed blue';
+            el.title = msg;
         }
 
-        // 3. Non-interactive elements with tabindex but no role or interactivity
-        const isSemanticallyInteractive = ['A', 'BUTTON', 'INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName);
+        // ⚠️ 3. Non-interactive element with tabindex but no role/onClick
+        const isSemanticallyInteractive = ['A', 'BUTTON', 'INPUT', 'TEXTAREA', 'SELECT'].includes(tag);
         const isExplicitlyInteractive = role !== '' || el.hasAttribute('onclick');
 
         if (!isSemanticallyInteractive && !isExplicitlyInteractive && tabIndex !== null) {
-            console.info(`❌ ${el.tagName} has tabindex but is not a semantic or role-based interactive element. Consider adding role or removing tabindex.`);
+            const msg = `${tag} "${text}" has tabindex="${tabIndex}" but is not a semantic or interactive element. Consider removing tabindex or adding a role.`;
+            logWarning(msg);
 
             el.style.outline = '2px dashed yellow';
+            el.title = msg;
         }
     });
 }

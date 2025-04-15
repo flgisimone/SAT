@@ -1,283 +1,111 @@
-  <h1>SEO Accessibility Tool (SAT) 🕵️‍♂️ for Developer</h1>
-  An accessibility and SEO validation tool focused on <strong>heading structure best practices</strong> 
-  and <strong>universal accessibility compliance</strong>.  
-  Detects common mistakes in heading usage (h1-h6), ARIA, color contrast, and more to ensure semantic hierarchy for better accessibility and SEO performance.
+# SEO Accessibility Tool (SAT) 🕵️‍♂️ for Developers
 
-  <hr>
+An accessibility and SEO validation tool focused on **heading structure best practices** and **universal accessibility compliance**.  
+Detects common issues in heading usage (`<h1>`-`<h6>`), ARIA roles, contrast, labels, and more — with a visual UI panel.
 
-<h2>🚀 Features</h2>
-<ul>
-  <li>✅ Validates the correct order of heading tags (<code>&lt;h1&gt;</code> to <code>&lt;h6&gt;</code>)</li>
-  <li>✅ Detects missing or multiple <code>&lt;h1&gt;</code> tags</li>
-  <li>✅ Checks if the first <code>&lt;h1&gt;</code> is <strong>visible</strong> in the viewport</li>
-  <li>✅ Detects <strong>level jumps</strong> and <strong>regressions</strong> (e.g., H1 ➔ H4 without H2/H3)</li>
-  <li>✅ Validates accessible <strong>ARIA labels</strong> on interactive elements (<code>&lt;button&gt;</code>, <code>&lt;a&gt;</code>, <code>&lt;input&gt;</code>, <code>&lt;svg&gt;</code>)</li>
-  <li>✅ Checks <strong>ARIA roles</strong> for correctness and provides semantic suggestions</li>
-  <li>✅ Verifies <strong>landmark elements</strong> (e.g., <code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>) are unique or properly labeled</li>
-  <li>✅ Checks <strong>color contrast</strong> ratios for text readability and WCAG 2.1 compliance (AA/AAA)</li>
-  <li>✅ Ensures <strong>input fields</strong> are properly associated with a <code>&lt;label&gt;</code> for better accessibility and screen reader support</li>
-  <li>✅ Validates <strong>focus management</strong> on interactive elements (proper <code>tabindex</code> usage and accessibility focus order)</li>
-  <li>✅ Detects <strong>empty or invalid links</strong> (e.g., <code>&lt;a href="#"&gt;</code> or no <code>href</code>) and suggests better alternatives</li>
-  <li>✅ Detects empty or invalid <code>href="#"</code> links without a meaningful destination</li>
-  <li>✅ Checks external links (<code>target="_blank"</code>) for missing <code>rel="noopener noreferrer"</code> to prevent tabnabbing attacks</li>
-  <li>✅ Supports <strong>custom allowed link texts</strong> to skip warnings (e.g., "read more")</li>
-  <li>✅ Detects <strong>broken internal links</strong> (404/500 errors)</li>
-  <li>✅ Universal Toggle Button: Inject a button into any page (React, Vue, Vanilla) to enable/disable SAT at runtime</li>
-  <li>✅ Logs clear and actionable warnings in the browser console</li>
-  <li>✅ Framework-agnostic core logic (works in <strong>React</strong> and <strong>Vue</strong>)</li>
-</ul>
+---
 
-<hr>
+## 🚀 Features
 
-<h2>📦 Installation</h2>
-<h3>React / Vue</h3>
-  <pre><code>npm install seo-accessibility-tool</code></pre>
+✅ Framework-agnostic core logic (React, Vue, Vanilla)  
+✅ Validates heading structure and ARIA roles  
+✅ Injects a floating toggle button to analyze any page  
+✅ Interactive error and warning panels  
+✅ Persists results in `localStorage`  
+✅ No more console logs — clean, accessible UI  
+✅ Supports progressive checks via custom options
 
-  <hr>
+---
 
-<h2>⚙️ Advanced Usage with SAT Options</h2>
-You can selectively enable or disable specific checks using the SATOptions interface.
+## 📦 Installation
 
-<h3>SATOptions (Defaults)</h3>
-<pre><code>
-const satOptions = {
-  enableCheckH1: true,
-  enableCheckH1Visible: true,
-  enableCheckHeadingOrder: true,
-  enableCheckJumpLevels: true,
-  enableCheckTextElementContrast: true,
-  enableCheckAriaLabel: true,
-  enableCheckAriaRolesWithSuggestions: true,
-  enableCheckUniqueLandmarks: true,
-  enableCheckInputLabel: true,
-  enableCheckFocusManagement: true,
-  enableCheckEmptyLinks: true,
-  enableCheckTabindexNegativeOne: true
-};
-</code></pre>
+```bash
+npm install seo-accessibility-tool
+```
 
-<h4>When to Use Custom Options?</h4>
-<li>If you want to fix one issue at a time, you can enable only the relevant checks</li>
-<li>Helps in progressive debugging without cluttering the console with multiple warnings</li>
-<ul>
-</ul>
-<hr>
+---
 
-<h2>📝 Example Usage</h2>
+## ⚛️ React Integration
 
-<h3>React</h3>
-<pre><code>import {useSATController} from 'seo-accessibility-tool/sat-controller';
+```tsx
+import { useSATChecker } from "seo-accessibility-tool/react";
 
-useEffect(() => {
-  useSATController({
-        // custom options...
-    });
-}, []);
-</code></pre>
+function App() {
+  useSATChecker(); // Runs SAT when component mounts
+  return <div>My App</div>;
+}
+```
 
-<h3>Vue</h3>
-<pre><code>import {useSATController} from 'seo-accessibility-tool/sat-controller';
+---
+
+## 🧪 Vue 3 Integration
+
+```ts
+import { useSatChecker } from "seo-accessibility-tool/vue";
+import { onMounted } from "vue";
 
 onMounted(() => {
-	useSATController({
-            // custom options...
-        });
-</code></pre>
+  useSatChecker(); // Activates SAT
+});
+```
 
+---
 
-<ul>
-  <li>🖱️ A floating button will appear on Desktop screens.</li>
-  <li>✅ Clicking <strong>SAT: ON</strong> runs the accessibility checks.</li>
-  <li>❌ Clicking <strong>SAT: OFF</strong> resets and clears highlights & console logs.</li>
-</ul>
+## 🖱️ UI Behavior
 
-<hr>
+- Toggle button to activate/deactivate
+- Shows error/warning counts
+- Expandable panels with detailed messages
+- Results persist in `localStorage`
+- Works without any console output
 
-## 🖥️ SAT Button Behavior
+---
 
-- Appears on Desktop (screens wider than 1024px).
-- Defaults to `OFF`. You click to turn it `ON`.
-- Custom options can be passed during injection.
-- Works in **React**, and **Vue** projects.
+## 🧩 Customization via SATOptions
 
-<hr>
-<h2>✅ Accessibility Checks Summary</h2>
+You can pass custom options to enable/disable specific checks.
 
-<table>
-  <thead>
-    <tr>
-      <th>Option</th>
-      <th>Description</th>
-      <th>Default</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code>enableCheckH1</code></td>
-      <td>Check for missing/multiple H1 tags</td>
-      <td><code>true</code></td>
-    </tr>
-    <tr>
-      <td><code>enableCheckH1Visible</code></td>
-      <td>Check if H1 is visible in viewport</td>
-      <td><code>true</code></td>
-    </tr>
-    <tr>
-      <td><code>enableCheckHeadingOrder</code></td>
-      <td>Validate heading order hierarchy</td>
-      <td><code>true</code></td>
-    </tr>
-    <tr>
-      <td><code>enableCheckJumpLevels</code></td>
-      <td>Detect heading level jumps/regressions</td>
-      <td><code>true</code></td>
-    </tr>
-    <tr>
-      <td><code>enableCheckAriaLabel</code></td>
-      <td>Validate ARIA labels on interactive elements</td>
-      <td><code>true</code></td>
-    </tr>
-    <tr>
-      <td><code>enableCheckAriaRolesWithSuggestions</code></td>
-      <td>Check ARIA roles and suggest improvements</td>
-      <td><code>true</code></td>
-    </tr>
-    <tr>
-      <td><code>enableCheckUniqueLandmarks</code></td>
-      <td>Ensure unique landmark elements (main, nav, etc.)</td>
-      <td><code>true</code></td>
-    </tr>
-    <tr>
-      <td><code>enableCheckTextElementContrast</code></td>
-      <td>Check color contrast of text for WCAG compliance</td>
-      <td><code>true</code></td>
-    </tr>
-    <tr>
-      <td><code>enableCheckInputLabel</code></td>
-      <td>Verify input fields have associated labels</td>
-      <td><code>true</code></td>
-    </tr>
-    <tr>
-      <td><code>enableCheckFocusManagement</code></td>
-      <td>Validate focus and tabindex management</td>
-      <td><code>true</code></td>
-    </tr>
-    <tr>
-      <td><code>enableCheckEmptyLinks</code></td>
-      <td>Detect links without destinations (empty href or #)</td>
-      <td><code>true</code></td>
-    </tr>
-    <tr>
-      <td><code>enableCheckExternalLinksRel</code></td>
-      <td>Check external links for missing rel="noopener noreferrer"</td>
-      <td><code>true</code></td>
-    </tr>
-    <tr>
-      <td><code>enableCheckNonDescriptiveLinks</code></td>
-      <td>Warn on links with nondescriptive text</td>
-      <td><code>false</code></td>
-    </tr>
-    <tr>
-      <td><code>allowedLinkTexts</code></td>
-      <td>Allowed link texts (skip warnings on these)</td>
-      <td><code>[]</code></td>
-    </tr>
-  </tbody>
-</table>
+```ts
+useSATChecker({
+  enableCheckH1: true,
+  enableCheckH1Visible: true,
+  enableCheckAriaLabel: false,
+  allowedLinkTexts: ["Read more", "Learn more"],
+});
+```
 
-<h2>📌 Example Usage Options Table (SATOptions)</h2>
+---
 
-<table>
-  <thead>
-    <tr>
-      <th>Option</th>
-      <th>Description</th>
-      <th>Default</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>enableCheckH1</td>
-      <td>Validate if there's exactly one &lt;h1&gt; tag on the page</td>
-      <td>true</td>
-    </tr>
-    <tr>
-      <td>enableCheckH1Visible</td>
-      <td>Verify the first &lt;h1&gt; is visible in the viewport</td>
-      <td>true</td>
-    </tr>
-    <tr>
-      <td>enableCheckHeadingOrder</td>
-      <td>Check if heading levels follow the correct hierarchical order</td>
-      <td>true</td>
-    </tr>
-    <tr>
-      <td>enableCheckJumpLevels</td>
-      <td>Detect jumps or regressions in heading levels</td>
-      <td>true</td>
-    </tr>
-    <tr>
-      <td>enableCheckTextElementContrast</td>
-      <td>Validate text contrast ratio meets WCAG 2.1 AA/AAA</td>
-      <td>true</td>
-    </tr>
-    <tr>
-      <td>enableCheckAriaLabel</td>
-      <td>Ensure interactive elements have aria-label or descriptive text</td>
-      <td>true</td>
-    </tr>
-    <tr>
-      <td>enableCheckAriaRolesWithSuggestions</td>
-      <td>Verify role attributes are correct and suggest improvements</td>
-      <td>true</td>
-    </tr>
-    <tr>
-      <td>enableCheckUniqueLandmarks</td>
-      <td>Check that landmark roles (e.g., &lt;main&gt;) appear only once</td>
-      <td>true</td>
-    </tr>
-    <tr>
-      <td>enableCheckInputLabel</td>
-      <td>Ensure form inputs have associated &lt;label&gt; elements</td>
-      <td>true</td>
-    </tr>
-    <tr>
-      <td>enableCheckFocusManagement</td>
-      <td>Validate focusability and tabindex usage on interactive elements</td>
-      <td>true</td>
-    </tr>
-    <tr>
-      <td>enableCheckEmptyLinks</td>
-      <td>Detect anchor tags with empty href or # placeholders</td>
-      <td>true</td>
-    </tr>
-    <tr>
-      <td>enableCheckExternalLinksRel</td>
-      <td>Ensure external links use rel="noopener noreferrer"</td>
-      <td>true</td>
-    </tr>
-    <tr>
-      <td>enableCheckTabindexNegativeOne</td>
-      <td>Check for misuse of tabindex="-1" in focusable elements</td>
-      <td>true</td>
-    </tr>
-<tr>
-  <td>enableCheckBrokenInternalLinks</td>
-  <td>Detect internal links that return 404/500 (Broken Links)</td>
-  <td>true</td>
-</tr>
-  </tbody>
-</table>
+## 🧠 Available Options
 
-<hr>
+| Option                             | Description                                               | Default |
+|-----------------------------------|-----------------------------------------------------------|---------|
+| `enableCheckH1`                   | Detect multiple/missing H1 tags                           | `true`  |
+| `enableCheckH1Visible`            | Ensure first H1 is visible                                | `true`  |
+| `enableCheckHeadingOrder`        | Validate heading hierarchy (H1 > H2 > H3...)              | `true`  |
+| `enableCheckJumpLevels`          | Detect jumps or regressions in heading levels             | `true`  |
+| `enableCheckAriaLabel`           | Validate ARIA labels on interactive elements              | `true`  |
+| `enableCheckAriaRolesWithSuggestions` | Suggest improved ARIA roles                          | `true`  |
+| `enableCheckUniqueLandmarks`     | Ensure unique use of landmark elements (`<main>`)         | `true`  |
+| `enableCheckTextElementContrast` | Validate WCAG 2.1 text contrast                           | `true`  |
+| `enableCheckInputLabel`          | Check that inputs are labeled                             | `true`  |
+| `enableCheckFocusManagement`     | Validate focus order and tabindex                         | `true`  |
+| `enableCheckEmptyLinks`          | Detect anchor tags with empty href or `#`                 | `true`  |
+| `enableCheckExternalLinksRel`    | Check for missing `rel="noopener noreferrer"`             | `true`  |
+| `enableCheckTabindexNegativeOne` | Detect invalid tabindex="-1" on focusable elements        | `true`  |
+| `enableCheckNonDescriptiveLinks` | Warn about vague link texts                               | `false` |
+| `enableCheckBrokenInternalLinks` | Detect internal links that return 404/500                 | `true`  |
+| `allowedLinkTexts`               | Array of allowed phrases for non-descriptive link bypass  | `[]`    |
 
-<h2>📄 License</h2>
-  <p>MIT License © 2025 Giulio Simone Floresta</p>
+---
 
-  <hr>
+## 📄 License
 
-<h2>📚 References</h2>
-  <ul>
-    <li>WCAG 2.1 Guidelines</li>
-    <li>WAI-ARIA Authoring Practices</li>
-  </ul>
+MIT License © 2025 [Giulio Simone Floresta](https://github.com/flgisimone)
+
+---
+
+## 🔗 References
+
+- [WCAG 2.1 Guidelines](https://www.w3.org/TR/WCAG21/)
+- [WAI-ARIA Authoring Practices](https://www.w3.org/WAI/ARIA/apg/)

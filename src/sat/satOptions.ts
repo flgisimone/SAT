@@ -1,5 +1,3 @@
-import {checkExternalLinksRel} from "./core/improvedLinksControl/externalLinksRelChecker";
-
 export interface SATOptions {
     enableCheckH1: boolean;
     enableCheckH1Visible: boolean;

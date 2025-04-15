@@ -1,22 +1,24 @@
+import {logError} from "../../sat/satLogger";
+
 export function checkH1(enableCheckH1?: boolean): void {
     if (!enableCheckH1) return;
 
     const h1Count = document.querySelectorAll('h1');
 
     const message = {
-        messageMultipleH1: `❌ Multiple h1 found`,
-        messageH1NotFound: `❌ H1 not found`,
-    }
+        messageMultipleH1: `Multiple <h1> found on the page.`,
+        messageH1NotFound: `No <h1> found on the page.`,
+    };
 
     if (h1Count.length > 1) {
-        console.error(message.messageMultipleH1);
+        logError(message.messageMultipleH1);
     } else if (h1Count.length === 0) {
-        console.error(message.messageH1NotFound);
+        logError(message.messageH1NotFound);
     }
 
     h1Count.forEach(h1 => {
         const el = h1 as HTMLElement;
-        el.style.backgroundColor = 'rgba(255, 0, 0, 0.1)'; // light red
+        el.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
         el.style.outline = '2px solid red';
     });
 }
@@ -54,10 +56,9 @@ export function checkHeadingOrder(enableCheckHeadingOrder: boolean): void {
 
     let lastLevel = 0;
 
-    // Reset styles before new check
+    // Reset styles
     headings.forEach((heading) => {
         const el = heading as HTMLElement;
-
         el.style.outline = '';
         el.style.backgroundColor = '';
         el.removeAttribute('title');
@@ -69,36 +70,35 @@ export function checkHeadingOrder(enableCheckHeadingOrder: boolean): void {
         const text = el.textContent?.trim() || '';
 
         if (currentLevel < lastLevel) {
-            const message = `❌ Heading order issue: Found a ${el.tagName} ("${text}") after a heading of lower level (H${lastLevel}).`;
-
-            console.error(message);
-
-            el.title = `Incorrect ${el.tagName.toLowerCase()} order`;
+            const msg = `Heading order issue: Found a ${el.tagName} ("${text}") after a heading of lower level (H${lastLevel}).`;
+            logError(msg);
+            el.title = msg;
         }
 
+        // Style per livello
         switch (el.tagName.toLowerCase()) {
             case 'h1':
-                el.style.backgroundColor = 'rgba(255, 0, 0, 0.1)'; // red
+                el.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
                 el.style.outline = '2px solid red';
                 break;
             case 'h2':
-                el.style.backgroundColor = 'rgba(255, 165, 0, 0.1)'; // orange
+                el.style.backgroundColor = 'rgba(255, 165, 0, 0.1)';
                 el.style.outline = '2px solid orange';
                 break;
             case 'h3':
-                el.style.backgroundColor = 'rgba(255, 255, 0, 0.1)'; // yellow
+                el.style.backgroundColor = 'rgba(255, 255, 0, 0.1)';
                 el.style.outline = '2px solid yellow';
                 break;
             case 'h4':
-                el.style.backgroundColor = 'rgba(0, 128, 0, 0.1)'; // green
+                el.style.backgroundColor = 'rgba(0, 128, 0, 0.1)';
                 el.style.outline = '2px solid green';
                 break;
             case 'h5':
-                el.style.backgroundColor = 'rgba(0, 0, 255, 0.1)'; // blue
+                el.style.backgroundColor = 'rgba(0, 0, 255, 0.1)';
                 el.style.outline = '2px solid blue';
                 break;
             case 'h6':
-                el.style.backgroundColor = 'rgba(128, 0, 128, 0.1)'; // purple
+                el.style.backgroundColor = 'rgba(128, 0, 128, 0.1)';
                 el.style.outline = '2px solid purple';
                 break;
         }
@@ -117,25 +117,18 @@ export function checkJumpLevels(enableCheckJumpLevels: boolean): void {
     headings.forEach((heading) => {
         const currentLevel = parseInt(heading.tagName.replace('H', ''), 10);
         const text = heading.textContent?.trim() || '';
-        const message = {
-            levelJumpDetected:
-                `❌ Heading level jump detected: Found ${heading.tagName} ("${text}") skipping levels after H${lastLevel}.`,
-            regressionDetected:
-                `❌ Heading regression detected: Found ${heading.tagName} ("${text}") after a higher level heading (H${lastLevel}).`
-        }
 
         if (lastLevel === 0) {
             lastLevel = currentLevel;
-
             return;
         }
 
         const levelDifference = currentLevel - lastLevel;
 
         if (levelDifference > 1) {
-            console.error('❌' + message.levelJumpDetected);
+            logError(`Heading level jump detected: Found ${heading.tagName} ("${text}") skipping levels after H${lastLevel}.`);
         } else if (levelDifference < -1) {
-            console.error('❌' + message.regressionDetected);
+            logError(`Heading regression detected: Found ${heading.tagName} ("${text}") after a higher level heading (H${lastLevel}).`);
         }
 
         lastLevel = currentLevel;

@@ -1,3 +1,5 @@
+import {logError, logWarning} from "../../sat/satLogger";
+
 export const validRoles: string[] = [
     'alert', 'alertdialog', 'application', 'article',
     'banner', 'button', 'cell', 'checkbox', 'columnheader',
@@ -56,23 +58,22 @@ export function checkAriaRolesWithSuggestions(enableCheckAriaRolesWithSuggestion
     if (!enableCheckAriaRolesWithSuggestions) return;
 
     const elementsWithRoles = Array.from(document.querySelectorAll<HTMLElement>(`
-    [role], header, footer, nav, main, aside, section, form, button, a, ul, ol, li, article, table, tr, td, th, input, textarea, select
-  `));
+        [role], header, footer, nav, main, aside, section, form, button, a, ul, ol, li, article, table, tr, td, th, input, textarea, select
+    `));
 
     elementsWithRoles.forEach((el) => {
         const roleAttr = el.getAttribute('role');
         const tagName = el.tagName.toLowerCase();
-
         const recommendedRoles = recommendedRolesMap[tagName] || [];
 
         if (!roleAttr) {
             if (recommendedRoles.length > 0) {
-                console.error(`❌ <${tagName}> is missing a 'role' attribute. Recommended role(s): [${recommendedRoles.join(', ')}].`);
+                const msg = `<${tagName}> is missing a 'role' attribute. Recommended: [${recommendedRoles.join(', ')}].`;
+                logWarning(msg);
 
                 el.style.outline = '2px dashed turquoise';
                 el.title = `Recommended role(s): ${recommendedRoles.join(', ')}`;
             }
-
             return;
         }
 
@@ -80,12 +81,14 @@ export function checkAriaRolesWithSuggestions(enableCheckAriaRolesWithSuggestion
         const invalidRoles = roles.filter(r => !validRoles.includes(r));
 
         if (invalidRoles.length > 0) {
-            console.error(`❌ <${tagName}> has invalid role(s): [${invalidRoles.join(', ')}]. Recommended: ${recommendedRoles.length ? recommendedRoles.join(', ') : 'None'}`);
+            const msg = `<${tagName}> has invalid role(s): [${invalidRoles.join(', ')}]. Recommended: [${recommendedRoles.join(', ') || 'None'}].`;
+            logError(msg);
 
             el.style.outline = '2px dashed magenta';
-            el.title = `Invalid ARIA role(s): ${invalidRoles.join(', ')}. Recommended: ${recommendedRoles.join(', ')}`;
+            el.title = `Invalid role(s): ${invalidRoles.join(', ')}`;
         } else if (recommendedRoles.length && !roles.some(role => recommendedRoles.includes(role))) {
-            console.info(`ℹ️ <${tagName}> has a valid role but not the recommended one. Recommended role(s): [${recommendedRoles.join(', ')}]. Current role(s): [${roles.join(', ')}]`);
+            const msg = `<${tagName}> has valid role(s) [${roles.join(', ')}] but not the recommended one(s): [${recommendedRoles.join(', ')}].`;
+            logWarning(msg);
 
             el.style.outline = '2px dashed purple';
             el.title = `Consider using: ${recommendedRoles.join(', ')}`;
@@ -133,21 +136,22 @@ export function checkUniqueLandmarks(enableCheckUniqueLandmarks?: boolean): void
                     el.hasAttribute('aria-label') || el.hasAttribute('aria-labelledby');
 
                 if (!hasAriaLabel) {
-                    console.error(
-                        `❌ Multiple <${selector}> elements found (${elements.length}). Element ${
-                            index + 1
-                        } is missing aria-label or aria-labelledby. Role: ${role}`
-                    );
+                    const msg = `Multiple <${selector}> elements (${elements.length}). Element ${index + 1} is missing aria-label or aria-labelledby. Role: ${role}`;
+                    logError(msg);
+
                     el.style.outline = '2px dashed orange';
                     el.title = `❌ Duplicate <${selector}> without aria-label`;
                 } else {
-                    console.info(
-                        `ℹ️ Duplicate <${selector}> with aria-label or aria-labelledby: OK`
-                    );
+                    const msg = `Duplicate <${selector}> with aria-label or aria-labelledby (OK). Role: ${role}`;
+                    logWarning(msg);
+
+                    el.style.outline = '1px dashed lightgreen';
+                    el.title = `✅ Duplicate landmark properly labeled`;
                 }
             });
-        } else {
-            console.error(`❌ Missing <${selector}> landmark role: ${role}`);
+        } else if (elements.length === 0) {
+            const msg = `Missing landmark <${selector}>. Expected role: ${role}`;
+            logError(msg);
         }
     });
 }

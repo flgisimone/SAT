@@ -1,3 +1,5 @@
+import { logError, logWarning } from '../../sat/satLogger';
+
 type RGB = [number, number, number];
 
 /**
@@ -127,7 +129,6 @@ export function checkTextElementContrast(enableCheckTextElementContrast?: boolea
         const color = computedStyle.color;
         let backgroundColor = computedStyle.backgroundColor;
 
-        // If background is transparent, get effective background from parent elements
         if (backgroundColor === 'rgba(0, 0, 0, 0)' || backgroundColor === 'transparent') {
             backgroundColor = getEffectiveBackground(el);
         }
@@ -136,15 +137,21 @@ export function checkTextElementContrast(enableCheckTextElementContrast?: boolea
         const rgbBackground = colorToRgbArray(backgroundColor);
 
         const contrastRatio = contrast(rgbText, rgbBackground);
-        const text = el.textContent?.trim() || '';
+        const text = el.textContent?.trim() || '[no text]';
+        const tag = el.tagName;
 
         if (contrastRatio < 4.5) {
-            console.error(`❌️️ Insufficient contrast on ${el.tagName} ("${text}"): contrast ratio ${contrastRatio.toFixed(2)}. Minimum AA requirement is 4.5.`);
+            const msg = `Insufficient contrast on <${tag}> ("${text}"): contrast ratio ${contrastRatio.toFixed(2)}. Minimum AA requirement is 4.5.`;
+            logError(msg);
 
-            el.title = `Insufficient contrast (${contrastRatio.toFixed(2)})`;
+            el.title = `❌ Contrast ratio too low: ${contrastRatio.toFixed(2)}`;
             el.style.outline = '2px dashed red';
         } else if (contrastRatio < 7) {
-            console.warn(`⚠️ Contrast on ${el.tagName} ("${text}") is ${contrastRatio.toFixed(2)}. Meets AA but not AAA standards.`);
+            const msg = `Suboptimal contrast on <${tag}> ("${text}"): ratio ${contrastRatio.toFixed(2)}. Meets AA but not AAA.`;
+            logWarning(msg);
+
+            el.title = `⚠️ Contrast ratio: ${contrastRatio.toFixed(2)}`;
+            el.style.outline = '1px dashed orange';
         }
     });
 }

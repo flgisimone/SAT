@@ -1,10 +1,11 @@
+import {logWarning} from "../../sat/satLogger";
+
 /**
  * Checks if <a> links have descriptive text.
  * Warns if the link text is too short or non-descriptive, unless allowed by options.
  *
  * @param {boolean} enabled - Enable or disable this check.
  * @param {string[]} [allowedTexts=[]] - List of allowed link texts to skip validation.
- * @returns {void}
  */
 export function checkNonDescriptiveLinks(
     enabled: boolean,
@@ -28,16 +29,16 @@ export function checkNonDescriptiveLinks(
     ];
 
     links.forEach((link) => {
-        const text = link.textContent?.trim().toLowerCase() || '';
+        const rawText = link.textContent?.trim() || '';
+        const text = rawText.toLowerCase();
 
         const isAllowed = allowedTexts.includes(text);
         const isTooShort = text.length < 4;
         const isNonDescriptive = NON_DESCRIPTIVE_LINK_TEXTS.includes(text);
 
         if ((isTooShort || isNonDescriptive) && !isAllowed) {
-            console.error(
-                `❌ Non-descriptive link text found: "${link.textContent?.trim()}" in <a href="${link.href}">`
-            );
+            const msg = `Non-descriptive link text found: "${rawText}" in <a href="${link.href}">`;
+            logWarning(msg);
 
             link.style.outline = '2px dashed orange';
             link.title = '⚠️ Non-descriptive link text';
