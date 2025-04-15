@@ -10,23 +10,31 @@ import { checkAriaRolesWithSuggestions, checkUniqueLandmarks } from './accessibi
 import { checkAriaLabel } from "./accessibilityA11y/ariaLabelChecker";
 import { checkInputLabels } from "./accessibilityA11y/inputLabelChecker";
 import { checkFocusManagement } from "./accessibilityA11y/focusManagementChecker";
+
 import { checkEmptyLinks } from "./improvedLinksControl/emptyLinksChecker";
 import { checkTabindexNegativeOne } from "./improvedLinksControl/tabIndexNegativeOneChecker";
-
-import { SATOptions, satOptions } from "../satOptions";
 import { checkExternalLinksRel } from "./improvedLinksControl/externalLinksRelChecker";
 import { checkNonDescriptiveLinks } from "./improvedLinksControl/nonDescriptiveLinksChecker";
 import { checkBrokenInternalLinks } from "./improvedLinksControl/brokenInternalLinksChecker";
+
+import {resetSatLogStats, getSatLogStats} from "../sat/satLogger";
+import {satOptions, SATOptions} from "../sat/satOptions";
 
 /**
  * Runs the Universal Accessibility Checker (A11y).
  *
  * @param customOptions - (Optional) Override default options for individual checks.
  */
-export async function useSAT(customOptions?: Partial<SATOptions>): Promise<void> {
+export async function seoAccessibilityTool(customOptions?: Partial<SATOptions>): Promise<{
+    errors: number;
+    warnings: number;
+    errorMessages: string[];
+    warningMessages: string[];
+}> {
     const options = { ...satOptions, ...customOptions };
 
     console.clear();
+    resetSatLogStats();
 
     // Synchronous checks
     checkH1(options.enableCheckH1);
@@ -56,5 +64,8 @@ export async function useSAT(customOptions?: Partial<SATOptions>): Promise<void>
         }
     }
 
-    console.log('🔍✅ [A11y] Accessibility checks completed.');
+    const result = getSatLogStats();
+    console.log('🔍✅ [A11y] Accessibility checks completed.', result);
+
+    return result;
 }

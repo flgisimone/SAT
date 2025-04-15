@@ -1,3 +1,5 @@
+import {logWarning} from "../../sat/satLogger";
+
 /**
  * Checks all external links (<a> tags with target="_blank") for missing rel="noopener noreferrer".
  * Logs a warning if unsafe links are found.
@@ -17,9 +19,9 @@ export function checkExternalLinksRel(enableCheckExternalLinksRel?: boolean): vo
         const hasNoReferrer = relAttr.includes('noreferrer');
 
         if (!hasNoOpener || !hasNoReferrer) {
-            console.error(`❌ External link "${href}" with target="_blank" is missing rel="noopener noreferrer". Potential security risk.`);
+            const msg = `External link "${href}" with target="_blank" is missing rel="noopener noreferrer". Potential security risk.`;
+            logWarning(msg);
 
-            // Optional: highlight the element in the DOM
             link.style.outline = '2px dashed black';
             link.title = 'Missing rel="noopener noreferrer"';
         }
