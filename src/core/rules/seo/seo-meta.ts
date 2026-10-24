@@ -1,3 +1,4 @@
+import { queryTargets } from "../../../sat/satDom";
 import type { Rule } from "../rule";
 
 const TITLE_MAX_LENGTH = 60;
@@ -5,8 +6,8 @@ const DESCRIPTION_MAX_LENGTH = 160;
 
 /**
  * Basic SEO metadata in <head>:
- * - <title>: present and not empty (warning above 60 characters);
- * - meta description: present and not empty (warning above 160 characters);
+ * - <title>: present, not empty and only one (warning above 60 characters);
+ * - meta description: present, not empty and only one (warning above 160 characters);
  * - warning: meta viewport missing.
  */
 export const seoMeta: Rule = {
@@ -23,6 +24,16 @@ export const seoMeta: Rule = {
                 message: `<title> is ${title.length} characters long; search results usually cut it after ${TITLE_MAX_LENGTH}.`,
                 severity: 'warning',
             });
+        }
+
+        // HTML allows one <title> and one meta description per document.
+        const titles = queryTargets('title', document).filter((el) => !el.closest('svg'));
+        if (titles.length > 1) {
+            report({ element: titles[1], message: `${titles.length} <title> elements found; keep only one.` });
+        }
+        const descriptions = queryTargets('meta[name="description" i]', document);
+        if (descriptions.length > 1) {
+            report({ element: descriptions[1], message: `${descriptions.length} <meta name="description"> found; keep only one.` });
         }
 
         const description = document.querySelector('meta[name="description" i]')?.getAttribute('content')?.trim();

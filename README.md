@@ -106,8 +106,18 @@ useSATChecker({
 | `tabindex-negative` | a11y     | Visible native controls removed from the tab order with `tabindex="-1"`   | warning    | `enableCheckTabindexNegativeOne` |
 | `link-text`         | a11y     | Vague link texts ("click here", "more")                                    | off        | `enableCheckNonDescriptiveLinks` |
 | `html-lang`         | a11y     | `<html>` has a `lang` attribute                                           | error      | `enableCheckHtmlLang` |
-| `seo-meta`          | seo      | `<title>` and meta description (error), lengths and meta viewport (warning) | error    | `enableCheckSeoMeta` |
+| `seo-meta`          | seo      | One `<title>` and one meta description (error), lengths and meta viewport (warning) | error | `enableCheckSeoMeta` |
+| `canonical`         | seo      | Several or empty canonicals (error), missing or relative canonical (warning) | warning   | — |
+| `robots-meta`       | seo      | `noindex`, `nofollow` or `none` in a robots meta tag                      | warning    | — |
+| `social-meta`       | seo      | Required Open Graph properties, absolute `og:image`/`og:url`, `twitter:card` | warning | — |
+| `hreflang`          | seo      | Invalid language codes, relative URLs, one language with two URLs         | error      | — |
+| `structured-data`   | seo      | JSON-LD that doesn't parse (with the position) or items without `@type`   | error      | — |
+| `mixed-content`     | seo      | `http:` resources on an `https:` page: scripts, frames, styles (error), images and media (warning) | error | — |
+| `image-size`        | seo      | Visible `<img>` without `width` and `height` (layout shift)               | warning    | — |
+| `image-lazy-load`   | seo      | `loading="lazy"` on images visible when the page opens                    | warning    | — |
 | `link-broken`       | seo      | HEAD request to each internal link to find 4xx/5xx (skips logout-like URLs) | off      | `enableCheckBrokenInternalLinks` |
+
+Each rule has a page in [docs/rules](docs/rules) on what it checks, why and how to fix it; the panel links to it from every group, and each issue has its URL in `help`.
 
 The 1.x options `enableCheck*` still work (`true` turns the rule on, `false` off) but are deprecated; `rules` takes precedence.
 
@@ -119,7 +129,7 @@ The 1.x options `enableCheck*` still work (`true` turns the rule on, `false` off
 import { seoAccessibilityTool } from "seo-accessibility-tool";
 
 const { issues, errors, warnings } = await seoAccessibilityTool({ rules: { "link-text": "warning" } });
-// issues: [{ ruleId, severity, category, message, wcag?, element?, selector? }]
+// issues: [{ ruleId, severity, category, message, wcag?, element?, selector?, help }]
 ```
 
 The page is not changed. `selector` matches only the element of the issue. `satReset` is deprecated and does nothing. `errorMessages` and `warningMessages` (lists of strings) are still returned but deprecated.

@@ -1,5 +1,5 @@
 import { rules, type Rule, type Report } from './rules';
-import { cssSelector, type Issue } from '../sat/issue';
+import { cssSelector, ruleHelp, type Issue } from '../sat/issue';
 import { LEGACY_OPTIONS, type LegacyOptions, type RuleSetting, type SATOptions } from '../sat/satOptions';
 
 export type { SATOptions, RuleSetting } from '../sat/satOptions';
@@ -52,6 +52,7 @@ export async function seoAccessibilityTool(customOptions: Partial<SATOptions> = 
                 wcag: wcag ?? rule.wcag,
                 element,
                 selector: element && cssSelector(element),
+                help: ruleHelp(rule.id),
             });
         };
 
@@ -60,7 +61,7 @@ export async function seoAccessibilityTool(customOptions: Partial<SATOptions> = 
             await rule.run({ document: doc, allowedLinkTexts: customOptions.allowedLinkTexts ?? [], report });
         } catch (error) {
             const detail = error instanceof Error ? error.message : String(error);
-            issues.push({ ruleId: rule.id, severity: 'error', category: rule.category, message: `SAT internal error in ${rule.id}: ${detail}` });
+            issues.push({ ruleId: rule.id, severity: 'error', category: rule.category, message: `SAT internal error in ${rule.id}: ${detail}`, help: ruleHelp(rule.id) });
         }
     }
 

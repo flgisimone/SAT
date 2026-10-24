@@ -18,6 +18,14 @@ export type RuleId =
     | 'link-text'
     | 'html-lang'
     | 'seo-meta'
+    | 'canonical'
+    | 'robots-meta'
+    | 'social-meta'
+    | 'hreflang'
+    | 'structured-data'
+    | 'mixed-content'
+    | 'image-size'
+    | 'image-lazy-load'
     | 'link-broken';
 
 /** What a rule passes to `ctx.report`. */

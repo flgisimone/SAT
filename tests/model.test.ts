@@ -1,3 +1,4 @@
+import { existsSync, readdirSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { seoAccessibilityTool } from '../src/core/seoAccessibilityTool';
 import { rules } from '../src/core/rules';
@@ -21,6 +22,13 @@ describe('Issue', () => {
         expect(issue).toMatchObject({ severity: 'error', category: 'a11y', wcag: ['1.1.1'] });
         expect(issue.message).toContain('alt');
         expect(issue.element).toBe(document.querySelector('img'));
+        expect(issue.help).toBe('https://github.com/flgisimone/SAT/blob/develop/docs/rules/image-alt.md');
+    });
+
+    it('every rule of the registry has its documentation page, and every page a rule', () => {
+        const docs = 'docs/rules';
+        expect(rules.filter((rule) => !existsSync(`${docs}/${rule.id}.md`)).map((rule) => rule.id)).toEqual([]);
+        expect(readdirSync(docs).sort()).toEqual(rules.map((rule) => `${rule.id}.md`).sort());
     });
 
     it.each([
@@ -39,10 +47,10 @@ describe('Issue', () => {
 });
 
 describe('rule registry', () => {
-    it('has the 18 rules with unique ids', () => {
+    it('has the 26 rules with unique ids', () => {
         const ids = rules.map((rule) => rule.id);
-        expect(ids).toHaveLength(18);
-        expect(new Set(ids).size).toBe(18);
+        expect(ids).toHaveLength(26);
+        expect(new Set(ids).size).toBe(26);
     });
 
     it('a failing rule becomes an issue and the others still run', async () => {

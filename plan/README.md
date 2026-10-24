@@ -22,10 +22,11 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | Strumenti | Gli stessi di oneoffice: Vitest 5 con jsdom, Playwright 1.64, ESLint 10 con typescript-eslint, TypeScript 6, tokensave, `npm run verify` / `verify:e2e` / `usage` | Un solo modo di lavorare fra i progetti (F1-06) |
 | Test | Unit test in jsdom per la logica; test in Chromium sul bundle per tutto ciò che dipende da layout, colori e visibilità | jsdom non ha layout né canvas (F1-04) |
 | Rilascio | Semver; i cambi di comportamento vanno in `CHANGELOG.md`; la pubblicazione su npm la fa il maintainer | CONVENTIONS §8 |
+| Versione in F4 | **1.10.0**: 8 regole SEO e di caricamento nuove, accese di default, documentazione per regola (`Issue.help`) | Funzioni nuove senza rotture di API (F4) |
 | Versione dopo F3 | **1.9.0**: pannello nuovo, nessuna modifica alla pagina, `satReset` deprecato | Funzioni nuove senza rotture di API (F3) |
 | Versione dopo F2 | **1.8.0 compatibile**: `issues` e `rules` accanto a `enableCheck*` ed `errorMessages`/`warningMessages`, deprecati; si tolgono in una 2.0 | Nessuna rottura per chi usa 1.x (F2 §1) |
 | Lingua | Solo inglese, per messaggi e UI; niente localizzazione | Un solo insieme di testi da mantenere (F2-07 annullato) |
-| Motore per l'accessibilità | **Da decidere in F4-01**: adattatore opzionale per axe-core (proposta) oppure solo regole proprie | axe-core copre circa 90 regole mantenute da Deque; il valore distintivo di SAT è nell'interfaccia in pagina e nei controlli SEO (F4 §1) |
+| Motore per l'accessibilità | **Da decidere in F4-01** (confronto fatto, vedi F4-01): adattatore opzionale per axe-core (proposta) oppure solo regole proprie | axe-core copre circa 90 regole mantenute da Deque e sulle pagine provate non ha dato falsi positivi; SAT è 20–30 volte più veloce; il valore distintivo di SAT è nell'interfaccia in pagina e nei controlli SEO (F4 §1) |
 
 ## Fasi
 

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { JSDOM } from 'jsdom';
 import { seoAccessibilityTool, type RuleId, type SATOptions } from '../src/core/seoAccessibilityTool';
 import { rules } from '../src/core/rules';
 import { blend, isLargeText, parseColor } from '../src/core/rules/a11y/color-contrast';
@@ -10,11 +11,11 @@ function render(html: string) {
 }
 
 /** Runs only the given rules (turning on the ones that are off by default). */
-function runOnly(ids: RuleId[], options: Partial<SATOptions> = {}) {
+function runOnly(ids: RuleId[], options: Partial<SATOptions> = {}, doc: Document = document) {
     const config = Object.fromEntries(
         rules.map((rule) => [rule.id, ids.includes(rule.id) ? (rule.defaultOff ? rule.defaultSeverity : undefined) : 'off'])
     );
-    return seoAccessibilityTool({ ...options, rules: { ...config, ...options.rules } });
+    return seoAccessibilityTool({ ...options, rules: { ...config, ...options.rules } }, doc);
 }
 
 beforeEach(() => {
@@ -204,6 +205,117 @@ describe('SEO meta', () => {
         const r = await runOnly(['html-lang', 'seo-meta']);
         expect(r.errors).toBe(0);
         expect(r.warnings).toBe(0);
+    });
+});
+
+describe('SEO meta: duplicates', () => {
+    it('reports a second <title> and meta description, not an SVG title', async () => {
+        document.title = 'Home';
+        document.head.innerHTML += '<title>Again</title><meta name="description" content="A"><meta name="description" content="B">';
+        render('<svg><title>Icon</title></svg>');
+        const r = await runOnly(['seo-meta']);
+        expect(r.errorMessages).toEqual([
+            '2 <title> elements found; keep only one.',
+            '2 <meta name="description"> found; keep only one.',
+        ]);
+    });
+});
+
+/** A complete head: no indexing or sharing issue. */
+const COMPLETE_HEAD = `
+    <link rel="canonical" href="https://example.com/en/">
+    <link rel="alternate" hreflang="en" href="https://example.com/en/">
+    <link rel="alternate" hreflang="en-GB" href="https://example.com/uk/">
+    <link rel="alternate" hreflang="x-default" href="https://example.com/">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Home"><meta property="og:type" content="website">
+    <meta property="og:image" content="https://example.com/a.png"><meta property="og:url" content="https://example.com/en/">
+    <meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"A"},{"@type":"WebSite"}]}</script>`;
+const INDEXING: RuleId[] = ['canonical', 'robots-meta', 'social-meta', 'hreflang', 'structured-data'];
+
+describe('SEO: indexing and sharing', () => {
+    it('a complete head has no issues', async () => {
+        document.head.innerHTML = COMPLETE_HEAD;
+        const r = await runOnly(INDEXING);
+        expect([...r.errorMessages, ...r.warningMessages]).toEqual([]);
+    });
+
+    it.each([
+        ['missing canonical', '', 'warning', /Missing <link rel="canonical">/],
+        ['two canonicals', '<link rel="canonical" href="https://a.com/"><link rel="canonical" href="https://b.com/">', 'error', /2 <link rel="canonical">/],
+        ['empty canonical', '<link rel="canonical" href="">', 'error', /empty href/],
+        ['relative canonical', '<link rel="canonical" href="/en/">', 'warning', /is relative/],
+    ])('canonical: %s', async (_, head, severity, message) => {
+        document.head.innerHTML = head;
+        const r = await runOnly(['canonical']);
+        const messages = severity === 'error' ? r.errorMessages : r.warningMessages;
+        expect(r.errors + r.warnings).toBe(1);
+        expect(messages[0]).toMatch(message);
+    });
+
+    it('robots: warns on noindex, nofollow and none', async () => {
+        document.head.innerHTML = '<meta name="robots" content="noindex"><meta name="googlebot" content="NOFOLLOW"><meta name="robots" content="none">';
+        const r = await runOnly(['robots-meta']);
+        expect(r.errors).toBe(0);
+        expect(r.warnings).toBe(4);
+    });
+
+    it('social: lists the missing Open Graph properties, relative URLs and the Twitter card', async () => {
+        document.head.innerHTML = '<meta property="og:title" content="Home"><meta property="og:image" content="/a.png">';
+        const r = await runOnly(['social-meta']);
+        expect(r.warningMessages).toEqual([
+            'Missing Open Graph <meta property="og:type">, <meta property="og:url">: link previews may be incomplete.',
+            '<meta property="og:image" content="/a.png"> must be an absolute URL (https://…).',
+            'Missing <meta name="twitter:card"> (e.g. "summary_large_image"): X shows no card without it.',
+        ]);
+    });
+
+    it('hreflang: invalid code, relative URL and two URLs for one language', async () => {
+        document.head.innerHTML = `
+            <link rel="alternate" hreflang="english" href="https://example.com/en/">
+            <link rel="alternate" hreflang="it" href="/it/">
+            <link rel="alternate" hreflang="de" href="https://example.com/de/">
+            <link rel="alternate" hreflang="DE" href="https://example.com/de-2/">
+            <link rel="alternate" hreflang="es-419" href="https://example.com/es/">
+            <link rel="alternate" hreflang="zh-Hant-TW" href="https://example.com/tw/">`;
+        const r = await runOnly(['hreflang']);
+        expect(r.errorMessages).toHaveLength(3);
+        expect(r.errorMessages[0]).toContain('"english" is not a language code');
+        expect(r.errorMessages[1]).toContain('relative URL "/it/"');
+        expect(r.errorMessages[2]).toContain('points to both');
+    });
+});
+
+describe('SEO: contents', () => {
+    it('malformed JSON-LD is an error with the parse position', async () => {
+        render('<script type="application/ld+json">{"@type": "Organization",}</script>');
+        const r = await runOnly(['structured-data']);
+        expect(r.errors).toBe(1);
+        expect(r.errorMessages[0]).toMatch(/Invalid JSON-LD .*position 25/);
+    });
+
+    it('JSON-LD items without @type are an error', async () => {
+        render('<script type="application/ld+json">[{"@type":"Person"},{"name":"x"}]</script><script type="application/ld+json">{"@graph":[{"name":"y"}]}</script>');
+        const r = await runOnly(['structured-data']);
+        expect(r.errorMessages).toHaveLength(2);
+        expect(r.errorMessages[0]).toContain('1 item(s) without "@type"');
+    });
+
+    it('mixed content: active resources are errors, images warnings, links and http pages ignored', async () => {
+        const html = `<!doctype html><head>
+            <link rel="stylesheet" href="http://cdn.example.com/a.css"><link rel="alternate" hreflang="en" href="http://example.com/">
+            </head><body>
+            <script src="http://cdn.example.com/a.js"></script>
+            <img src="https://example.com/ok.png"><img srcset="https://example.com/a.png 1x, http://example.com/b.png 2x">
+            <a href="http://example.com/">page</a><iframe src="//example.com/protocol-relative"></iframe></body>`;
+        const secure = await runOnly(['mixed-content'], {}, new JSDOM(html, { url: 'https://example.com/' }).window.document);
+        expect(secure.errors).toBe(2);
+        expect(secure.warnings).toBe(1);
+        expect(secure.warningMessages[0]).toContain('http://example.com/b.png');
+
+        const plain = await runOnly(['mixed-content'], {}, new JSDOM(html, { url: 'http://example.com/' }).window.document);
+        expect(plain.errors + plain.warnings).toBe(0);
     });
 });
 
