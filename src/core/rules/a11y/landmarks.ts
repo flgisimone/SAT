@@ -26,8 +26,6 @@ export const landmarks: Rule = {
     defaultSeverity: 'error',
     wcag: ['1.3.1'],
     run({ document, report }) {
-        const style = { outline: '2px dashed orange' };
-
         const mains = landmarkElements(document, 'main', 'main');
         if (mains.length === 0) {
             report({ message: 'Missing <main> landmark. Wrap the primary content of the page in <main>.' });
@@ -36,7 +34,6 @@ export const landmarks: Rule = {
                 report({
                     element: el,
                     message: `Multiple <main> landmarks (${mains.length}): ${describeElement(el)}. A page should have only one visible main.`,
-                    highlight: { ...style, title: '❌ Duplicate main landmark' },
                 });
             });
         }
@@ -48,7 +45,6 @@ export const landmarks: Rule = {
                 report({
                     element: el,
                     message: `Multiple page-level <${tag}> (role ${role}) found (${elements.length}): ${describeElement(el)}. Only one is allowed per page.`,
-                    highlight: { ...style, title: `❌ Duplicate ${role} landmark` },
                 });
             });
         });
@@ -60,7 +56,6 @@ export const landmarks: Rule = {
                     element: el,
                     message: `Multiple <nav> landmarks (${navs.length}) and ${describeElement(el)} has no aria-label/aria-labelledby to tell them apart.`,
                     severity: 'warning',
-                    highlight: { ...style, title: 'Add an aria-label to distinguish this navigation' },
                 });
             });
         }

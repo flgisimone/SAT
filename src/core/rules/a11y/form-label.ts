@@ -37,7 +37,6 @@ export const formLabel: Rule = {
             report({
                 element: field,
                 message: `Missing label for form field ${describeElement(field)} (name="${name}").${placeholderNote}`,
-                highlight: { outline: '2px dashed green', title: '❌ Missing accessible label' },
             });
         });
 
@@ -48,7 +47,6 @@ export const formLabel: Rule = {
                 element: input,
                 message: `<input type="image"> without alt text: ${describeElement(input)}.`,
                 wcag: ['1.1.1'],
-                highlight: { outline: '2px dashed green', title: '❌ Missing alt text' },
             });
         });
     },

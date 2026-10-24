@@ -10,9 +10,9 @@ Detects common issues in heading usage (`<h1>`-`<h6>`), ARIA roles, contrast, la
 ✅ Framework-agnostic core logic (React, Vue, Vanilla)  
 ✅ Validates heading structure, ARIA roles, labels, contrast, images and SEO meta tags  
 ✅ Injects a floating toggle button to analyze any page  
-✅ Interactive error and warning panels  
-✅ Persists results in `localStorage`  
-✅ Restores the page's original styles when you turn SAT off  
+✅ Results panel grouped by rule, with filters and a heading map; click an issue to jump to the element  
+✅ Never changes your page: highlights are drawn on SAT's own layer  
+✅ Follows single-page apps: route changes rerun the checks  
 ✅ Supports progressive checks via custom options
 
 ---
@@ -52,10 +52,14 @@ useSatChecker(); // Call it directly in setup: SAT starts when the component is 
 
 ## 🖱️ UI Behavior
 
-- 🚀 runs the checks, 🛑 turns SAT off and restores the page's original styles, 🔃 runs them again
-- Shows error/warning counts
-- Expandable panels with detailed messages
-- Results persist in `localStorage`, separately for each page path
+- 🚀 runs the checks, 🛑 turns SAT off, 🔃 runs them again; the counts button opens the results panel
+- **Issues**: grouped by rule with their count, filtered by severity and category. Click an issue to scroll to the element, focus it (when it can take focus) and flash its box
+- **Structure**: the H1–H6 tree of the page, with skipped levels marked; click a heading to jump to it
+- Boxes over the page show each issue (red: error, orange dashed: warning). They are drawn in SAT's own layer, so the page's elements, styles and attributes are never changed
+- The panel lives in a Shadow DOM: the page's CSS doesn't affect it and its CSS doesn't leak into the page
+- Single-page apps: when SAT is on, a route change (`pushState`, `replaceState`, back/forward) runs the checks again. Use `observeDom` to rerun them on any DOM change
+- Keyboard: Tab through the dock and the panel, Escape closes the panel and returns focus to the counts button
+- SAT stays on across reloads until you stop it (a flag in `localStorage`)
 - Runs only when `process.env.NODE_ENV === "development"` (set by Vite, webpack, Next, etc.)
 
 ---
@@ -80,6 +84,7 @@ useSATChecker({
 | `rules`            | `{ [ruleId]: "error" \| "warning" \| "off" }`. A severity applies to every issue of that rule   | `{}`    |
 | `allowedLinkTexts` | Link texts `link-text` accepts anyway (case-insensitive)                                         | `[]`    |
 | `enabled`          | Controller only: `true` starts SAT without a bundler, `false` never starts it                    | starts when `NODE_ENV === "development"` |
+| `observeDom`       | Controller only: while SAT is on, reruns the checks this many ms after the DOM stops changing    | off     |
 
 ### Rules
 
@@ -87,7 +92,7 @@ useSATChecker({
 |---------------------|----------|---------------------------------------------------------------------------|------------|------------|
 | `h1`                | seo      | Exactly one `<h1>`                                                        | error      | `enableCheckH1` |
 | `h1-visible`        | seo      | The first `<h1>` is rendered (not hidden)                                 | error      | `enableCheckH1Visible` |
-| `heading-order`     | a11y     | Highlights headings by level; warns if the first heading is not an `<h1>` | warning    | `enableCheckHeadingOrder` |
+| `heading-order`     | a11y     | The first heading of the page is an `<h1>`                                | warning    | `enableCheckHeadingOrder` |
 | `heading-levels`    | a11y     | Skipped heading levels (e.g. H2 → H4)                                     | error      | `enableCheckJumpLevels` |
 | `accessible-name`   | a11y     | Buttons, links and `svg[role="img"]` have an accessible name              | error      | `enableCheckAriaLabel` |
 | `aria-roles`        | a11y     | Invalid `role` values (error), redundant roles (warning)                  | error      | `enableCheckAriaRolesWithSuggestions` |
@@ -111,14 +116,13 @@ The 1.x options `enableCheck*` still work (`true` turns the rule on, `false` off
 ## 🔎 Results without the panel
 
 ```ts
-import { seoAccessibilityTool, satReset } from "seo-accessibility-tool";
+import { seoAccessibilityTool } from "seo-accessibility-tool";
 
 const { issues, errors, warnings } = await seoAccessibilityTool({ rules: { "link-text": "warning" } });
 // issues: [{ ruleId, severity, category, message, wcag?, element?, selector? }]
-satReset(); // removes the highlights
 ```
 
-`selector` matches only the element of the issue. `errorMessages` and `warningMessages` (lists of strings) are still returned but deprecated.
+The page is not changed. `selector` matches only the element of the issue. `satReset` is deprecated and does nothing. `errorMessages` and `warningMessages` (lists of strings) are still returned but deprecated.
 
 ---
 

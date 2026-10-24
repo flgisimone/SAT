@@ -130,7 +130,6 @@ export const ariaRoles: Rule = {
                 report({
                     element: el,
                     message: `Empty role attribute on ${describeElement(el)}. Remove it or set a valid role.`,
-                    highlight: { outline: '2px dashed magenta', title: 'Empty role attribute' },
                 });
                 return;
             }
@@ -140,7 +139,6 @@ export const ariaRoles: Rule = {
                 report({
                     element: el,
                     message: `Invalid role(s) [${invalid}] on ${describeElement(el)}.`,
-                    highlight: { outline: '2px dashed magenta', title: `Invalid role(s): ${invalid}` },
                 });
                 return;
             }
@@ -151,7 +149,6 @@ export const ariaRoles: Rule = {
                     element: el,
                     message: `Redundant role="${native}" on ${describeElement(el)}: the element already has this role natively. Remove the attribute.`,
                     severity: 'warning',
-                    highlight: { outline: '2px dashed purple', title: `Redundant role: ${native}` },
                 });
             }
         });

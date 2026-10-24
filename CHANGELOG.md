@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.9.0 — unreleased
+
+### Added
+- New results panel in a Shadow DOM: issues grouped by rule with counts (groups start closed), filters by severity and category, and a **Structure** tab with the H1–H6 tree and skipped levels marked.
+- Click an issue or a heading to scroll to the element, focus it when it can take focus, and flash its box.
+- Single-page apps: while SAT is on, route changes (`pushState`, `replaceState`, back/forward) run the checks again.
+- `observeDom` option (milliseconds): reruns the checks when the page's DOM stops changing. Off by default.
+- Keyboard: Escape closes the panel and returns focus to the counts button.
+
+### Behavior changes
+- SAT no longer changes the page. Highlights are boxes on SAT's own layer (red for errors, orange dashed for warnings) instead of `outline`, `background-color` and `title` on the elements, so an app re-render no longer erases them. This also applies to `seoAccessibilityTool()` used without the panel.
+- `heading-order` no longer colors every heading by level: the Structure tab shows the outline.
+- Multiple `<h1>`: the issue now points at the second `<h1>`.
+- SAT stays on across reloads instead of showing the stored messages of the last run: only an on/off flag is stored, and the checks run again.
+- The dock moved to the bottom left; the counts button opens the panel.
+
+### Deprecated
+- `satReset`: there is nothing to restore anymore. It does nothing and will be removed in 2.0.
+
+### Performance
+- A run on a page of about 5,000 elements with 850 issues went from about 140 ms to about 55 ms (Chromium): no style writes between reads, and a linear CSS selector for each issue.
+
 ## 1.8.0 — unreleased
 
 ### Added

@@ -22,7 +22,6 @@ export const accessibleName: Rule = {
             report({
                 element: el,
                 message: `Missing accessible name on ${describeElement(el)}. Add visible text, aria-label or aria-labelledby.`,
-                highlight: { outline: '2px solid red', backgroundColor: 'rgba(255, 0, 0, 0.1)', title: '❌ Missing accessible name' },
             });
         });
 
@@ -41,7 +40,6 @@ export const accessibleName: Rule = {
                     element: svg,
                     message: `<svg role="img"> without a <title> or aria-label: ${describeElement(svg)}. Add a name, or use aria-hidden="true" if decorative.`,
                     wcag: ['1.1.1'],
-                    highlight: { outline: '2px solid red', title: '❌ Missing accessible name' },
                 });
             }
         });

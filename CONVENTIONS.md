@@ -303,11 +303,11 @@ src/
       headings.ts             helpers shared by the heading rules
   sat/
     satChecker.ts             in-page controller: button, run/stop, storage (entry: "./sat-controller")
-    satDom.ts                 DOM helpers shared by every rule (queryTargets, highlight, describeElement)
+    satDom.ts                 DOM helpers shared by every rule (queryTargets, describeElement)
     issue.ts                  Issue, Severity, Category, cssSelector
     satOptions.ts             SATOptions, rule settings, 1.x options mapped to rules
-    satReset.ts               restores the page
-  ui/                         SAT panel and buttons (DOM built by hand, no framework)
+    satReset.ts               deprecated no-op (SAT no longer changes the page)
+  ui/                         panel in a shadow root (satUI.ts), boxes over the page (overlay.ts), styles (DOM built by hand, no framework)
   integrations/               react.ts, vue.ts: thin wrappers around satChecker
   types/                      global declarations
 tests/                        Vitest (jsdom) unit tests, setup
@@ -344,7 +344,7 @@ Changing the severity or the default state of a check is a behavior change (§8.
 SAT runs inside someone else's application.
 
 - Select elements with `queryTargets(selector, ctx.document)` so SAT's own UI (`[data-sat-ignore]`) is excluded and the checked document is the one of the run.
-- Change the page only through `highlight` (outline, background, title). It saves the original values so `satReset` can restore them. Never write other styles or attributes on host elements.
+- Never change the page: no styles, attributes or nodes on host elements. Rules only report; the panel draws the boxes on its own layer (`ui/overlay.ts`). Moving focus to an element the user clicked in the panel is the only exception.
 - Checks are read-only otherwise: no network requests, no navigation, no storage writes. The broken-links check is the only one that makes requests; it is off by default and skips state-changing URLs.
 - Do not print to the console from rules; results go through `ctx.report`.
 
@@ -356,7 +356,7 @@ SAT runs inside someone else's application.
 ### 6.5 Adding a Check
 
 1. One file `core/rules/<category>/<id>.ts` exporting a `Rule`: `id` (kebab-case, added to `RuleId`), `category`, `defaultSeverity`, `wcag` when a criterion applies, `defaultOff: true` if it must be turned on explicitly, and `run(ctx)`.
-2. `run` selects elements from `ctx.document` and calls `ctx.report({ message, element, highlight })` once per problem; `severity` and `wcag` only when they differ from the rule's defaults.
+2. `run` selects elements from `ctx.document` and calls `ctx.report({ message, element })` once per problem; `severity` and `wcag` only when they differ from the rule's defaults.
 3. The rule added to the array in `core/rules/index.ts`; the runner already wraps each rule in an error guard and applies the `rules` option.
 4. A row in the README rules table.
 5. Unit tests with passing and failing markup; browser tests if the rule depends on layout, computed colors or visibility.
@@ -366,8 +366,8 @@ New rules get no `enableCheck*` option: those exist only for 1.x compatibility.
 
 ## 7. SAT User Interface
 
-- Every SAT element is inside a container with `data-sat-ignore`.
-- SAT's UI must pass SAT's own checks: buttons have accessible names, controls work with the keyboard.
+- Every SAT element is inside the `<sat-panel data-sat-ignore>` host, in its open shadow root; styles live in `ui/styles.ts`, and `:host { all: initial }` stops inherited page styles.
+- SAT's UI must pass SAT's own checks: buttons have accessible names, controls work with the keyboard, Escape closes the panel and returns focus (tested in `tests/browser/panel.spec.ts`).
 - The UI never depends on the host's CSS and must not leak styles into the host.
 - UI strings and messages are in English only (no localization).
 
@@ -587,7 +587,7 @@ A task is complete only when all applicable requirements below have been address
 ### Accuracy and Compatibility
 
 - [ ] Checks follow the referenced specification; valid patterns are not reported (§6.1).
-- [ ] The host page is only changed through `highlight` and is restored by `satReset` (§6.3).
+- [ ] The host page is never changed (§6.3).
 - [ ] Public API, defaults and severities are unchanged, or the change is in `CHANGELOG.md` (§8).
 - [ ] README options table and `CHANGELOG.md` are up to date.
 

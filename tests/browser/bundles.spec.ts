@@ -1,8 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { openPage } from './serve';
 
-// The entry points share one chunk: SAT's state (saved highlights) exists once
-// even when an app imports more than one of them.
+// The entry points share one chunk: SAT is loaded once even when an app imports more than one of them.
 
 const REACT_STUB = 'export function useEffect(effect) { effect(); }';
 const PAGE = `<!doctype html><html lang="en"><head>
@@ -24,24 +23,17 @@ test('without a bundler, enabled: true shows the button; without it SAT stays of
     await expect(page.locator('#sat-run-button')).toBeVisible();
 });
 
-test('index and react share state: stopping SAT also clears highlights from an index run', async ({ page }) => {
+test('index and react load the shared chunk once', async ({ page }) => {
     await openPage(page, PAGE, { '/react-stub.js': REACT_STUB });
-    const outline = () => page.locator('#a').evaluate((el) => (el as HTMLElement).style.outline);
+    const chunks: string[] = [];
+    page.on('request', (request) => { if (request.url().includes('/chunks/')) chunks.push(request.url()); });
 
     await page.evaluate(async () => {
         const { seoAccessibilityTool } = await import('/index.js');
         await seoAccessibilityTool();
-    });
-    expect(await outline()).not.toBe('');
-
-    await page.evaluate(async () => {
         const { useSATChecker } = await import('/react.js');
         useSATChecker({ enabled: true });
     });
-    const button = page.locator('#sat-run-button');
-    await button.click(); // run
-    await expect(button).toHaveAttribute('aria-label', 'Stop SAT and clear highlights');
-    await button.click(); // stop
-
-    expect(await outline()).toBe('');
+    await expect(page.locator('#sat-run-button')).toBeVisible();
+    expect(chunks).toHaveLength(1);
 });

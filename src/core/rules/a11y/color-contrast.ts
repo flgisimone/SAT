@@ -179,7 +179,6 @@ export const colorContrast: Rule = {
                 report({
                     element: el,
                     message: `Insufficient contrast on ${describeElement(el)}: ratio ${shown}. Minimum AA${sizeNote} is ${aa}.`,
-                    highlight: { outline: '2px dashed red', title: `❌ Contrast ratio too low: ${shown}` },
                 });
             } else if (ratio < aaa) {
                 report({
@@ -187,7 +186,6 @@ export const colorContrast: Rule = {
                     message: `Suboptimal contrast on ${describeElement(el)}: ratio ${shown}. Meets AA but not AAA${sizeNote} (${aaa}).`,
                     severity: 'warning',
                     wcag: ['1.4.6'],
-                    highlight: { outline: '1px dashed orange', title: `⚠️ Contrast ratio: ${shown}` },
                 });
             }
         });

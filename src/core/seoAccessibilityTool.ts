@@ -1,6 +1,5 @@
 import { rules, type Rule, type Report } from './rules';
 import { cssSelector, type Issue } from '../sat/issue';
-import { highlight } from '../sat/satDom';
 import { LEGACY_OPTIONS, type LegacyOptions, type RuleSetting, type SATOptions } from '../sat/satOptions';
 
 export type { SATOptions, RuleSetting } from '../sat/satOptions';
@@ -32,7 +31,7 @@ function settingFor(rule: Rule, options: Partial<SATOptions>): RuleSetting | 'de
 
 /**
  * Runs the enabled SEO and accessibility rules on a document (the current page by default).
- * Each run has its own results, so runs on different documents can overlap.
+ * Each run has its own results, so runs on different documents can overlap. The page is never changed.
  *
  * @param customOptions - (Optional) Severity per rule and rule options.
  * @param doc - (Optional) The document to check.
@@ -44,7 +43,7 @@ export async function seoAccessibilityTool(customOptions: Partial<SATOptions> = 
         const setting = settingFor(rule, customOptions);
         if (setting === 'off') continue;
 
-        const report = ({ message, element, severity, wcag, highlight: style }: Report) => {
+        const report = ({ message, element, severity, wcag }: Report) => {
             issues.push({
                 ruleId: rule.id,
                 severity: setting === 'default' ? severity ?? rule.defaultSeverity : setting,
@@ -54,12 +53,11 @@ export async function seoAccessibilityTool(customOptions: Partial<SATOptions> = 
                 element,
                 selector: element && cssSelector(element),
             });
-            if (element && style) highlight(element, style);
         };
 
         // A failing rule is reported but doesn't stop the others.
         try {
-            await rule.run({ document: doc, allowedLinkTexts: customOptions.allowedLinkTexts ?? [], report, highlight });
+            await rule.run({ document: doc, allowedLinkTexts: customOptions.allowedLinkTexts ?? [], report });
         } catch (error) {
             const detail = error instanceof Error ? error.message : String(error);
             issues.push({ ruleId: rule.id, severity: 'error', category: rule.category, message: `SAT internal error in ${rule.id}: ${detail}` });

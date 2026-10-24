@@ -28,14 +28,14 @@ export const focusManagement: Rule = {
             if (isDisabled || !isElementVisible(el)) {
                 if (tabIndex >= 0) {
                     const message = `${desc} is hidden or disabled but has tabindex="${tabIndexAttr}". It should not be focusable.`;
-                    report({ element: el, message, highlight: { outline: '2px dashed orange', title: message } });
+                    report({ element: el, message });
                 }
                 return;
             }
 
             if (tabIndex > 0) {
                 const message = `${desc} has tabindex="${tabIndexAttr}". Positive tabindex values change the tab order and confuse keyboard users; use 0.`;
-                report({ element: el, message, severity: 'warning', highlight: { outline: '2px dashed blue', title: message } });
+                report({ element: el, message, severity: 'warning' });
             }
 
             const isNativeInteractive = NATIVE_INTERACTIVE.includes(el.tagName) || el.isContentEditable;
@@ -43,7 +43,7 @@ export const focusManagement: Rule = {
 
             if (!isNativeInteractive && !hasRole && tabIndex >= 0) {
                 const message = `${desc} is in the tab order (tabindex="${tabIndexAttr}") but is not interactive. Use a native control (e.g. <button>) or add a role.`;
-                report({ element: el, message, severity: 'warning', highlight: { outline: '2px dashed yellow', title: message } });
+                report({ element: el, message, severity: 'warning' });
             }
         });
     },
