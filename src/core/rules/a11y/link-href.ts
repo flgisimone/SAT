@@ -2,12 +2,11 @@ import { describeElement, isHiddenFromAssistiveTech, queryTargets } from "../../
 import type { Rule } from "../rule";
 
 /**
- * <a> elements that don't point anywhere (WCAG 2.1.1, 4.1.2).
- * - Error: href="", href="#" or href="javascript:…" (an action disguised as a link).
- * - Warning: <a> without href, which is not keyboard-focusable.
+ * <a> elements that don't point anywhere (WCAG 2.1.1, 4.1.2): href="", href="#" or
+ * href="javascript:…" (an action disguised as a link). Framework click handlers (React onClick,
+ * Vue @click) aren't visible in the DOM, so the suggestion is to use a <button> for actions.
  *
- * Framework click handlers (React onClick, Vue @click) aren't visible in the DOM,
- * so in both cases the suggestion is to use a <button> for actions.
+ * <a> without href is a placeholder link, valid HTML, and is not reported.
  * Links hidden from assistive technologies (e.g. a closed menu) can't be reached and are skipped.
  */
 export const linkHref: Rule = {
@@ -21,12 +20,7 @@ export const linkHref: Rule = {
             if (isHiddenFromAssistiveTech(link)) return;
             const href = link.getAttribute('href');
 
-            if (href === null) {
-                if (link.hasAttribute('name')) return; // legacy in-page anchor target
-                const message = `${describeElement(link)} has no href, so keyboard users can't reach it. If it triggers an action, use a <button>.`;
-                report({ element: link, message, severity: 'warning' });
-                return;
-            }
+            if (href === null) return;
 
             const value = href.trim();
             if (value === '' || value === '#' || /^javascript:/i.test(value)) {

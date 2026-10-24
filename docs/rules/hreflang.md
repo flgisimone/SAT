@@ -2,6 +2,8 @@
 
 **Category**: SEO · **Default**: error
 
+**Source**: [Google Search Central: localized versions](https://developers.google.com/search/docs/specialty/international/localized-versions)
+
 ## What it checks
 
 `<link rel="alternate" hreflang>`: a value that isn't a language code (`en`, `en-GB`, `es-419`, `zh-Hant-TW`) or `x-default`, a relative or empty `href`, and the same language pointing to two URLs. The return links on the other language versions need requests and are not checked.

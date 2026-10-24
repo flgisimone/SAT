@@ -2,6 +2,8 @@
 
 **Category**: SEO · **Default**: warning
 
+**Source**: [The Open Graph protocol](https://ogp.me/) · [X cards markup](https://developer.x.com/en/docs/x-for-websites/cards/overview/markup)
+
 ## What it checks
 
 The four required Open Graph properties (`og:title`, `og:type`, `og:image`, `og:url`), with `og:image` and `og:url` as absolute URLs, and `<meta name="twitter:card">`. All warnings.

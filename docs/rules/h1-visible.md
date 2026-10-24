@@ -1,6 +1,8 @@
 # `h1-visible`
 
-**Category**: SEO · **Default**: error
+**Category**: SEO · **Default**: warning
+
+**Source**: [Google Search Central: hidden text](https://developers.google.com/search/docs/essentials/spam-policies#hidden-text-and-links) · [Google Search Central: title links](https://developers.google.com/search/docs/appearance/title-link)
 
 ## What it checks
 

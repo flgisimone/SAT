@@ -8,9 +8,9 @@ import { openPage } from './serve';
 
 type Result = Omit<SATResult, 'issues'>;
 
-async function run(page: Page, body: string, rule: RuleId): Promise<Result> {
+async function run(page: Page, body: string, rule: RuleId, extra: object = {}): Promise<Result> {
     await openPage(page, `<!doctype html><html lang="en"><body>${body}</body></html>`);
-    const only = { rules: Object.fromEntries(rules.map((r) => [r.id, r.id === rule ? undefined : 'off'])) };
+    const only = { ...extra, rules: Object.fromEntries(rules.map((r) => [r.id, r.id === rule ? undefined : 'off'])) };
     return page.evaluate(async (options) => {
         const { seoAccessibilityTool } = await import('/index.js');
         const { errors, warnings, errorMessages, warningMessages } = await seoAccessibilityTool(options);
@@ -57,7 +57,14 @@ test.describe('contrast', () => {
 
         const large = await run(page, '<p style="color:#888;font-size:24px">Large</p>', contrast);
         expect(large.errors).toBe(0);
-        expect(large.warnings).toBe(1);
+        expect(large.warnings).toBe(0);
+    });
+
+    test('AAA (1.4.6) warnings only with wcagLevel: "AAA"', async ({ page }) => {
+        // #6b6b6b on white ≈ 5.3:1 — meets AA, not AAA
+        const text = '<p style="color:#6b6b6b;font-size:16px">Gray</p>';
+        expect(await run(page, text, contrast)).toMatchObject({ errors: 0, warnings: 0 });
+        expect(await run(page, text, contrast, { wcagLevel: 'AAA' })).toMatchObject({ errors: 0, warnings: 1 });
     });
 
     test('hidden text and background images are skipped', async ({ page }) => {
@@ -74,10 +81,10 @@ test.describe('contrast', () => {
 test.describe('visibility', () => {
     test('hidden h1 is reported, visible h1 is not', async ({ page }) => {
         const hidden = await run(page, '<h1 style="display:none">Title</h1>', 'h1-visible');
-        expect(hidden.errors).toBe(1);
+        expect(hidden.warnings).toBe(1);
 
         const visible = await run(page, '<h1>Title</h1>', 'h1-visible');
-        expect(visible.errors).toBe(0);
+        expect(visible.warnings).toBe(0);
     });
 
     test('position:fixed controls are treated as visible', async ({ page }) => {

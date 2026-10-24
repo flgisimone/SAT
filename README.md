@@ -66,7 +66,7 @@ export default defineConfig({
 });
 ```
 
-It takes the options that fit in JSON (`rules`, `allowedLinkTexts`, `observeDom`, the 1.x flags) and `axe: true` to run axe-core too (install `axe-core`). It works with any app Vite serves: Svelte, SvelteKit, Solid, Preact, Vue, React. `vite` is an optional peer dependency (5 or later).
+It takes the options that fit in JSON (`rules`, `wcagLevel`, `allowedLinkTexts`, `observeDom`, the 1.x flags) and `axe: true` to run axe-core too (install `axe-core`). It works with any app Vite serves: Svelte, SvelteKit, Solid, Preact, Vue, React. `vite` is an optional peer dependency (5 or later).
 
 ---
 
@@ -128,7 +128,7 @@ Turn rules off or change their severity with `rules`, as in ESLint:
 useSATChecker({
   rules: {
     "color-contrast": "warning", // every issue of the rule becomes a warning
-    "link-target-blank": "off",
+    "landmarks": "off",
     "link-text": "warning",      // rules that are off by default are turned on by a severity
   },
   allowedLinkTexts: ["Read more", "Learn more"],
@@ -138,6 +138,7 @@ useSATChecker({
 | Option             | Description                                                                                      | Default |
 |--------------------|--------------------------------------------------------------------------------------------------|---------|
 | `rules`            | `{ [ruleId]: "error" \| "warning" \| "off" }`. A severity applies to every issue of that rule   | `{}`    |
+| `wcagLevel`        | `"AA"` or `"AAA"`: AAA adds the AAA criteria as warnings (e.g. 1.4.6 contrast)                   | `"AA"`  |
 | `allowedLinkTexts` | Link texts `link-text` accepts anyway (case-insensitive)                                         | `[]`    |
 | `enabled`          | Controller only: `true` starts SAT without a bundler, `false` never starts it                    | starts when `NODE_ENV === "development"` |
 | `observeDom`       | Controller only: while SAT is on, reruns the checks this many ms after the DOM stops changing    | off     |
@@ -145,25 +146,27 @@ useSATChecker({
 
 ### Rules
 
+Each rule follows an official source, cited on its page in [`docs/rules/`](docs/rules/): WCAG 2.2 and the W3C ACT rules, WAI-ARIA 1.2, the HTML standard, Google Search Central. Requirements are errors, recommendations are warnings, and what the sources call valid is not reported.
+
 | Rule                | Category | Checks                                                                    | Default    | 1.x option |
 |---------------------|----------|---------------------------------------------------------------------------|------------|------------|
-| `h1`                | seo      | Exactly one `<h1>`                                                        | error      | `enableCheckH1` |
-| `h1-visible`        | seo      | The first `<h1>` is rendered (not hidden)                                 | error      | `enableCheckH1Visible` |
+| `h1`                | seo      | The page has an `<h1>` (several are valid)                                | warning    | `enableCheckH1` |
+| `h1-visible`        | seo      | The first `<h1>` is rendered (not hidden)                                 | warning    | `enableCheckH1Visible` |
 | `heading-order`     | a11y     | The first heading of the page is an `<h1>`                                | warning    | `enableCheckHeadingOrder` |
-| `heading-levels`    | a11y     | Skipped heading levels (e.g. H2 → H4)                                     | error      | `enableCheckJumpLevels` |
+| `heading-levels`    | a11y     | Skipped heading levels (e.g. H2 → H4)                                     | warning    | `enableCheckJumpLevels` |
 | `accessible-name`   | a11y     | Buttons, links and `svg[role="img"]` have an accessible name              | error      | `enableCheckAriaLabel` |
 | `aria-roles`        | a11y     | Invalid `role` values (error), redundant roles (warning)                  | error      | `enableCheckAriaRolesWithSuggestions` |
-| `landmarks`         | a11y     | One `<main>`, one page-level header/footer; labelled navs when repeated (warning) | error | `enableCheckUniqueLandmarks` |
-| `color-contrast`    | a11y     | WCAG text contrast: below AA (error), below AAA (warning)                 | error      | `enableCheckTextElementContrast` |
+| `landmarks`         | a11y     | Several visible `<main>` (error); no main, several page-level header/footer, unlabelled repeated navs (warning) | error | `enableCheckUniqueLandmarks` |
+| `color-contrast`    | a11y     | WCAG text contrast: below AA (error), below AAA with `wcagLevel: "AAA"` (warning) | error | `enableCheckTextElementContrast` |
 | `form-label`        | a11y     | Form fields have a label (placeholder is not enough)                      | error      | `enableCheckInputLabel` |
 | `focus-management`  | a11y     | Hidden focusable elements (error), positive tabindex and non-interactive tab stops (warning) | error | `enableCheckFocusManagement` |
 | `image-alt`         | a11y     | `<img>` without `alt` (error), alt text that looks like a file name (warning) | error  | `enableCheckImageAlt` |
-| `link-href`         | a11y     | `href=""`, `#` or `javascript:` (error), `<a>` without href (warning)     | error      | `enableCheckEmptyLinks` |
-| `link-target-blank` | seo      | `target="_blank"` without `rel="noopener noreferrer"`                     | warning    | `enableCheckExternalLinksRel` |
+| `link-href`         | a11y     | `href=""`, `#` or `javascript:`                                           | error      | `enableCheckEmptyLinks` |
+| `link-target-blank` | seo      | `target="_blank"` with `rel="opener"` (HTML already implies noopener)    | off        | `enableCheckExternalLinksRel` |
 | `tabindex-negative` | a11y     | Visible native controls removed from the tab order with `tabindex="-1"`   | warning    | `enableCheckTabindexNegativeOne` |
 | `link-text`         | a11y     | Vague link texts ("click here", "more")                                    | off        | `enableCheckNonDescriptiveLinks` |
-| `html-lang`         | a11y     | `<html>` has a `lang` attribute                                           | error      | `enableCheckHtmlLang` |
-| `seo-meta`          | seo      | One `<title>` and one meta description (error), lengths and meta viewport (warning) | error | `enableCheckSeoMeta` |
+| `html-lang`         | a11y     | `<html>` has a `lang`; every `lang` is a valid language tag               | error      | `enableCheckHtmlLang` |
+| `seo-meta`          | seo      | One `<title>` and one meta description (error), meta viewport (warning); no length limits | error | `enableCheckSeoMeta` |
 | `canonical`         | seo      | Several or empty canonicals (error), missing or relative canonical (warning) | warning   | — |
 | `robots-meta`       | seo      | `noindex`, `nofollow` or `none` in a robots meta tag                      | warning    | — |
 | `social-meta`       | seo      | Required Open Graph properties, absolute `og:image`/`og:url`, `twitter:card` | warning | — |
@@ -245,7 +248,7 @@ test("report", async ({ page }) => {
 });
 ```
 
-- Both take the SAT options that can cross into the page (`rules`, `allowedLinkTexts`, the 1.x flags) and `axe: true` to run axe-core too (install `axe-core`).
+- Both take the SAT options that can cross into the page (`rules`, `wcagLevel`, `allowedLinkTexts`, the 1.x flags) and `axe: true` to run axe-core too (install `axe-core`).
 - `expect` is Playwright's own, extended: use it in place of the one from `@playwright/test`, or merge it with yours through `mergeExpects`.
 - Pages with a strict Content Security Policy block the added script: create the context with `bypassCSP: true`.
 
@@ -267,6 +270,7 @@ npx sat-check http://localhost:5173/ http://localhost:5173/pricing
 | `--html <file>` | — | Writes a standalone HTML report |
 | `--config <file>` | — | JSON with SAT options, e.g. `{ "rules": { "link-text": "warning" } }` |
 | `--axe` | off | Runs axe-core too (install `axe-core`) |
+| `--wcag-level <level>` | `AA` | `AAA` adds the AAA criteria as warnings |
 | `--depth <n>` | `0` | Follows same-origin links this many levels deep, checks those pages and reports broken links |
 | `--max-pages <n>` | `100` | Stops after this many pages |
 | `--not-found <text>` | — | A page showing this text is a broken link: the "not found" view of a single-page app |

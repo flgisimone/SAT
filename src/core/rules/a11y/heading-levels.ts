@@ -2,11 +2,14 @@ import { describeElement } from "../../../sat/satDom";
 import { headingOutline } from "../headings";
 import type { Rule } from "../rule";
 
-/** Reports skipped heading levels going down the outline (e.g. H2 → H4). */
+/**
+ * Skipped heading levels going down the outline (e.g. H2 → H4). A warning: WCAG lists ordered
+ * levels as an advisory technique (G141), not as a requirement of 1.3.1.
+ */
 export const headingLevels: Rule = {
     id: 'heading-levels',
     category: 'a11y',
-    defaultSeverity: 'error',
+    defaultSeverity: 'warning',
     wcag: ['1.3.1'],
     run({ document, report }) {
         headingOutline(document).forEach(({ element, skipped }, i, outline) => {

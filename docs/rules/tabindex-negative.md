@@ -2,6 +2,8 @@
 
 **Category**: Accessibility · **Default**: warning · **WCAG**: [2.1.1 Keyboard](https://www.w3.org/WAI/WCAG22/Understanding/keyboard.html)
 
+**Source**: [HTML: the tabindex attribute](https://html.spec.whatwg.org/multipage/interaction.html#the-tabindex-attribute) · [Understanding 2.1.1 Keyboard](https://www.w3.org/WAI/WCAG22/Understanding/keyboard.html)
+
 ## What it checks
 
 Visible native controls (links, buttons, fields, `summary`) with `tabindex="-1"`. On non-interactive elements (modals, skip-link targets, headings focused by code) `tabindex="-1"` is correct and not reported.

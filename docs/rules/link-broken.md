@@ -2,6 +2,8 @@
 
 **Category**: SEO · **Default**: off (error when on)
 
+**Source**: [Google Search Central: crawlable links](https://developers.google.com/search/docs/crawling-indexing/links-crawlable)
+
 ## What it checks
 
 Internal links answer without 4xx/5xx, checked with one HEAD request per URL, at most 5 at a time. Logout, delete and similar URLs are never requested.

@@ -2,6 +2,8 @@
 
 **Category**: Accessibility · **Default**: off (warning when on) · **WCAG**: [2.4.4 Link Purpose (In Context)](https://www.w3.org/WAI/WCAG22/Understanding/link-purpose-in-context.html)
 
+**Source**: [Understanding 2.4.4 Link Purpose](https://www.w3.org/WAI/WCAG22/Understanding/link-purpose-in-context.html) · [Google Search Central: anchor text](https://developers.google.com/search/docs/crawling-indexing/links-crawlable#anchor-text-placement)
+
 ## What it checks
 
 Vague link texts such as "click here" or "more". Texts listed in the `allowedLinkTexts` option are accepted. Links without any name are reported by [`accessible-name`](accessible-name.md).

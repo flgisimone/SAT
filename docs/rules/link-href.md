@@ -2,9 +2,11 @@
 
 **Category**: Accessibility · **Default**: error · **WCAG**: [2.1.1 Keyboard](https://www.w3.org/WAI/WCAG22/Understanding/keyboard.html)
 
+**Source**: [HTML: the a element](https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-a-element) · [Google Search Central: crawlable links](https://developers.google.com/search/docs/crawling-indexing/links-crawlable)
+
 ## What it checks
 
-`href=""`, `href="#"` and `href="javascript:…"` are errors; `<a>` without `href` is a warning (it isn't focusable). Elements hidden from assistive technologies (`display: none`, `visibility: hidden`, `hidden`, `aria-hidden="true"`) are skipped.
+`href=""`, `href="#"` and `href="javascript:…"` are errors. `<a>` without `href` is a placeholder link, valid HTML, and is not reported. Elements hidden from assistive technologies (`display: none`, `visibility: hidden`, `hidden`, `aria-hidden="true"`) are skipped.
 
 ## Why
 

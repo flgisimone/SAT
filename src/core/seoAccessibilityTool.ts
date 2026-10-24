@@ -4,7 +4,7 @@ import { LEGACY_OPTIONS, type LegacyOptions, type RuleSetting, type SATOptions }
 
 export type { SATOptions, RuleSetting, Engine } from '../sat/satOptions';
 export type { Issue, Severity, Category } from '../sat/issue';
-export type { RuleId } from './rules';
+export type { RuleId, WcagLevel } from './rules';
 export { satReset } from '../sat/satReset';
 
 export interface SATResult {
@@ -60,7 +60,7 @@ export async function seoAccessibilityTool(customOptions: Partial<SATOptions> = 
 
         // A failing rule is reported but doesn't stop the others.
         try {
-            await rule.run({ document: doc, allowedLinkTexts: customOptions.allowedLinkTexts ?? [], report });
+            await rule.run({ document: doc, allowedLinkTexts: customOptions.allowedLinkTexts ?? [], wcagLevel: customOptions.wcagLevel ?? 'AA', report });
         } catch (error) {
             const detail = error instanceof Error ? error.message : String(error);
             issues.push({ ruleId: rule.id, severity: 'error', category: rule.category, message: `SAT internal error in ${rule.id}: ${detail}`, help: ruleHelp(rule.id) });

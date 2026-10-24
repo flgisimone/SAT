@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.13.0 — unreleased
+
+Every rule now follows an official source (WCAG 2.2 and the W3C ACT rules, WAI-ARIA 1.2, the HTML standard, Google Search Central), cited on its page in `docs/rules/`. Requirements are errors, recommendations warnings, and what the sources call valid is no longer reported. To get a previous behavior back, set the rule's severity in `rules`.
+
+### Added
+- `wcagLevel` option (`"AA"` by default, or `"AAA"`), also in the Vite plugin, Playwright and the CLI (`--wcag-level`).
+- `html-lang` checks that `lang` is a valid language tag, on `<html>` and on every element (ACT bf051a, de46e4; WCAG 3.1.2).
+
+### Changed
+- `seo-meta`: no more warnings on titles above 60 characters and descriptions above 160. Google states there is no length limit.
+- `h1`: a missing `<h1>` is a warning instead of an error; several `<h1>` are no longer reported (valid HTML; Google sets no number of headings).
+- `h1-visible`: warning instead of error.
+- `heading-levels`: skipped levels are a warning instead of an error (WCAG technique G141 is advisory).
+- `color-contrast`: the AAA warnings (WCAG 1.4.6) appear only with `wcagLevel: "AAA"`.
+- `landmarks`: a missing main, several `role="main"` and several page-level `<header>`/`<footer>` are warnings (WAI-ARIA "should"); several visible `<main>` stay errors (HTML "must not").
+- `link-href`: `<a>` without `href` is no longer reported (a placeholder link, valid HTML).
+- `link-target-blank`: off by default, and when on it reports only `rel="opener"`, since HTML already treats `target="_blank"` as `noopener`.
+
 ## 1.12.0 — unreleased
 
 ### Added

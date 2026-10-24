@@ -2,6 +2,8 @@
 
 **Category**: Accessibility · **Default**: error · **WCAG**: [2.4.3 Focus Order](https://www.w3.org/WAI/WCAG22/Understanding/focus-order.html)
 
+**Source**: [Understanding 2.4.3 Focus Order](https://www.w3.org/WAI/WCAG22/Understanding/focus-order.html) · [HTML: the tabindex attribute](https://html.spec.whatwg.org/multipage/interaction.html#the-tabindex-attribute)
+
 ## What it checks
 
 Hidden or disabled elements that are still in the tab order are errors. Positive `tabindex` values and non-interactive elements put in the tab order without a role are warnings. `tabindex="-1"` on non-interactive elements is fine.

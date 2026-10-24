@@ -15,8 +15,9 @@ function hasLabel(el: Element): boolean {
 /**
  * Page landmarks (WAI-ARIA landmark rules):
  *
- * - exactly one `main`;
- * - at most one page-level `banner` (<header>) and `contentinfo` (<footer>).
+ * - error: more than one visible <main> (HTML: a document "must not" have more than one);
+ * - warning: no main, or more than one with role="main" (WAI-ARIA "should");
+ * - warning: more than one page-level `banner` (<header>) or `contentinfo` (<footer>) (WAI-ARIA "should").
  *   Headers/footers inside article, aside, main, nav or section are not landmarks and are ignored;
  * - warning: when there is more than one `navigation`, each needs an aria-label or aria-labelledby.
  */
@@ -28,12 +29,14 @@ export const landmarks: Rule = {
     run({ document, report }) {
         const mains = landmarkElements(document, 'main', 'main');
         if (mains.length === 0) {
-            report({ message: 'Missing <main> landmark. Wrap the primary content of the page in <main>.' });
+            report({ message: 'Missing <main> landmark. Wrap the primary content of the page in <main>.', severity: 'warning' });
         } else {
+            const nativeMains = mains.filter((el) => el.localName === 'main').length;
             mains.slice(1).forEach((el) => {
                 report({
                     element: el,
                     message: `Multiple <main> landmarks (${mains.length}): ${describeElement(el)}. A page should have only one visible main.`,
+                    severity: nativeMains > 1 ? 'error' : 'warning',
                 });
             });
         }
@@ -44,7 +47,8 @@ export const landmarks: Rule = {
             elements.slice(1).forEach((el) => {
                 report({
                     element: el,
-                    message: `Multiple page-level <${tag}> (role ${role}) found (${elements.length}): ${describeElement(el)}. Only one is allowed per page.`,
+                    message: `Multiple page-level <${tag}> (role ${role}) found (${elements.length}): ${describeElement(el)}. A page should have only one.`,
+                    severity: 'warning',
                 });
             });
         });

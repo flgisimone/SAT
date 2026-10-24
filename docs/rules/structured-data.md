@@ -2,6 +2,8 @@
 
 **Category**: SEO · **Default**: error
 
+**Source**: [Google Search Central: structured data](https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data) · [JSON-LD 1.1](https://www.w3.org/TR/json-ld11/)
+
 ## What it checks
 
 `<script type="application/ld+json">` blocks: invalid JSON (the message has the parser's position in Chromium and Firefox) and items without `@type` (top level, array items or `@graph` items). The properties each type requires are not checked.

@@ -77,3 +77,12 @@ test('limits and rule settings decide the exit code', async () => {
 
     expect((await satCheck(`${origin}/`, '--depth', '1', '--max-errors', '1')).code).toBe(0);
 });
+
+test('--wcag-level accepts AA or AAA only', async () => {
+    const wrong = await satCheck(`${origin}/about`, '--wcag-level', 'A');
+    expect(wrong.stdout).toContain('--wcag-level must be AA or AAA, got "A".');
+    expect(wrong.code).not.toBe(0);
+
+    const aaa = await satCheck(`${origin}/about`, '--wcag-level', 'AAA');
+    expect(aaa.code).toBe(0);
+});

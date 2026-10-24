@@ -2,6 +2,8 @@
 
 **Category**: SEO · **Default**: warning
 
+**Source**: [Google Search Central: canonical URLs](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls)
+
 ## What it checks
 
 `<link rel="canonical">`: more than one, or an empty `href`, is an error; a missing or relative canonical is a warning. A canonical on another host is valid (in development the page runs on localhost) and is not reported.

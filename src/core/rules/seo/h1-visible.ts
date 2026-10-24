@@ -5,7 +5,7 @@ import type { Rule } from "../rule";
 export const h1Visible: Rule = {
     id: 'h1-visible',
     category: 'seo',
-    defaultSeverity: 'error',
+    defaultSeverity: 'warning',
     run({ document, report }) {
         const el = queryTargets<HTMLElement>('h1', document)[0];
 

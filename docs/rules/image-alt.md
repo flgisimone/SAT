@@ -2,6 +2,8 @@
 
 **Category**: Accessibility · **Default**: error · **WCAG**: [1.1.1 Non-text Content](https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html)
 
+**Source**: [ACT 23a2a8 Image has non-empty accessible name](https://www.w3.org/WAI/standards-guidelines/act/rules/23a2a8/proposed/) · [HTML: requirements for providing text to act as an alternative for images](https://html.spec.whatwg.org/multipage/images.html#alt) · [Google Search Central: image SEO](https://developers.google.com/search/docs/appearance/google-images)
+
 ## What it checks
 
 `<img>` without an `alt` attribute is an error; alt text that looks like a file name (`photo.jpg`) is a warning. `alt=""` marks a decorative image and is valid.

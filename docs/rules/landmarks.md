@@ -2,9 +2,11 @@
 
 **Category**: Accessibility · **Default**: error · **WCAG**: [1.3.1 Info and Relationships](https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html)
 
+**Source**: [HTML: the main element](https://html.spec.whatwg.org/multipage/grouping-content.html#the-main-element) · [WAI-ARIA 1.2: banner](https://www.w3.org/TR/wai-aria-1.2/#banner), [contentinfo](https://www.w3.org/TR/wai-aria-1.2/#contentinfo), [main](https://www.w3.org/TR/wai-aria-1.2/#main), [navigation](https://www.w3.org/TR/wai-aria-1.2/#navigation) · [ARIA APG: landmark regions](https://www.w3.org/WAI/ARIA/apg/practices/landmark-regions/)
+
 ## What it checks
 
-Page landmarks: exactly one `<main>`, at most one page-level `<header>` and `<footer>` (those inside `article`, `aside`, `main`, `nav` or `section` don't count). When there is more than one `<nav>`, each needs `aria-label` or `aria-labelledby` (warning).
+Page landmarks. More than one visible `<main>` is an error (HTML: a document must not have more than one). Warnings, from WAI-ARIA "should": no main landmark, more than one `role="main"`, more than one page-level `<header>` or `<footer>` (those inside `article`, `aside`, `main`, `nav` or `section` don't count), and several `<nav>` without `aria-label` or `aria-labelledby`.
 
 ## Why
 
