@@ -374,6 +374,192 @@ describe('SEO: contents', () => {
     });
 });
 
+describe('aria-attributes (ACT 5f99a7, 6a7281, 4e8ab6, 5c01ea, kb1m8s)', () => {
+    it('accepts valid states and properties, native states and unknown roles', async () => {
+        render(`
+            <button aria-pressed="false" aria-expanded="true">a</button>
+            <input type="checkbox" role="switch" aria-label="Wi-Fi">
+            <div role="combobox" aria-expanded="false" aria-controls="x" aria-label="c"></div>
+            <div aria-live="polite" aria-busy="true">b</div>
+            <h2 aria-level="2">c</h2><div role="heading" aria-level="3">d</div>
+            <a href="/" aria-current="page">Home</a>
+            <img src="a.png" alt="" aria-label="Logo">
+            <section role="doc-chapter" aria-posinset="1">e</section>
+            <table role="grid"><tr><td aria-selected="true">f</td></tr></table>
+            <button role="none" aria-label="Close">x</button>`);
+        expect((await runOnly(['aria-attributes'])).issues.map((i) => i.message)).toEqual([]);
+    });
+
+    it('reports unknown attributes, invalid values, missing required states and attributes not allowed', async () => {
+        render(`
+            <div role="checkbox" aria-not-checked="true">a</div>
+            <div role="button" aria-expanded="collapsed">b</div>
+            <div role="slider" aria-valuenow="1" aria-valuemin="one">c</div>
+            <button aria-sort="ascending">d</button>
+            <span aria-label="Warning">!</span>`);
+        expect((await runOnly(['aria-attributes'])).errorMessages).toEqual([
+            'Unknown ARIA attribute aria-not-checked on <div> "a". Check the spelling.',
+            'role="checkbox" requires aria-checked, missing on <div> "a".',
+            'Invalid value aria-expanded="collapsed" on <div> "b": use one of true, false, undefined.',
+            'Invalid value aria-valuemin="one" on <div> "c": use a number.',
+            'aria-sort is not supported by role button on <button> "d". Remove it or change the role.',
+            'aria-label is not allowed on <span> "!" (role generic): this role can\'t be named. Remove it, or use an element or role that can.',
+        ]);
+    });
+
+    it('requires aria-valuenow only on a focusable separator, and skips hidden elements', async () => {
+        render('<div role="separator"></div><div role="checkbox" hidden></div><div role="separator" tabindex="0"></div>');
+        expect((await runOnly(['aria-attributes'])).errors).toBe(1);
+    });
+});
+
+describe('aria-hidden-focus (ACT 6cfa84)', () => {
+    it('reports what is reachable with Tab inside aria-hidden="true", aria-hidden="false" included', async () => {
+        render(`
+            <div aria-hidden="true"><a href="/" id="a">a</a><div aria-hidden="false"><button id="b">b</button></div></div>
+            <p tabindex="0" aria-hidden="true" id="c">c</p>`);
+        expect((await runOnly(['aria-hidden-focus'])).issues.map((i) => i.element?.id)).toEqual(['a', 'b', 'c']);
+    });
+
+    it('accepts tabindex="-1", disabled, inert and hidden elements', async () => {
+        render(`
+            <div aria-hidden="true">
+                <button tabindex="-1">a</button><input disabled><a href="/" style="display:none">b</a>
+                <div inert><button>c</button></div><p>text</p>
+            </div>
+            <button aria-hidden="false">d</button><button aria-hidden>e</button>`);
+        expect((await runOnly(['aria-hidden-focus'])).issues).toEqual([]);
+    });
+});
+
+describe('meta-viewport and meta-refresh (ACT b4f0c3, bc659a)', () => {
+    it.each(['width=device-width, initial-scale=1', 'maximum-scale=2.0', 'maximum-scale=-1', 'user-scalable=yes'])('accepts content="%s"', async (content) => {
+        document.head.innerHTML = `<meta name="viewport" content="${content}">`;
+        expect((await runOnly(['meta-viewport'])).issues).toEqual([]);
+    });
+
+    it.each(['user-scalable=no', 'width=device-width, maximum-scale=1', 'maximum-scale=1.5', 'user-scalable=0'])('reports content="%s"', async (content) => {
+        document.head.innerHTML = `<meta name="viewport" content="${content}">`;
+        expect((await runOnly(['meta-viewport'])).errors).toBe(1);
+    });
+
+    it('reports a timed refresh; immediate redirects, invalid values and 20 hours or more are fine', async () => {
+        document.head.innerHTML = '<meta http-equiv="refresh" content="30; URL=\'/next\'">';
+        expect((await runOnly(['meta-refresh'])).errorMessages[0]).toContain('after 30 s');
+        for (const content of ['0; URL=/next', '72001', '+5', 'foo; 30', '']) {
+            document.head.innerHTML = `<meta http-equiv="refresh" content="${content}">`;
+            expect((await runOnly(['meta-refresh'])).issues).toEqual([]);
+        }
+    });
+
+    it('meta-refresh lists 3.2.5 only at level AAA', async () => {
+        document.head.innerHTML = '<meta http-equiv="refresh" content="5">';
+        expect((await runOnly(['meta-refresh'])).issues[0].wcag).toEqual(['2.2.1']);
+        expect((await runOnly(['meta-refresh'], { wcagLevel: 'AAA' })).issues[0].wcag).toEqual(['2.2.1', '3.2.5']);
+    });
+});
+
+describe('iframe-name and accessible-name (ACT cae760, 2t702h, m6b1q3, ffd0e9, 8fc3b6)', () => {
+    it('iframe-name: frames need title, aria-label or aria-labelledby; hidden and tabindex="-1" frames are skipped', async () => {
+        render(`
+            <iframe title="Map" src="a.html"></iframe><iframe aria-label="Video" src="b.html"></iframe>
+            <iframe aria-hidden="true" src="c.html"></iframe><iframe tabindex="-1" src="d.html"></iframe>
+            <iframe role="presentation" src="e.html"></iframe>
+            <iframe name="Map" src="f.html"></iframe><iframe title=" " src="g.html"></iframe>`);
+        expect((await runOnly(['iframe-name'])).errors).toBe(2);
+    });
+
+    it('reports an empty summary, empty headings and unnamed objects showing an image', async () => {
+        render(`
+            <details><summary></summary><p>x</p></details>
+            <details><summary>Opening times</summary><summary></summary></details>
+            <h2><img src="a.png" alt=""></h2><h3><span aria-hidden="true">Hidden</span></h3><h4>Title</h4>
+            <div role="heading" aria-level="2"></div><h2 aria-hidden="true"></h2>
+            <object data="logo.png"></object><object data="logo.png" title="Logo"></object><object data="page.html"></object>`);
+        const r = await runOnly(['accessible-name']);
+        expect(r.issues.map((i) => i.element?.tagName)).toEqual(['SUMMARY', 'H2', 'H3', 'DIV', 'OBJECT']);
+        expect(r.issues.find((i) => i.element?.tagName === 'H2')?.wcag).toEqual([]);
+    });
+
+    it('a button whose only text is aria-hidden has no name; labelledby can point to hidden text', async () => {
+        render('<button><span aria-hidden="true">×</span></button><span id="l" hidden>Close</span><button aria-labelledby="l"></button>');
+        expect((await runOnly(['accessible-name'])).errors).toBe(1);
+    });
+});
+
+describe('autocomplete-valid (ACT 73f2c2)', () => {
+    it.each(['shipping email', 'off', 'on', 'section-a billing work tel', 'Street-Address', 'current-password webauthn', ''])('accepts autocomplete="%s"', async (value) => {
+        render(`<input autocomplete="${value}">`);
+        expect((await runOnly(['autocomplete-valid'])).issues).toEqual([]);
+    });
+
+    it.each(['mail', 'work photo', 'work shipping email', 'shipping', 'email invalid', 'work,email'])('reports autocomplete="%s"', async (value) => {
+        render(`<input autocomplete="${value}">`);
+        expect((await runOnly(['autocomplete-valid'])).errors).toBe(1);
+    });
+
+    it('skips disabled, hidden and button inputs', async () => {
+        render('<input autocomplete="mail" disabled><input autocomplete="mail" aria-disabled="true"><input type="hidden" autocomplete="mail"><input type="submit" autocomplete="mail"><input autocomplete="mail" style="display:none">');
+        expect((await runOnly(['autocomplete-valid'])).issues).toEqual([]);
+    });
+});
+
+describe('label-in-name (ACT 2ee8b8)', () => {
+    it('accepts a name that contains the visible label', async () => {
+        render(`
+            <button aria-label="Invia modulo">Invia</button><a href="/" aria-label="act Rules">ACT rules</a>
+            <button aria-label="Search by date">Search by date (YYYY-MM-DD)</button><button aria-label="Close">X</button>
+            <button aria-label="Next">Next…</button><nav aria-label="Main">Menu</nav>`);
+        expect((await runOnly(['label-in-name'])).issues).toEqual([]);
+    });
+
+    it('reports a name without the visible label, or with its words out of order', async () => {
+        render(`
+            <button aria-label="Chiudi">Invia</button><a href="/" aria-label="Discover Italy">Discover It</a>
+            <button aria-label="Download the specification">Download specification</button>
+            <a href="/" aria-label="Download specification">Download <span aria-hidden="true">gizmo</span> specification</a>`);
+        expect((await runOnly(['label-in-name'])).errors).toBe(4);
+    });
+});
+
+describe('table-headers (ACT a25f45, d0f69e)', () => {
+    it('accepts headers that point to cells of the same table and headers with cells', async () => {
+        render(`
+            <table><tr><th id="h1">Projects</th><th id="h2">Exams</th></tr><tr><td headers="h1">1</td><td headers="h2">2</td></tr></table>
+            <table><tr><th>Day</th><th>Morning</th></tr><tr><th>Mon</th><td>8-12</td></tr></table>
+            <table role="presentation"><tr><th>Layout</th></tr></table>`);
+        expect((await runOnly(['table-headers'])).issues).toEqual([]);
+    });
+
+    it('reports headers pointing elsewhere and a header with an empty column', async () => {
+        render(`
+            <table><tr><th id="a">A</th></tr><tr><td id="self" headers="a self missing">1</td></tr></table>
+            <table><tr><th>Rate</th><th>Value</th></tr><tr><td>15%</td></tr></table>`);
+        const r = await runOnly(['table-headers']);
+        expect(r.errorMessages).toHaveLength(2);
+        expect(r.errorMessages[0]).toContain('"self", "missing"');
+        expect(r.errorMessages[1]).toContain('Value');
+    });
+});
+
+describe('media-autoplay (ACT 80f0bf)', () => {
+    it('warns on media playing on their own with sound and no controls', async () => {
+        render(`
+            <video autoplay src="a.mp4" id="v"></video><audio autoplay src="a.mp3" id="a"></audio>
+            <video autoplay muted src="b.mp4"></video><audio autoplay controls src="b.mp3"></audio>
+            <video autoplay src="c.mp4#t=8,10"></video><video src="d.mp4"></video>`);
+        const r = await runOnly(['media-autoplay']);
+        expect([r.errors, r.warnings]).toEqual([0, 2]);
+    });
+});
+
+describe('target-size outside the browser', () => {
+    it('reports nothing without layout (jsdom)', async () => {
+        render('<button>a</button><button>b</button>');
+        expect((await runOnly(['target-size'])).issues).toEqual([]);
+    });
+});
+
 describe('Vue integration', () => {
     it('starts immediately when called outside a component', async () => {
         vi.resetModules();

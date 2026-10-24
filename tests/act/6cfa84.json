@@ -1,0 +1,97 @@
+{
+ "rule": "6cfa84",
+ "name": "Element with aria-hidden has no content in sequential focus navigation",
+ "page": "https://www.w3.org/WAI/standards-guidelines/act/rules/6cfa84/proposed/",
+ "cases": [
+  {
+   "id": "5bd22090d0f74dcea752749ef4ad8411e3772535",
+   "title": "Passed Example 1",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 1</title>\n</head>\n<body>\n\t<p aria-hidden=\"true\">Some text</p>\n</body>\n</html>"
+  },
+  {
+   "id": "9f9f5e323450f4c0bd5445597a39d160ce07ff48",
+   "title": "Passed Example 2",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 2</title>\n</head>\n<body>\n\t<div aria-hidden=\"true\">\n\t\t<a href=\"/\" style=\"display:none\">Link</a>\n\t</div>\n</body>\n</html>"
+  },
+  {
+   "id": "3c48f0e596f96b4bb701943356b6c179f41d383c",
+   "title": "Passed Example 3",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 3</title>\n</head>\n<body>\n\t<input disabled aria-hidden=\"true\" />\n</body>\n</html>"
+  },
+  {
+   "id": "d343bc6a2877b62d80153453c3781debc33e0b1d",
+   "title": "Passed Example 4",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 4</title>\n</head>\n<body>\n\t<div\n\t\tid=\"sampleModal\"\n\t\trole=\"dialog\"\n\t\taria-label=\"Sample Modal\"\n\t\taria-modal=\"true\"\n\t\tstyle=\"border: solid black 1px; padding: 1rem;\"\n\t>\n\t\t<label>First and last name <input id=\"dialogFirst\"/></label><br />\n\t\t<button id=\"closeButton\">Close button</button>\n\t</div>\n\t<div aria-hidden=\"true\">\n\t\t<a href=\"#\" id=\"sentinelAfter\" style=\"position:absolute; top:-999em\"\n\t\t\t>Upon receiving focus, this focus sentinel should wrap focus to the top of the modal</a\n\t\t>\n\t</div>\n\t<script>\n\t\tdocument.getElementById('sentinelAfter').addEventListener('focus', () => {\n\t\t\tdocument.getElementById('dialogFirst').focus()\n\t\t})\n\t\tdocument.getElementById('closeButton').addEventListener('click', () => {\n\t\t\tdocument.getElementById('sampleModal').style.display = 'none'\n\t\t})\n\t</script>\n</body>\n</html>"
+  },
+  {
+   "id": "85a2d2ea8aeb1eddb5a6576edb958c2d1597ddfc",
+   "title": "Passed Example 5",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 5</title>\n</head>\n<body>\n\t<div aria-hidden=\"true\">\n\t\t<button tabindex=\"-1\">Some button</button>\n\t</div>\n</body>\n</html>"
+  },
+  {
+   "id": "2dcf10cb4314dd7964dd38c2afe7d399bfcbcfac",
+   "title": "Passed Example 6",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 6</title>\n</head>\n<body>\n\t<a href=\"#\">\n\t\t<svg width=\"16\" height=\"16\" aria-hidden=\"true\">\n\t\t\t<circle cx=\"8\" cy=\"11\" r=\"4\" stroke=\"black\" stroke-width=\"2\" fill=\"transparent\" />\n\t\t</svg>\n\t\tHello ACT\n\t</a>\n</body>\n</html>"
+  },
+  {
+   "id": "4e7955d592cbf361a55113fcd4524e979b16bb08",
+   "title": "Failed Example 1",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 1</title>\n</head>\n<body>\n\t<div aria-hidden=\"true\">\n\t\t<a href=\"/\" style=\"position:absolute; top:-999em\">Link</a>\n\t</div>\n</body>\n</html>"
+  },
+  {
+   "id": "2adaacc2f7b8d7a0d2d1496ad6f56aafd171f7fe",
+   "title": "Failed Example 2",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 2</title>\n</head>\n<body>\n\t<div aria-hidden=\"true\">\n\t\t<input aria-disabled=\"true\" />\n\t</div>\n</body>\n</html>"
+  },
+  {
+   "id": "7d1d269e9ff9a8f396b2d638103379b6cf937225",
+   "title": "Failed Example 3",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 3</title>\n</head>\n<body>\n\t<div aria-hidden=\"true\">\n\t\t<div aria-hidden=\"false\">\n\t\t\t<button>Some button</button>\n\t\t</div>\n\t</div>\n</body>\n</html>"
+  },
+  {
+   "id": "d0b1b435bb2757bab5f644e53a273a9f50c8bc2c",
+   "title": "Failed Example 4",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 4</title>\n</head>\n<body>\n\t<p tabindex=\"0\" aria-hidden=\"true\">Some text</p>\n</body>\n</html>"
+  },
+  {
+   "id": "9cc94f9f9549ef0c9fc0433e22e4fe59843d1b2a",
+   "title": "Failed Example 5",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 5</title>\n</head>\n<body>\n\t<details aria-hidden=\"true\">\n\t\t<summary>Some button</summary>\n\t\t<p>Some details</p>\n\t</details>\n</body>\n</html>"
+  },
+  {
+   "id": "9812d828fef2da32081f4c0acce0c58912f071cb",
+   "title": "Failed Example 6",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 6</title>\n</head>\n<body>\n\t<div\n\t\tid=\"sampleModal\"\n\t\trole=\"dialog\"\n\t\taria-label=\"Sample Modal\"\n\t\taria-modal=\"true\"\n\t\tstyle=\"border: solid black 1px; padding: 1rem;\"\n\t>\n\t\t<label>First and last name <input id=\"dialogFirst\"/></label><br />\n\t\t<button id=\"closeButton\">Close button</button>\n\t</div>\n\t<div aria-hidden=\"true\">\n\t\t<a href=\"#\" id=\"sentinelAfter\" style=\"position:absolute; top:-999em\"\n\t\t\t>Upon receiving focus, this focus sentinel should wrap focus to the top of the modal</a\n\t\t>\n\t</div>\n\t<script>\n\t\tdocument.getElementById('closeButton').addEventListener('click', () => {\n\t\t\tdocument.getElementById('sampleModal').style.display = 'none'\n\t\t})\n\t</script>\n</body>\n</html>"
+  },
+  {
+   "id": "afb819d4c7cfdf8fc468bb2297da3247fb5ac056",
+   "title": "Inapplicable Example 1",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 1</title>\n</head>\n<body>\n\t<button tabindex=\"-1\" aria-hidden>Some button</button>\n</body>\n</html>"
+  },
+  {
+   "id": "22d7a78f0d6680f70dae9cc412f496450a2acf4e",
+   "title": "Inapplicable Example 2",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 2</title>\n</head>\n<body>\n\t<p aria-hidden=\"false\">Some text</p>\n</body>\n</html>"
+  },
+  {
+   "id": "4d71a1ad253efab083f05dc558656d94eb430ca7",
+   "title": "Inapplicable Example 3",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 3</title>\n</head>\n<body>\n\t<div aria-hidden=\"yes\">\n\t\t<p>Some text</p>\n\t</div>\n</body>\n</html>"
+  }
+ ]
+}

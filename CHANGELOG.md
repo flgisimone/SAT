@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.14.0 — unreleased
+
+Ten new accessibility rules from WCAG 2.2 and the W3C ACT rules, on by default. The ACT rules' own test cases are part of SAT's tests (`tests/act/`): failed cases are reported, passed and inapplicable ones are not. With the axe-core engine the new rules are off, except `target-size` (axe's rule is off by default). To turn a rule off, set it to `"off"` in `rules`.
+
+### Added
+- `aria-attributes` (error, WCAG 4.1.2): unknown `aria-*` attributes, invalid values, missing required states, attributes the role doesn't support, and names on roles that prohibit them (`aria-label` on a `<div>` or `<span>`) (ACT 5f99a7, 6a7281, 4e8ab6, 5c01ea, kb1m8s).
+- `aria-hidden-focus` (error, WCAG 4.1.2): elements reachable with Tab inside `aria-hidden="true"` (ACT 6cfa84).
+- `target-size` (error, WCAG 2.5.8): targets under 24×24 px too close to other targets; inline links in text and browser-drawn checkboxes and radios are exceptions. In the browser only.
+- `meta-viewport` (error, WCAG 1.4.4): `user-scalable=no` or `maximum-scale` below 2 (ACT b4f0c3).
+- `meta-refresh` (error, WCAG 2.2.1; 3.2.5 with `wcagLevel: "AAA"`): timed refreshes and redirects (ACT bc659a).
+- `iframe-name` (error, WCAG 4.1.2): frames without `title`, `aria-label` or `aria-labelledby` (ACT cae760).
+- `autocomplete-valid` (error, WCAG 1.3.5): `autocomplete` values outside the HTML autofill tokens (ACT 73f2c2).
+- `label-in-name` (error, WCAG 2.5.3): the visible label is not part of the accessible name (ACT 2ee8b8).
+- `table-headers` (error, WCAG 1.3.1): `headers` pointing outside the table and header cells without cells (ACT a25f45, d0f69e).
+- `media-autoplay` (warning, WCAG 1.4.2): `<video>`/`<audio>` that autoplay, not muted and without controls (ACT 80f0bf).
+- `accessible-name` also checks the `<summary>` of a `<details>`, empty headings (WAI-ARIA requires a name for headings) and `<object>` showing an image, audio or video (ACT 2t702h, ffd0e9, 8fc3b6).
+
+### Changed
+- Accessible names follow the accessible name computation more closely: text inside `aria-hidden="true"` or not rendered no longer counts, so a button whose only content is an `aria-hidden` icon is now reported by `accessible-name`; `aria-labelledby` may point to hidden text. This also applies to `link-text`.
+- `html-lang`: as in ACT, only the primary language subtag decides (`en-US-GB` is no longer reported), `lang=" "` on an element is an error, and a `lang` without text of its own is not reported.
+
+### Fixed
+- The panel's "How to fix" links are 24 px tall, so they pass `target-size`.
+
 ## 1.13.0 — unreleased
 
 Every rule now follows an official source (WCAG 2.2 and the W3C ACT rules, WAI-ARIA 1.2, the HTML standard, Google Search Central), cited on its page in `docs/rules/`. Requirements are errors, recommendations warnings, and what the sources call valid is no longer reported. To get a previous behavior back, set the rule's severity in `rules`.

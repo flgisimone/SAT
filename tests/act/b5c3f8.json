@@ -1,0 +1,37 @@
+{
+ "rule": "b5c3f8",
+ "name": "HTML page has lang attribute",
+ "page": "https://www.w3.org/WAI/standards-guidelines/act/rules/b5c3f8/proposed/",
+ "cases": [
+  {
+   "id": "0fac26928e2bf6b7db6c7f46a1e0ab50aaa8a7c1",
+   "title": "Passed Example 1",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n\t<body>\n\t\tThe quick brown fox jumps over the lazy dog.\n\t</body>\n</html>"
+  },
+  {
+   "id": "473352935acf2463b14dbd8e38073e913eeb5c08",
+   "title": "Failed Example 1",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html>\n\t<body>\n\t\tThe quick brown fox jumps over the lazy dog.\n\t</body>\n</html>"
+  },
+  {
+   "id": "98681b2a7949e49b2da1b353f70e688528fe7ddc",
+   "title": "Failed Example 2",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"\">\n\t<body>\n\t\tThe quick brown fox jumps over the lazy dog.\n\t</body>\n</html>"
+  },
+  {
+   "id": "4ea0280617a1b71dcc327356484f8767919b0f40",
+   "title": "Failed Example 3",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\" \">\n\t<body>\n\t\tThe quick brown fox jumps over the lazy dog.\n\t</body>\n</html>"
+  },
+  {
+   "id": "4f94c3e26f43701d91db403fe26cd8894bdc8ccf",
+   "title": "Failed Example 4",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html xml:lang=\"en\">\n\t<body>\n\t\tThe quick brown fox jumps over the lazy dog.\n\t</body>\n</html>"
+  }
+ ]
+}

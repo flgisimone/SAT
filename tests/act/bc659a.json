@@ -1,0 +1,97 @@
+{
+ "rule": "bc659a",
+ "name": "Meta element has no refresh delay",
+ "page": "https://www.w3.org/WAI/standards-guidelines/act/rules/bc659a/proposed/",
+ "cases": [
+  {
+   "id": "49d79a4e4e4a994a8eb7cf2eaf59c99d2251cac5",
+   "title": "Passed Example 1",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<meta http-equiv=\"refresh\" content=\"0; URL='https://github.com'\" />\n</head>\n</html>"
+  },
+  {
+   "id": "d48be8e9b638b9c27714cb3118a335376ed65f0f",
+   "title": "Passed Example 2",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<meta http-equiv=\"refresh\" content=\"0; https://w3.org\" />\n\t<meta http-equiv=\"refresh\" content=\"5; https://w3.org\" />\n</head>\n</html>"
+  },
+  {
+   "id": "b5ca868de7980f6944142ecdb849f47ad2cdfb5c",
+   "title": "Passed Example 3",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<meta http-equiv=\"refresh\" content=\"72001; https://w3.org\" />\n</head>\n</html>"
+  },
+  {
+   "id": "56857820788db21498e95a5cbba65d59a9a2b892",
+   "title": "Failed Example 1",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<meta http-equiv=\"refresh\" content=\"30\" />\n</head>\n<body>\n\t<p>This page refreshes after 30 seconds.</p>\n</body>\n</html>"
+  },
+  {
+   "id": "96c7657d21888cd05edd297d44a8fd554b21c908",
+   "title": "Failed Example 2",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<meta http-equiv=\"refresh\" content=\"30; URL='https://w3.org'\" />\n</head>\n<body>\n\t<p>This page redirects afte 30 seconds.</p>\n</body>\n</html>"
+  },
+  {
+   "id": "b2e7f3e00ffce0a2a1078f860452814e6445445d",
+   "title": "Failed Example 3",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<meta http-equiv=\"refresh\" content=\"0: https://w3.org\" />\n\t<meta http-equiv=\"refresh\" content=\"5; https://w3.org\" />\n</head>\n<body>\n\t<p>This page refreshes after 5 seconds.</p>\n</body>\n</html>"
+  },
+  {
+   "id": "5d4d5b214459c8a0779600ab39a5668003271c62",
+   "title": "Failed Example 4",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<meta http-equiv=\"refresh\" content=\"72000; https://w3.org\" />\n</head>\n<body>\n\t<p>This page redirects after exactly 20 hours.</p>\n</body>\n</html>"
+  },
+  {
+   "id": "48a600254c0883cd5a72471420b1ac5a532ca6c3",
+   "title": "Inapplicable Example 1",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<meta http-equiv=\"refresh\" />\n</head>\n<body>\n\t<p>This page does not refresh.</p>\n</body>\n</html>"
+  },
+  {
+   "id": "4dffd30573a924ad0158d813733e029aac160194",
+   "title": "Inapplicable Example 2",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<meta content=\"30\" />\n</head>\n<body>\n\t<p>This page does not refresh.</p>\n</body>\n</html>"
+  },
+  {
+   "id": "a05aeffa53890c3ed9fd9cefa544eb1071497de5",
+   "title": "Inapplicable Example 3",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<meta http-equiv=\"refresh\" content=\"0: https://w3.org\" />\n</head>\n<body>\n\t<p>This page does not redirect.</p>\n</body>\n</html>"
+  },
+  {
+   "id": "a8c47bb26867342e83342645507fb766648799d7",
+   "title": "Inapplicable Example 4",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<meta http-equiv=\"refresh\" content=\"-00.12 foo\" />\n</head>\n<body>\n\t<p>This page does not refresh.</p>\n</body>\n</html>"
+  },
+  {
+   "id": "ca4a053f47b6e322ad6de680fdabd05f651bf49b",
+   "title": "Inapplicable Example 5",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<meta http-equiv=\"refresh\" content=\"; 30\" />\n</head>\n<body>\n\t<p>This page does not refresh.</p>\n</body>\n</html>"
+  },
+  {
+   "id": "b42a3a108d5d0f65258cd8157eb0011b78ce9253",
+   "title": "Inapplicable Example 6",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<meta http-equiv=\"refresh\" content=\"\" />\n</head>\n<body>\n\t<p>This page does not refresh.</p>\n</body>\n</html>"
+  },
+  {
+   "id": "0bf30cdf02ff26dfca5aa705b7023227da221e05",
+   "title": "Inapplicable Example 7",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<meta http-equiv=\"refresh\" content=\"+5; https://w3.org\" />\n</head>\n<body>\n\t<p>This page does not redirect.</p>\n</body>\n</html>"
+  },
+  {
+   "id": "8ce8198a1e6907ae25eb957eb0a5a99e719131a1",
+   "title": "Inapplicable Example 8",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<meta http-equiv=\"refresh\" content=\"foo; URL='https://w3.org'\" />\n</head>\n<body>\n\t<p>This page does not redirect.</p>\n</body>\n</html>"
+  }
+ ]
+}

@@ -56,10 +56,10 @@ describe('Issue', () => {
 });
 
 describe('rule registry', () => {
-    it('has the 26 rules with unique ids', () => {
+    it('has the 36 rules with unique ids', () => {
         const ids = rules.map((rule) => rule.id);
-        expect(ids).toHaveLength(26);
-        expect(new Set(ids).size).toBe(26);
+        expect(ids).toHaveLength(36);
+        expect(new Set(ids).size).toBe(36);
     });
 
     it('a failing rule becomes an issue and the others still run', async () => {

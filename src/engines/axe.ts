@@ -6,9 +6,14 @@ import type { Engine } from '../sat/satOptions';
 
 /**
  * SAT rules that axe-core checks too (and better): off while axe runs, so a problem is reported once.
- * The others (headings, link-href, link-text, tabindex-negative and the SEO rules) have no axe equivalent.
+ * The others (headings, link-href, link-text, tabindex-negative and the SEO rules) have no axe equivalent;
+ * target-size stays on because axe's target-size rule is off by default.
  */
-const REPLACED: RuleId[] = ['accessible-name', 'aria-roles', 'landmarks', 'color-contrast', 'form-label', 'focus-management', 'image-alt', 'html-lang', 'heading-levels'];
+const REPLACED: RuleId[] = [
+    'accessible-name', 'aria-roles', 'aria-attributes', 'aria-hidden-focus', 'landmarks', 'color-contrast', 'form-label',
+    'focus-management', 'image-alt', 'html-lang', 'heading-levels', 'iframe-name', 'label-in-name', 'autocomplete-valid',
+    'table-headers', 'meta-viewport', 'meta-refresh', 'media-autoplay',
+];
 
 /** axe tags such as "wcag143" or "wcag1410" → "1.4.3", "1.4.10". */
 function wcagCriteria(tags: string[]): string[] {

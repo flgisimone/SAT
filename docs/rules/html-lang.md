@@ -6,7 +6,7 @@
 
 ## What it checks
 
-`<html>` has a `lang` attribute with a valid language tag (`en`, `en-GB`, `zh-Hant`), and every other non-empty `lang` in the page is valid too (WCAG 3.1.2). `lang=""` on an element means "unknown language" and is valid.
+`<html>` has a `lang` attribute with a valid language tag (`en`, `en-GB`, `zh-Hant`), and every other `lang` with text of its own is valid too (WCAG 3.1.2). As in the ACT rules, only the primary language subtag decides (`en-US-GB` is valid, `english` and `em` are not); three-letter codes are accepted. `lang=""` on an element means "unknown language" and is valid; `lang=" "` is not. A `lang` whose element has no rendered text or image alternative of its own is not reported.
 
 ## Why
 

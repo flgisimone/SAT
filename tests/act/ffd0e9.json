@@ -1,0 +1,97 @@
+{
+ "rule": "ffd0e9",
+ "name": "Heading has non-empty accessible name",
+ "page": "https://www.w3.org/WAI/standards-guidelines/act/rules/ffd0e9/proposed/",
+ "cases": [
+  {
+   "id": "0ac909cfd0a0200a97cca3107011fe1e1c08ecc8",
+   "title": "Passed Example 1",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 1</title>\n</head>\n<body>\n\t<h1>ACT rules</h1>\n</body>\n</html>"
+  },
+  {
+   "id": "73050f33875bf32ae13733b96d0408b6b255e4a1",
+   "title": "Passed Example 2",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 2</title>\n</head>\n<body>\n\t<div role=\"heading\" aria-level=\"1\">ACT rules</div>\n</body>\n</html>"
+  },
+  {
+   "id": "f55422cabb0efc3a6491733c849306bfea1b1c9c",
+   "title": "Passed Example 3",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 3</title>\n</head>\n<body>\n\t<span id=\"h-name\" hidden>ACT rules</span>\n\t<h1 aria-labelledby=\"h-name\">Learn about ACT rules</h1>\n</body>\n</html>"
+  },
+  {
+   "id": "bd1a62830ac1d9800078f26866da433781f9c85f",
+   "title": "Passed Example 4",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 4</title>\n</head>\n<body>\n\t<h1><img src=\"/WAI/content-assets/wcag-act-rules/test-assets/shared/act-logo.png\" alt=\"ACT rules\" /></h1>\n</body>\n</html>"
+  },
+  {
+   "id": "e62fd17ec8a90b871727e871d5136fc785ca13ad",
+   "title": "Passed Example 5",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 5</title>\n</head>\n<body>\n\t<h1 style=\"position: absolute; top: -9999px\">ACT rules</h1>\n</body>\n</html>"
+  },
+  {
+   "id": "5655cd127e7f8e1e9306b1858e2bc018392564b3",
+   "title": "Failed Example 1",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 1</title>\n</head>\n<body>\n\t<h1><img src=\"/WAI/content-assets/wcag-act-rules/test-assets/shared/act-logo.png\" alt=\"\" /></h1>\n</body>\n</html>"
+  },
+  {
+   "id": "d37f6335303b2a57c3f81d1d602287952f27ab8e",
+   "title": "Failed Example 2",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 2</title>\n</head>\n<body>\n\t<h1 aria-label=\"\"><span aria-hidden=\"true\">ACT rules</span></h1>\n</body>\n</html>"
+  },
+  {
+   "id": "c01940d4367bd13fca88f88c10c2a97bc243606d",
+   "title": "Failed Example 3",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 3</title>\n</head>\n<body>\n\t<span id=\"h-name\" hidden></span>\n\t<h1 aria-labelledby=\"h-name\"><span aria-hidden=\"true\">ACT rules</span></h1>\n</body>\n</html>"
+  },
+  {
+   "id": "623ac29716a01c2888ff9bc94bdbca9fd18296e1",
+   "title": "Failed Example 4",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 4</title>\n</head>\n<body>\n\t<h1><img src=\"/WAI/content-assets/wcag-act-rules/test-assets/shared/act-logo.png\" alt=\"ACT rules\" role=\"presentation\" /></h1>\n</body>\n</html>"
+  },
+  {
+   "id": "cc22b9130f7d1963b38975576e11d035ef44e13c",
+   "title": "Failed Example 5",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 5</title>\n</head>\n<body>\n\t<h1><br /></h1>\n</body>\n</html>"
+  },
+  {
+   "id": "937a207d1054feada41871a2fa88257d1345bda4",
+   "title": "Failed Example 6",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 6</title>\n</head>\n<body>\n\t<span>Hello</span>\n\t<h1></h1>\n\t<span>World!</span>\n</body>\n</html>"
+  },
+  {
+   "id": "7c593a17ea2affd0b822f3e66b9e804f00529f0a",
+   "title": "Failed Example 7",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 7</title>\n</head>\n<body>\n\t<div role=\"heading\" aria-level=\"1\" style=\"border-style: solid\"></div>\n</body>\n</html>"
+  },
+  {
+   "id": "0bf7d49ddf99066b816fe42e5cd827a15c7ad24d",
+   "title": "Failed Example 8",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 8</title>\n</head>\n<body>\n\t<h1 aria-label=\"\" role=\"none\"><span aria-hidden=\"true\">ACT rules</span></h1>\n</body>\n</html>"
+  },
+  {
+   "id": "8f610518a287c932742748371cd51d543bb506f9",
+   "title": "Inapplicable Example 1",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 1</title>\n</head>\n<body>\n\t<div></div>\n</body>\n</html>"
+  },
+  {
+   "id": "ed1daf488ef94f266fdd2a4c6c4ed016024beb14",
+   "title": "Inapplicable Example 2",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 2</title>\n</head>\n<body>\n\t<h1 aria-hidden=\"true\"></h1>\n</body>\n</html>"
+  }
+ ]
+}

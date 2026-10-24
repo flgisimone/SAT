@@ -2,11 +2,15 @@
 
 **Category**: Accessibility · **Default**: error · **WCAG**: [4.1.2 Name, Role, Value](https://www.w3.org/WAI/WCAG22/Understanding/name-role-value.html), [1.1.1 Non-text Content](https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html)
 
-**Source**: [ACT 97a4e1 Button has non-empty accessible name](https://www.w3.org/WAI/standards-guidelines/act/rules/97a4e1/proposed/) · [ACT c487ae Link has non-empty accessible name](https://www.w3.org/WAI/standards-guidelines/act/rules/c487ae/proposed/) · [ACT 7d6734 SVG element with explicit role has non-empty accessible name](https://www.w3.org/WAI/standards-guidelines/act/rules/7d6734/proposed/)
+**Source**: [ACT 97a4e1 Button has non-empty accessible name](https://www.w3.org/WAI/standards-guidelines/act/rules/97a4e1/proposed/) · [ACT c487ae Link has non-empty accessible name](https://www.w3.org/WAI/standards-guidelines/act/rules/c487ae/proposed/) · [ACT 7d6734 SVG element with explicit role has non-empty accessible name](https://www.w3.org/WAI/standards-guidelines/act/rules/7d6734/proposed/) · [ACT m6b1q3 Menuitem has non-empty accessible name](https://www.w3.org/WAI/standards-guidelines/act/rules/m6b1q3/) · [ACT 2t702h Summary element has non-empty accessible name](https://www.w3.org/WAI/standards-guidelines/act/rules/2t702h/proposed/) · [ACT ffd0e9 Heading has non-empty accessible name](https://www.w3.org/WAI/standards-guidelines/act/rules/ffd0e9/proposed/) · [ACT 8fc3b6 Object element rendering non-text content has non-empty accessible name](https://www.w3.org/WAI/standards-guidelines/act/rules/8fc3b6/proposed/)
 
 ## What it checks
 
-Buttons and links have an accessible name: text, `aria-label`, `aria-labelledby`, `title` or a labelled image or icon inside. `<svg role="img">` needs a `<title>`, `aria-label` or `aria-labelledby` (WCAG 1.1.1). Form fields are covered by [`form-label`](form-label.md). Elements hidden from assistive technologies (`display: none`, `visibility: hidden`, `hidden`, `aria-hidden="true"`) are skipped.
+Buttons, links, menu items, tabs and the `<summary>` of a `<details>` have an accessible name: visible text, `aria-label`, `aria-labelledby`, `title` or a labelled image or icon inside. Text inside `aria-hidden="true"` doesn't count; text of a hidden element pointed to by `aria-labelledby` does.
+
+Headings (`<h1>`–`<h6>`, `role="heading"`) are not empty: WAI-ARIA requires a name for the heading role, so an empty heading is an error with no WCAG criterion attached.
+
+`<svg role="img">` needs a `<title>`, `aria-label` or `aria-labelledby`, and an `<object>` showing an image, audio or video a `title`, `aria-label` or `aria-labelledby` (WCAG 1.1.1); the fallback content of `<object>` is not used when the file loads. Form fields are covered by [`form-label`](form-label.md). Elements hidden from assistive technologies (`display: none`, `visibility: hidden`, `hidden`, `aria-hidden="true"`) are skipped.
 
 ## Why
 

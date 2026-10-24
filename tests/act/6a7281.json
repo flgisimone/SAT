@@ -1,0 +1,127 @@
+{
+ "rule": "6a7281",
+ "name": "ARIA state or property has valid value",
+ "page": "https://www.w3.org/WAI/standards-guidelines/act/rules/6a7281/",
+ "cases": [
+  {
+   "id": "e970b77c1137e5fd4627f70663da4d1fcda36b23",
+   "title": "Passed Example 1",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 1</title>\n</head>\n<body>\n\t<div role=\"textbox\" aria-label=\"Family name\"></div>\n</body>\n</html>"
+  },
+  {
+   "id": "db10f30be20aebf661f0b81b2c0cfc698b1453eb",
+   "title": "Passed Example 2",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 2</title>\n</head>\n<body>\n\t<div role=\"textbox\" aria-required=\"true\" aria-label=\"Family name\"></div>\n</body>\n</html>"
+  },
+  {
+   "id": "766a5eb6a54c5b83a882a0d78731d808480a1b3e",
+   "title": "Passed Example 3",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 3</title>\n</head>\n<body>\n\t<div role=\"button\" aria-expanded=\"undefined\">A button</div>\n</body>\n</html>"
+  },
+  {
+   "id": "38b0160bfc6c056fa0d02affbc02e49dce284467",
+   "title": "Passed Example 4",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 4</title>\n</head>\n<body>\n\t<div role=\"button\" aria-pressed=\"mixed\">Partially pressed button</div>\n</body>\n</html>"
+  },
+  {
+   "id": "e4b47e094d44a9f3b5b3fd5c157f3ef6679bede0",
+   "title": "Passed Example 5",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 5</title>\n</head>\n<body>\n\t<div role=\"textbox\" aria-errormessage=\"my-error\" aria-label=\"A textbox\"></div>\n</body>\n</html>"
+  },
+  {
+   "id": "c27e7f509d546fa6aff12ca7aeace662d3fb1c7b",
+   "title": "Passed Example 6",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 6</title>\n</head>\n<body>\n\t<h1>Shopping list</h1>\n\t<div role=\"list\" aria-owns=\"item1 item2\"></div>\n\t<div id=\"item1\">Apples</div>\n\t<div id=\"item2\">Bananas</div>\n</body>\n</html>"
+  },
+  {
+   "id": "f78fb0548e68839232441636b6d8489ad17c50b5",
+   "title": "Passed Example 7",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 7</title>\n</head>\n<body>\n\t<div role=\"gridcell\" aria-rowindex=\"2\">Fred</div>\n</body>\n</html>"
+  },
+  {
+   "id": "83f5e9df90e96c1af508ad8b4e2cda78c0dae7c4",
+   "title": "Passed Example 8",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 8</title>\n</head>\n<body>\n\t<div role=\"spinbutton\" aria-valuemin=\"1.0\" aria-valuemax=\"2.0\" aria-valuenow=\"1.5\" aria-label=\"Select a value\"></div>\n</body>\n</html>"
+  },
+  {
+   "id": "0496ff9d59d514f97c8739004b2b941dd7ca97bf",
+   "title": "Passed Example 9",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 9</title>\n</head>\n<body>\n\t<a href=\"/\" aria-current=\"page\">Home</a>\n</body>\n</html>"
+  },
+  {
+   "id": "ed053b32aa2b4453ddc225e45f7f1931f62c7f49",
+   "title": "Passed Example 10",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 10</title>\n</head>\n<body>\n\t<div role=\"alert\" aria-relevant=\"text removals\"></div>\n</body>\n</html>"
+  },
+  {
+   "id": "ce27fcdd85fbf37a953727cdc454f3e504041a31",
+   "title": "Failed Example 1",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 1</title>\n</head>\n<body>\n\t<div role=\"textbox\" aria-required=\"undefined\" aria-label=\"A required textbox\"></div>\n</body>\n</html>"
+  },
+  {
+   "id": "1f586827cecc5b1b4d9f60dcaba1e77f4a90c54a",
+   "title": "Failed Example 2",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 2</title>\n</head>\n<body>\n\t<div role=\"button\" aria-expanded=\"collapsed\">A button</div>\n</body>\n</html>"
+  },
+  {
+   "id": "0959137934bd17ea8c95b86120b1c7331e4facc2",
+   "title": "Failed Example 3",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 3</title>\n</head>\n<body>\n\t<div role=\"button\" aria-pressed=\"horizontal\">An other button</div>\n</body>\n</html>"
+  },
+  {
+   "id": "e1bd70b33e2d53e3b9bc105a5cad59a76b4c54d5",
+   "title": "Failed Example 4",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 4</title>\n</head>\n<body>\n\t<div role=\"gridcell\" aria-rowindex=\"2.5\">Fred</div>\n</body>\n</html>"
+  },
+  {
+   "id": "4078701ed7982e75316b51adb59b6d05c1583aa5",
+   "title": "Failed Example 5",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 5</title>\n</head>\n<body>\n\t<div role=\"spinbutton\" aria-valuemin=\"one\" aria-valuemax=\"three\" aria-valuenow=\"two\" aria-label=\"Choose a value\"></div>\n</body>\n</html>"
+  },
+  {
+   "id": "88ff0942922e48b686413cf12cd0fd3510a8b29f",
+   "title": "Failed Example 6",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 6</title>\n</head>\n<body>\n\t<div role=\"main\" aria-live=\"page\"></div>\n</body>\n</html>"
+  },
+  {
+   "id": "b78f507edd1866cc5b1a7fae8b530da964b470fb",
+   "title": "Failed Example 7",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 7</title>\n</head>\n<body>\n\t<div role=\"alert\" aria-relevant=\"text always\"></div>\n</body>\n</html>"
+  },
+  {
+   "id": "9d80b71ad39b258fb75db804867f189d76ecdab8",
+   "title": "Inapplicable Example 1",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 1</title>\n</head>\n<body>\n\t<div>Some Content</div>\n</body>\n</html>"
+  },
+  {
+   "id": "90428c9c8cc74d6a3047775637078366994a8e88",
+   "title": "Inapplicable Example 2",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 2</title>\n</head>\n<body>\n\t<div role=\"button\">Some Content</div>\n</body>\n</html>"
+  },
+  {
+   "id": "0b90f166412e03fa01b460aa1c8e68f722a47434",
+   "title": "Inapplicable Example 3",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 3</title>\n</head>\n<body>\n\t<div role=\"alert\" aria-live>Remember to be awesome!</div>\n</body>\n</html>"
+  }
+ ]
+}

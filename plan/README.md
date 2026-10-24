@@ -29,6 +29,7 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | Rilascio | Semver; i cambi di comportamento vanno in `CHANGELOG.md`; la pubblicazione su npm la fa il maintainer | CONVENTIONS §8 |
 | Gravità | Errore per un requisito normativo (WCAG A/AA, «must» di HTML e WAI-ARIA, requisito di Google), avviso per una raccomandazione, niente per ciò che le fonti dichiarano valido; ogni regola cita la sua fonte | Revisione del 24/10/2026 sulle fonti ufficiali ([00-analisi-linee-guida.md](00-analisi-linee-guida.md)) |
 | Ordine dopo F7 | Prima le regole (F8, F9, F10), poi il pannello (F11), che mostra così titoli e fonti definitivi | Scelta del 24/10/2026 |
+| Versione dopo F9 | **1.14.0**: dieci regole nuove da WCAG 2.2 e ACT, accese di default; i casi di test ACT fanno parte dei test | Funzioni nuove senza rotture di API (F9) |
 | Versione dopo F8 | **1.13.0**: gravità dalle fonti ufficiali, fonte per ogni regola, `wcagLevel`, lingue valide | Cambiano gravità e default, non le API (F8) |
 | Versione dopo F6 | **1.12.0**: plugin Vite, estensione per il browser, stili del pannello che passano la CSP | Funzioni nuove senza rotture di API (F6) |
 | Integrazioni Svelte e Angular | Nessun wrapper: `satChecker` con una riga nell'entry point, esempi nel README | Un wrapper non aggiungerebbe nulla (F6-02) |
@@ -53,7 +54,7 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | F7 | [07-manutenzione-ci.md](07-manutenzione-ci.md) | CI di nuovo verde (`rollup-plugin-dts` compatibile con TypeScript 6), azioni GitHub su Node 24 | — |
 | — | [00-analisi-linee-guida.md](00-analisi-linee-guida.md) | Regole contro WCAG 2.2, ACT, WAI-ARIA, HTML e Google Search Central; valutazione del pannello | — |
 | F8 | [08-allineamento-regole.md](08-allineamento-regole.md) | Gravità dalle fonti ufficiali, fonte per ogni regola, `wcagLevel`, lingue valide, 1.13.0 | — |
-| F9 | [09-regole-wcag-act.md](09-regole-wcag-act.md) | Regole nuove dalle regole ACT e da WCAG 2.2 (`target-size`, `aria-attributes`…), 1.14.0 | F8 |
+| F9 | [09-regole-wcag-act.md](09-regole-wcag-act.md) | Regole nuove dalle regole ACT e da WCAG 2.2 (`target-size`, `aria-attributes`…), casi di test ACT nei test, 1.14.0 | F8 |
 | F10 | [10-dati-strutturati-google.md](10-dati-strutturati-google.md) | Proprietà obbligatorie di Google nei dati strutturati, 1.15.0 | F8 |
 | F11 | [11-pannello-professionale.md](11-pannello-professionale.md) | Pannello in stile DevTools: token, tema scuro, icone SVG, riepilogo, problemi leggibili con fonte, 1.16.0 | F8, F9 |
 

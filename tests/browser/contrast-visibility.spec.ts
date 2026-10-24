@@ -97,3 +97,26 @@ test.describe('visibility', () => {
         expect(r.errorMessages[0]).toContain('Hidden');
     });
 });
+
+test.describe('accessible names in the browser', () => {
+    test('content inside display: contents (e.g. <picture>) counts, display: none does not', async ({ page }) => {
+        const r = await run(page, `
+            <a href="/"><picture style="display:contents"><img src="logo.svg" alt="Home"></picture></a>
+            <a href="/a" id="empty"><span style="display:none">Hidden</span></a>`, 'accessible-name');
+        expect(r.errorMessages).toHaveLength(1);
+        expect(r.errorMessages[0]).toContain('id="empty"');
+    });
+});
+
+test.describe('label-in-name in the browser', () => {
+    test('keyboard shortcuts, SVG masks, transparent, visually hidden and clipped copies are not part of the visible label', async ({ page }) => {
+        const r = await run(page, `
+            <button aria-label="Search">Search <kbd>⌘</kbd><kbd>K</kbd></button>
+            <a href="/a" aria-label="Download specification">Download <span style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">gizmo</span> specification</a>
+            <a href="/b" aria-label="Sign in" style="display:inline-block;height:18px;line-height:18px;overflow:hidden"><span style="display:block">Sign in</span><span style="display:block">Sign in</span></a>
+            <a href="/d" aria-label="Sign in"><svg width="60" height="20"><defs><mask id="m"><text x="0" y="15">Sign in</text></mask></defs><rect width="60" height="20" mask="url(#m)"/></svg><span style="opacity:0">Sign in</span></a>
+            <a href="/c" aria-label="Sign in" id="wrong">Log in</a>`, 'label-in-name');
+        expect(r.errorMessages).toHaveLength(1);
+        expect(r.errorMessages[0]).toContain('id="wrong"');
+    });
+});

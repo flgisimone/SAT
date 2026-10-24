@@ -40,7 +40,7 @@ button { font: inherit; color: inherit; cursor: pointer; margin: 0; }
 details { border-bottom: 1px solid #eee; }
 summary { padding: 6px 0; font-weight: 600; cursor: pointer; }
 ul { margin: 0; padding: 0 0 6px; list-style: none; }
-.docs { display: inline-block; margin: 0 6px 4px; font-size: 13px; color: #0842a0; }
+.docs { display: inline-block; margin: 0 6px 4px; padding: 3px 0; font-size: 13px; color: #0842a0; }
 li > span { display: block; padding: 4px 6px; }
 .item { display: block; width: 100%; text-align: left; border: none; background: none; padding: 4px 6px; border-radius: 4px; }
 .item:hover { background: #eef5ff; }
