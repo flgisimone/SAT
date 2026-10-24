@@ -18,6 +18,25 @@ function idSelector(id: string): string {
     return `[id="${id.replace(/["\\]/g, '\\$&')}"]`;
 }
 
+// Sibling walks instead of copying `parent.children`: a list of 1,000 items reported
+// item by item would otherwise cost a copy of the list per item.
+function indexOfType(el: Element): number {
+    let index = 1;
+    for (let sibling = el.previousElementSibling; sibling; sibling = sibling.previousElementSibling) {
+        if (sibling.localName === el.localName) index++;
+    }
+    return index;
+}
+
+function hasSiblingOfType(el: Element): boolean {
+    for (const step of ['previousElementSibling', 'nextElementSibling'] as const) {
+        for (let sibling = el[step]; sibling; sibling = sibling[step]) {
+            if (sibling.localName === el.localName) return true;
+        }
+    }
+    return false;
+}
+
 /**
  * Builds a CSS selector that matches only `el`: the closest ancestor with a unique id,
  * then `tag:nth-of-type(n)` steps down to the element.
@@ -39,8 +58,7 @@ export function cssSelector(el: Element): string {
             break;
         }
 
-        const sameTag = Array.from(parent.children).filter((child) => child.localName === tag);
-        parts.unshift(sameTag.length > 1 ? `${tag}:nth-of-type(${sameTag.indexOf(node) + 1})` : tag);
+        parts.unshift(hasSiblingOfType(node) ? `${tag}:nth-of-type(${indexOfType(node)})` : tag);
     }
 
     return parts.join(' > ');

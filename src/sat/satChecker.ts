@@ -1,12 +1,15 @@
 import { seoAccessibilityTool } from "../core/seoAccessibilityTool";
-import { SATOptions } from "./satOptions";
-import { satReset } from "./satReset";
+import { headingOutline } from "../core/rules/headings";
+import type { Issue } from "./issue";
+import type { SATOptions } from "./satOptions";
 import { createSATUI } from "../ui/satUI";
-import { createExpandableItem } from "../ui/createExpandableItem";
 
 let satHasRun = false;
 
 const RUN_FAILED = "Error while running SAT.";
+const STORAGE_KEY = "sat-enabled";
+/** Time the app gets to render the new route before the checks run again. */
+const ROUTE_DELAY = 300;
 
 /**
  * Bundlers (Vite, webpack, Next…) replace `process.env.NODE_ENV` at build time.
@@ -20,160 +23,108 @@ function isDevelopment(): boolean {
     }
 }
 
-/** Results are stored per page, so another route doesn't show stale results. */
-function storageKey(kind: "errors" | "warnings"): string {
-    return `sat-${kind}:${window.location.pathname}`;
-}
-
-function readStored(kind: "errors" | "warnings"): string[] {
+/** SAT stays on across reloads: the flag is the only thing stored. */
+function storeEnabled(enabled: boolean): void {
     try {
-        const parsed = JSON.parse(localStorage.getItem(storageKey(kind)) || "[]");
-        return Array.isArray(parsed) ? parsed : [];
+        if (enabled) localStorage.setItem(STORAGE_KEY, "true");
+        else localStorage.removeItem(STORAGE_KEY);
     } catch {
-        return [];
+        // storage unavailable (private mode, quota): SAT just starts off on reload
     }
 }
 
-function writeStored(kind: "errors" | "warnings", messages: string[] | null): void {
+function storedEnabled(): boolean {
     try {
-        if (messages === null) {
-            localStorage.removeItem(storageKey(kind));
-        } else {
-            localStorage.setItem(storageKey(kind), JSON.stringify(messages));
-        }
+        return localStorage.getItem(STORAGE_KEY) === "true";
     } catch {
-        // storage unavailable (private mode, quota): results just won't persist
+        return false;
+    }
+}
+
+/**
+ * Calls `listener` when a single-page app changes route: back/forward (`popstate`)
+ * and `history.pushState`/`replaceState`, wrapped once. Changes of the hash alone are ignored.
+ */
+function onRouteChange(listener: () => void): void {
+    const route = () => location.pathname + location.search;
+    let last = route();
+    const check = () => {
+        if (route() === last) return;
+        last = route();
+        listener();
+    };
+
+    window.addEventListener("popstate", check);
+    for (const method of ["pushState", "replaceState"] as const) {
+        const original = history[method];
+        history[method] = function (this: History, ...args: Parameters<History["pushState"]>) {
+            original.apply(this, args);
+            check();
+        };
     }
 }
 
 export function satChecker(customOptions: Partial<SATOptions> = {}): void {
     if (satHasRun) return;
     if (!(customOptions.enabled ?? isDevelopment())) return;
-    if (document.getElementById("sat-run-button")) return;
+    if (document.querySelector("sat-panel")) return;
 
     satHasRun = true;
 
-    let satEnabled = false;
+    let running = false;
+    let runId = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
-    const handleRunClick = async () => {
-        if (satEnabled) {
-            disableSAT();
-        } else {
-            await enableSAT();
-        }
-    };
+    const run = async () => {
+        const id = ++runId;
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
-    const handleReloadClick = async () => {
-        satReset();
-        await enableSAT();
-    };
-
-    const {
-        wrapper,
-        runButton,
-        reloadButton,
-        logPanel,
-        errorListPanel,
-        warningListPanel,
-        updateLogCounts,
-        setVisibility
-    } = createSATUI(handleRunClick, handleReloadClick);
-
-    runButton.id = "sat-run-button";
-    reloadButton.style.display = "none";
-
-    const enableSAT = async () => {
+        let issues: Issue[];
         try {
-            errorListPanel.innerHTML = "";
-            warningListPanel.innerHTML = "";
-
-            await new Promise(resolve => requestAnimationFrame(() =>
-                requestAnimationFrame(resolve)
-            ));
-
-            const result = await seoAccessibilityTool(customOptions);
-
-            const { errors, warnings, errorMessages, warningMessages } = result;
-
-            writeStored("errors", errorMessages);
-            writeStored("warnings", warningMessages);
-
-            runButton.textContent = "🛑";
-            runButton.setAttribute("aria-label", "Stop SAT and clear highlights");
-            reloadButton.style.display = "block";
-            satEnabled = true;
-
-            updateLogCounts(errors, warnings);
-            setVisibility(errors > 0, warnings > 0);
-
-            renderMessages(errorMessages, warningMessages);
+            issues = (await seoAccessibilityTool(customOptions)).issues;
         } catch {
-            const fallbackMsg = createExpandableItem(`⚠️ ${RUN_FAILED}`, "red");
-            errorListPanel.innerHTML = "";
-            errorListPanel.appendChild(fallbackMsg);
-
-            writeStored("errors", [RUN_FAILED]);
-            writeStored("warnings", null);
-
-            updateLogCounts(1, 0);
-            setVisibility(true, false);
-
-            runButton.textContent = "🛑";
-            runButton.setAttribute("aria-label", "Stop SAT and clear highlights");
-            reloadButton.style.display = "block";
-            satEnabled = true;
+            issues = [{ ruleId: "sat", severity: "error", category: "a11y", message: RUN_FAILED }];
         }
+
+        // Stopped, or a newer run started while this one waited (e.g. on link-broken requests).
+        if (!running || id !== runId) return;
+        ui.showResults(issues, headingOutline(document));
     };
 
-    const disableSAT = () => {
-        satReset();
-        runButton.textContent = "🚀";
-        runButton.setAttribute("aria-label", "Run SAT checks");
-        reloadButton.style.display = "none";
-        satEnabled = false;
-
-        errorListPanel.innerHTML = "";
-        warningListPanel.innerHTML = "";
-        updateLogCounts(0, 0);
-        setVisibility(false, false);
-
-        writeStored("errors", null);
-        writeStored("warnings", null);
+    const runSoon = (delay: number) => {
+        clearTimeout(timer);
+        timer = setTimeout(run, delay);
     };
 
-    const renderMessages = (errors: string[], warnings: string[]) => {
-        errorListPanel.innerHTML = "";
-        warningListPanel.innerHTML = "";
+    const domObserver = customOptions.observeDom
+        ? new MutationObserver(() => runSoon(customOptions.observeDom!))
+        : null;
 
-        errors.forEach((msg) => {
-            const li = createExpandableItem(msg, "red");
-            errorListPanel.appendChild(li);
-        });
-
-        warnings.forEach((msg) => {
-            const li = createExpandableItem(msg, "orange");
-            warningListPanel.appendChild(li);
-        });
+    const start = () => {
+        running = true;
+        storeEnabled(true);
+        ui.setRunning(true);
+        domObserver?.observe(document.body, { childList: true, subtree: true, attributes: true, characterData: true });
+        return run();
     };
 
-    const loadFromStorage = () => {
-        const storedErrors = readStored("errors");
-        const storedWarnings = readStored("warnings");
-
-        if (storedErrors.length || storedWarnings.length) {
-            runButton.textContent = "🛑";
-            runButton.setAttribute("aria-label", "Stop SAT and clear highlights");
-            reloadButton.style.display = "block";
-            satEnabled = true;
-
-            updateLogCounts(storedErrors.length, storedWarnings.length);
-            setVisibility(storedErrors.length > 0, storedWarnings.length > 0);
-            renderMessages(storedErrors, storedWarnings);
-        }
+    const stop = () => {
+        running = false;
+        clearTimeout(timer);
+        domObserver?.disconnect();
+        storeEnabled(false);
+        ui.setRunning(false);
     };
 
-    document.body.appendChild(wrapper);
-    document.body.appendChild(logPanel);
+    const ui = createSATUI(() => (running ? stop() : start()), run);
 
-    loadFromStorage();
+    onRouteChange(() => {
+        if (!running) return;
+        ui.clearHighlights(); // the old page's elements are gone
+        runSoon(ROUTE_DELAY);
+    });
+
+    document.body.appendChild(ui.host);
+    ui.setRunning(false);
+    if (storedEnabled()) start();
 }

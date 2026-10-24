@@ -1,8 +1,5 @@
-import { clearHighlights } from './satDom';
-
 /**
- * Removes SAT highlights and restores each element's original inline styles and title.
+ * @deprecated SAT no longer changes the page, so there is nothing to restore.
+ * Kept for 1.x compatibility; the panel removes its own highlights when it is turned off.
  */
-export function satReset(): void {
-    clearHighlights();
-}
+export function satReset(): void {}

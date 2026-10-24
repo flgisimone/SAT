@@ -76,4 +76,9 @@ export interface SATOptions extends LegacyOptions {
      * By default SAT starts when `process.env.NODE_ENV === "development"`.
      */
     enabled?: boolean;
+    /**
+     * Controller only: while SAT is on, runs the checks again this many milliseconds
+     * after the page's DOM stops changing. Off by default; route changes always rerun them.
+     */
+    observeDom?: number;
 }

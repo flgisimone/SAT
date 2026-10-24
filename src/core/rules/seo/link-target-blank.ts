@@ -15,7 +15,6 @@ export const linkTargetBlank: Rule = {
             report({
                 element: link,
                 message: `Link "${link.getAttribute('href') || '[no href]'}" with target="_blank" is missing rel="noopener noreferrer".`,
-                highlight: { outline: '2px dashed black', title: 'Missing rel="noopener noreferrer"' },
             });
         });
     },

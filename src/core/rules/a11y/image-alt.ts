@@ -28,7 +28,6 @@ export const imageAlt: Rule = {
                 report({
                     element: img,
                     message: `<img src="${img.getAttribute('src') || '[no src]'}"> has no alt attribute. Describe the image, or use alt="" if it is decorative.`,
-                    highlight: { outline: '3px solid red', title: '❌ Missing alt attribute' },
                 });
                 return;
             }
@@ -38,7 +37,6 @@ export const imageAlt: Rule = {
                     element: img,
                     message: `Alt text looks like a file name on ${describeElement(img)}: "${alt}". Describe what the image shows.`,
                     severity: 'warning',
-                    highlight: { outline: '3px dashed orange', title: '⚠️ Alt text looks like a file name' },
                 });
             }
         });

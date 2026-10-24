@@ -1,28 +1,9 @@
 /**
  * DOM helpers shared by all checkers.
- *
- * - `queryTargets` skips SAT's own UI (anything inside [data-sat-ignore]).
- * - `highlight` remembers the element's original inline styles and title,
- *   so `clearHighlights` can restore them instead of wiping the host app's styles.
+ * `queryTargets` skips SAT's own UI (anything inside [data-sat-ignore]).
  */
 
 export const SAT_IGNORE_SELECTOR = '[data-sat-ignore]';
-
-type StylableElement = HTMLElement | SVGElement;
-
-interface SavedState {
-    outline: string;
-    backgroundColor: string;
-    title: string | null;
-}
-
-export interface HighlightStyle {
-    outline?: string;
-    backgroundColor?: string;
-    title?: string;
-}
-
-const originals = new Map<StylableElement, SavedState>();
 
 export function isSatElement(el: Element): boolean {
     return el.closest(SAT_IGNORE_SELECTOR) !== null;
@@ -30,36 +11,6 @@ export function isSatElement(el: Element): boolean {
 
 export function queryTargets<T extends Element = HTMLElement>(selector: string, root: ParentNode = document): T[] {
     return Array.from(root.querySelectorAll<T>(selector)).filter((el) => !isSatElement(el));
-}
-
-export function highlight(el: Element, style: HighlightStyle): void {
-    const target = el as StylableElement;
-    if (!target.style || isSatElement(el)) return;
-
-    if (!originals.has(target)) {
-        originals.set(target, {
-            outline: target.style.outline,
-            backgroundColor: target.style.backgroundColor,
-            title: target.getAttribute('title'),
-        });
-    }
-
-    if (style.outline !== undefined) target.style.outline = style.outline;
-    if (style.backgroundColor !== undefined) target.style.backgroundColor = style.backgroundColor;
-    if (style.title !== undefined) target.setAttribute('title', style.title);
-}
-
-export function clearHighlights(): void {
-    originals.forEach((saved, el) => {
-        el.style.outline = saved.outline;
-        el.style.backgroundColor = saved.backgroundColor;
-        if (saved.title === null) {
-            el.removeAttribute('title');
-        } else {
-            el.setAttribute('title', saved.title);
-        }
-    });
-    originals.clear();
 }
 
 /** Computed style from the element's own window, so elements of other documents (iframes) work too. */

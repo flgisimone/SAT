@@ -22,14 +22,14 @@ export const linkHref: Rule = {
             if (href === null) {
                 if (link.hasAttribute('name')) return; // legacy in-page anchor target
                 const message = `${describeElement(link)} has no href, so keyboard users can't reach it. If it triggers an action, use a <button>.`;
-                report({ element: link, message, severity: 'warning', highlight: { outline: '2px dashed orange', title: message } });
+                report({ element: link, message, severity: 'warning' });
                 return;
             }
 
             const value = href.trim();
             if (value === '' || value === '#' || /^javascript:/i.test(value)) {
                 const message = `${describeElement(link)} has href="${href}", which doesn't lead anywhere. Use a real URL, or a <button> for actions.`;
-                report({ element: link, message, highlight: { outline: '2px dashed brown', title: message } });
+                report({ element: link, message });
             }
         });
     },

@@ -24,7 +24,6 @@ export const tabindexNegative: Rule = {
             report({
                 element: el,
                 message: `${describeElement(el)} is visible and interactive but has tabindex="-1", so keyboard users can't reach it.`,
-                highlight: { outline: '2px dashed #FFA500', title: '⚠️ Interactive element removed from tab order' },
             });
         });
     },

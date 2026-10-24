@@ -1,5 +1,5 @@
-import { describeElement, queryTargets } from "../../../sat/satDom";
-import { HEADINGS, headingLevel } from "../headings";
+import { describeElement } from "../../../sat/satDom";
+import { headingOutline } from "../headings";
 import type { Rule } from "../rule";
 
 /** Reports skipped heading levels going down the outline (e.g. H2 → H4). */
@@ -9,17 +9,10 @@ export const headingLevels: Rule = {
     defaultSeverity: 'error',
     wcag: ['1.3.1'],
     run({ document, report }) {
-        let lastLevel = 0;
-
-        queryTargets<HTMLElement>(HEADINGS, document).forEach((el) => {
-            const level = headingLevel(el);
-
-            if (lastLevel !== 0 && level - lastLevel > 1) {
-                const message = `Heading level skipped: ${describeElement(el)} comes after an H${lastLevel}. Expected H${lastLevel + 1} or higher.`;
-                report({ element: el, message, highlight: { title: message } });
-            }
-
-            lastLevel = level;
+        headingOutline(document).forEach(({ element, skipped }, i, outline) => {
+            if (!skipped) return;
+            const previous = outline[i - 1].level;
+            report({ element, message: `Heading level skipped: ${describeElement(element)} comes after an H${previous}. Expected H${previous + 1} or higher.` });
         });
     },
 };

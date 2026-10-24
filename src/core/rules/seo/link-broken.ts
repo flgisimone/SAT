@@ -49,12 +49,11 @@ export const linkBroken: Rule = {
     category: 'seo',
     defaultSeverity: 'error',
     defaultOff: true,
-    async run({ document, report, highlight }) {
+    async run({ document, report }) {
         const queue = Array.from(collectInternalLinks(document).entries());
 
         const markBroken = (url: string, links: HTMLAnchorElement[], reason: string) => {
             report({ element: links[0], message: `Broken internal link: ${url} (${reason}), used by ${links.length} link(s).` });
-            links.forEach((link) => highlight(link, { outline: '2px solid red', title: `Broken link (${reason})` }));
         };
 
         const worker = async () => {

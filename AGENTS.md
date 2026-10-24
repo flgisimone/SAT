@@ -30,7 +30,7 @@ Un bug si corregge alla causa, nel punto per cui passano tutti i chiamanti. Nien
 
 ## Controlli: meglio un problema mancato che un falso positivo
 
-Un controllo segue la specifica (WCAG, WAI-ARIA, HTML) e non segnala i pattern validi. La pagina ospite si tocca solo con `highlight`, che `satReset` sa ripristinare (CONVENTIONS §6).
+Un controllo segue la specifica (WCAG, WAI-ARIA, HTML) e non segnala i pattern validi. La pagina ospite non si tocca: le regole riportano soltanto, i riquadri li disegna il pannello sul proprio strato (CONVENTIONS §6.3).
 
 ## Efficienza
 

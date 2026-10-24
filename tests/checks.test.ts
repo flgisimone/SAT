@@ -1,10 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { highlight } from '../src/sat/satDom';
-import { satReset } from '../src/sat/satReset';
 import { seoAccessibilityTool, type RuleId, type SATOptions } from '../src/core/seoAccessibilityTool';
 import { rules } from '../src/core/rules';
 import { blend, isLargeText, parseColor } from '../src/core/rules/a11y/color-contrast';
 import { collectInternalLinks } from '../src/core/rules/seo/link-broken';
+import { headingOutline } from '../src/core/rules/headings';
 
 function render(html: string) {
     document.body.innerHTML = html;
@@ -19,35 +18,18 @@ function runOnly(ids: RuleId[], options: Partial<SATOptions> = {}) {
 }
 
 beforeEach(() => {
-    satReset();
     document.head.innerHTML = '';
     document.body.innerHTML = '';
     document.documentElement.removeAttribute('lang');
 });
 
-describe('highlight / satReset', () => {
-    it('restores the original inline styles and title of the host page', () => {
-        render('<p id="p" style="outline: 1px solid blue; background-color: yellow" title="original">x</p><span id="s">y</span>');
-        const p = document.getElementById('p')!;
-        const s = document.getElementById('s')!;
-        const originalOutline = p.style.outline;
-
-        highlight(p, { outline: '2px solid red', backgroundColor: 'pink', title: 'SAT' });
-        highlight(p, { outline: '3px dashed red' });
-        highlight(s, { title: 'SAT' });
-        satReset();
-
-        expect(p.style.outline).toBe(originalOutline);
-        expect(p.style.backgroundColor).toBe('yellow');
-        expect(p.getAttribute('title')).toBe('original');
-        expect(s.hasAttribute('title')).toBe(false);
-    });
-
-    it('never touches SAT UI elements', () => {
-        render('<div data-sat-ignore="true"><button id="b">x</button></div>');
-        const b = document.getElementById('b')!;
-        highlight(b, { outline: '2px solid red' });
-        expect(b.style.outline).toBe('');
+describe('host page', () => {
+    it('a run never changes the page', async () => {
+        render('<main><h1 style="color: #ccc" title="t">A</h1><h1>B</h1><h4>C</h4><img src="a.png"><a href="#">x</a><button></button><div tabindex="2">y</div></main>');
+        const before = document.documentElement.outerHTML;
+        const r = await seoAccessibilityTool();
+        expect(r.errors).toBeGreaterThan(3);
+        expect(document.documentElement.outerHTML).toBe(before);
     });
 });
 
@@ -154,6 +136,17 @@ describe('headings', () => {
     it('reports a skipped level once', async () => {
         render('<h1>A</h1><h3>B</h3>');
         expect((await runOnly(['heading-order', 'heading-levels'])).errors).toBe(1);
+    });
+
+    it('outline: headings in page order with their levels and skipped levels', () => {
+        render('<h1>Title</h1><h2> A  b </h2><h4>C</h4><h2>D</h2><h3>E</h3><div data-sat-ignore><h2>SAT</h2></div>');
+        expect(headingOutline(document).map(({ level, text, skipped }) => [level, text, skipped])).toEqual([
+            [1, 'Title', false],
+            [2, 'A b', false],
+            [4, 'C', true],
+            [2, 'D', false],
+            [3, 'E', false],
+        ]);
     });
 
     it('reports missing and multiple h1', async () => {

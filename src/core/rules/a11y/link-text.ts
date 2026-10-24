@@ -37,7 +37,6 @@ export const linkText: Rule = {
                 report({
                     element: link,
                     message: `Non-descriptive link text: "${rawText}" in <a href="${link.getAttribute('href')}">.`,
-                    highlight: { outline: '2px dashed orange', title: '⚠️ Non-descriptive link text' },
                 });
             }
         });

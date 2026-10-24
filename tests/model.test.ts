@@ -2,11 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { seoAccessibilityTool } from '../src/core/seoAccessibilityTool';
 import { rules } from '../src/core/rules';
 import { cssSelector } from '../src/sat/issue';
-import { satReset } from '../src/sat/satReset';
 import { LEGACY_OPTIONS, type LegacyOptions } from '../src/sat/satOptions';
 
 beforeEach(() => {
-    satReset();
     document.body.innerHTML = '';
 });
 
@@ -138,20 +136,22 @@ describe('run context', () => {
 describe('enabled option', () => {
     beforeEach(() => {
         vi.resetModules();
-        document.getElementById('sat-run-button')?.parentElement?.remove();
+        document.querySelector('sat-panel')?.remove();
+        vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} }); // not in jsdom
     });
 
     it('true starts the controller without NODE_ENV, false never does', async () => {
         vi.stubEnv('NODE_ENV', 'development');
         const off = await import('../src/sat/satChecker');
         off.satChecker({ enabled: false });
-        expect(document.getElementById('sat-run-button')).toBeNull();
+        expect(document.querySelector('sat-panel')).toBeNull();
 
         vi.stubEnv('NODE_ENV', 'production');
         vi.resetModules();
         const on = await import('../src/sat/satChecker');
         on.satChecker({ enabled: true });
-        expect(document.getElementById('sat-run-button')).not.toBeNull();
+        expect(document.querySelector('sat-panel')).not.toBeNull();
         vi.unstubAllEnvs();
+        vi.unstubAllGlobals();
     });
 });
