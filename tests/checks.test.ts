@@ -1,28 +1,25 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getSatLogStats, resetSatLogStats } from '../src/sat/satLogger';
 import { highlight } from '../src/sat/satDom';
 import { satReset } from '../src/sat/satReset';
-import { blend, isLargeText, parseColor } from '../src/core/accessibilityA11y/colorContrastChecker';
-import { checkAriaRolesWithSuggestions, checkUniqueLandmarks } from '../src/core/accessibilityA11y/ariaRolesChecker';
-import { checkAriaLabel } from '../src/core/accessibilityA11y/ariaLabelChecker';
-import { checkInputLabels } from '../src/core/accessibilityA11y/inputLabelChecker';
-import { checkImageAlt } from '../src/core/accessibilityA11y/imageAltChecker';
-import { checkH1, checkHeadingOrder, checkJumpLevels } from '../src/core/improvedHeadingControl/improvedHeadingControl';
-import { checkEmptyLinks } from '../src/core/improvedLinksControl/emptyLinksChecker';
-import { checkNonDescriptiveLinks } from '../src/core/improvedLinksControl/nonDescriptiveLinksChecker';
-import { collectInternalLinks } from '../src/core/improvedLinksControl/brokenInternalLinksChecker';
-import { checkHtmlLang, checkSeoMeta } from '../src/core/seo/seoMetaChecker';
-import { satOptions } from '../src/sat/satOptions';
+import { seoAccessibilityTool, type RuleId, type SATOptions } from '../src/core/seoAccessibilityTool';
+import { rules } from '../src/core/rules';
+import { blend, isLargeText, parseColor } from '../src/core/rules/a11y/color-contrast';
+import { collectInternalLinks } from '../src/core/rules/seo/link-broken';
 
 function render(html: string) {
     document.body.innerHTML = html;
 }
 
-const stats = () => getSatLogStats();
+/** Runs only the given rules (turning on the ones that are off by default). */
+function runOnly(ids: RuleId[], options: Partial<SATOptions> = {}) {
+    const config = Object.fromEntries(
+        rules.map((rule) => [rule.id, ids.includes(rule.id) ? (rule.defaultOff ? rule.defaultSeverity : undefined) : 'off'])
+    );
+    return seoAccessibilityTool({ ...options, rules: { ...config, ...options.rules } });
+}
 
 beforeEach(() => {
     satReset();
-    resetSatLogStats();
     document.head.innerHTML = '';
     document.body.innerHTML = '';
     document.documentElement.removeAttribute('lang');
@@ -79,49 +76,45 @@ describe('contrast helpers', () => {
 });
 
 describe('ARIA roles', () => {
-    it('does not report native elements without a role', () => {
+    it('does not report native elements without a role', async () => {
         render('<header></header><nav><ul><li><a href="/">Home</a></li></ul></nav><main><button>Ok</button></main>');
-        checkAriaRolesWithSuggestions(true);
-        expect(stats().errors).toBe(0);
-        expect(stats().warnings).toBe(0);
+        const r = await runOnly(['aria-roles']);
+        expect(r.errors).toBe(0);
+        expect(r.warnings).toBe(0);
     });
 
-    it('reports invalid and redundant roles', () => {
+    it('reports invalid and redundant roles', async () => {
         render('<div role="foo"></div><button role="button">Ok</button><div role="button" tabindex="0">Ok</div>');
-        checkAriaRolesWithSuggestions(true);
-        expect(stats().errors).toBe(1);
-        expect(stats().warnings).toBe(1);
+        const r = await runOnly(['aria-roles']);
+        expect(r.errors).toBe(1);
+        expect(r.warnings).toBe(1);
     });
 });
 
 describe('landmarks', () => {
-    it('ignores header/footer inside articles', () => {
+    it('ignores header/footer inside articles', async () => {
         render('<header></header><main><article><header></header><footer></footer></article></main><footer></footer>');
-        checkUniqueLandmarks(true);
-        expect(stats().errors).toBe(0);
+        expect((await runOnly(['landmarks'])).errors).toBe(0);
     });
 
-    it('reports a missing main and duplicate page headers', () => {
+    it('reports a missing main and duplicate page headers', async () => {
         render('<header></header><header></header>');
-        checkUniqueLandmarks(true);
-        expect(stats().errors).toBe(2);
+        expect((await runOnly(['landmarks'])).errors).toBe(2);
     });
 });
 
 describe('accessible names', () => {
-    it('accepts buttons named by aria-label, text or labelled image', () => {
+    it('accepts buttons named by aria-label, text or labelled image', async () => {
         render('<button aria-label="Close"><svg></svg></button><button>Save</button><a href="/"><img src="l.png" alt="Home"></a>');
-        checkAriaLabel(true);
-        expect(stats().errors).toBe(0);
+        expect((await runOnly(['accessible-name'])).errors).toBe(0);
     });
 
-    it('reports unnamed buttons and links', () => {
+    it('reports unnamed buttons and links', async () => {
         render('<button><svg></svg></button><a href="/x"><img src="x.png" alt=""></a>');
-        checkAriaLabel(true);
-        expect(stats().errors).toBe(2);
+        expect((await runOnly(['accessible-name'])).errors).toBe(2);
     });
 
-    it('labels: hidden/submit inputs are ignored, unlabeled fields reported once', () => {
+    it('labels: hidden/submit inputs are ignored, unlabeled fields reported once', async () => {
         render(`
             <input type="hidden" name="csrf">
             <input type="submit" value="Send">
@@ -129,65 +122,60 @@ describe('accessible names', () => {
             <label>Email <input type="email"></label>
             <input placeholder="Search">
         `);
-        checkInputLabels(true);
-        checkAriaLabel(true);
-        expect(stats().errors).toBe(1);
-        expect(stats().errorMessages[0]).toContain('placeholder');
+        const r = await runOnly(['form-label', 'accessible-name']);
+        expect(r.errors).toBe(1);
+        expect(r.errorMessages[0]).toContain('placeholder');
     });
 
-    it('does not throw on ids with quotes', () => {
+    it('does not throw on ids with quotes', async () => {
         render('<input id=\'a"b\'>');
-        expect(() => checkInputLabels(true)).not.toThrow();
+        const r = await runOnly(['form-label']);
+        expect(r.errorMessages.join()).not.toContain('internal error');
     });
 });
 
 describe('images', () => {
-    it('reports missing alt but accepts decorative images', () => {
+    it('reports missing alt but accepts decorative images', async () => {
         render('<img src="a.png"><img src="b.png" alt=""><img src="c.png" alt="Logo"><img src="d.png" alt="photo.jpg">');
-        checkImageAlt(true);
-        expect(stats().errors).toBe(1);
-        expect(stats().warnings).toBe(1);
+        const r = await runOnly(['image-alt']);
+        expect(r.errors).toBe(1);
+        expect(r.warnings).toBe(1);
     });
 });
 
 describe('headings', () => {
-    it('allows going back to a higher level (H3 -> H2)', () => {
+    it('allows going back to a higher level (H3 -> H2)', async () => {
         render('<h1>A</h1><h2>B</h2><h3>C</h3><h2>D</h2>');
-        checkH1(true);
-        checkHeadingOrder(true);
-        checkJumpLevels(true);
-        expect(stats().errors).toBe(0);
-        expect(stats().warnings).toBe(0);
+        const r = await runOnly(['h1', 'heading-order', 'heading-levels']);
+        expect(r.errors).toBe(0);
+        expect(r.warnings).toBe(0);
     });
 
-    it('reports a skipped level once', () => {
+    it('reports a skipped level once', async () => {
         render('<h1>A</h1><h3>B</h3>');
-        checkHeadingOrder(true);
-        checkJumpLevels(true);
-        expect(stats().errors).toBe(1);
+        expect((await runOnly(['heading-order', 'heading-levels'])).errors).toBe(1);
     });
 
-    it('reports missing and multiple h1', () => {
+    it('reports missing and multiple h1', async () => {
         render('<h2>A</h2>');
-        checkH1(true);
+        const missing = await runOnly(['h1']);
         render('<h1>A</h1><h1>B</h1>');
-        checkH1(true);
-        expect(stats().errors).toBe(2);
+        const multiple = await runOnly(['h1']);
+        expect(missing.errors + multiple.errors).toBe(2);
     });
 });
 
 describe('links', () => {
-    it('reports empty hrefs (including href="") and warns on missing href', () => {
+    it('reports empty hrefs (including href="") and warns on missing href', async () => {
         render('<a href="">a</a><a href="#">b</a><a href="javascript:void(0)">c</a><a>d</a><a href="/ok">e</a>');
-        checkEmptyLinks(true);
-        expect(stats().errors).toBe(3);
-        expect(stats().warnings).toBe(1);
+        const r = await runOnly(['link-href']);
+        expect(r.errors).toBe(3);
+        expect(r.warnings).toBe(1);
     });
 
-    it('matches allowed link texts case-insensitively', () => {
+    it('matches allowed link texts case-insensitively', async () => {
         render('<a href="/a">Read more</a><a href="/b">Click here</a>');
-        checkNonDescriptiveLinks(true, ['Read more']);
-        expect(stats().warnings).toBe(1);
+        expect((await runOnly(['link-text'], { allowedLinkTexts: ['Read more'] })).warnings).toBe(1);
     });
 
     it('collects same-origin links once, skipping external, protocol-relative and logout URLs', () => {
@@ -203,28 +191,26 @@ describe('links', () => {
         expect([...links.values()][0]).toHaveLength(2);
     });
 
-    it('is disabled by default', () => {
-        expect(satOptions.enableCheckBrokenInternalLinks).toBe(false);
+    it('link-text and link-broken are off by default', () => {
+        expect(rules.filter((rule) => rule.defaultOff).map((rule) => rule.id)).toEqual(['link-text', 'link-broken']);
     });
 });
 
 describe('SEO meta', () => {
-    it('reports missing lang, title and description', () => {
+    it('reports missing lang, title and description', async () => {
         document.title = '';
-        checkHtmlLang(true);
-        checkSeoMeta(true);
-        expect(stats().errors).toBe(3);
-        expect(stats().warnings).toBe(1); // viewport
+        const r = await runOnly(['html-lang', 'seo-meta']);
+        expect(r.errors).toBe(3);
+        expect(r.warnings).toBe(1); // viewport
     });
 
-    it('passes on a complete head', () => {
+    it('passes on a complete head', async () => {
         document.documentElement.setAttribute('lang', 'it');
         document.title = 'Home';
         document.head.innerHTML += '<meta name="description" content="Desc"><meta name="viewport" content="width=device-width">';
-        checkHtmlLang(true);
-        checkSeoMeta(true);
-        expect(stats().errors).toBe(0);
-        expect(stats().warnings).toBe(0);
+        const r = await runOnly(['html-lang', 'seo-meta']);
+        expect(r.errors).toBe(0);
+        expect(r.warnings).toBe(0);
     });
 });
 
@@ -237,5 +223,6 @@ describe('Vue integration', () => {
         const { useSatChecker } = await import('../src/integrations/vue');
         useSatChecker({ enableCheckH1: false });
         expect(satChecker).toHaveBeenCalledWith({ enableCheckH1: false });
+        vi.doUnmock('../src/sat/satChecker');
     });
 });

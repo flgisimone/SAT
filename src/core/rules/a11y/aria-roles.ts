@@ -1,5 +1,5 @@
-import { logError, logWarning } from "../../sat/satLogger";
-import { describeElement, highlight, queryTargets } from "../../sat/satDom";
+import { describeElement, queryTargets } from "../../../sat/satDom";
+import type { Rule } from "../rule";
 
 /** Concrete (non-abstract) WAI-ARIA 1.2 roles. */
 export const validRoles: string[] = [
@@ -109,88 +109,51 @@ export function implicitRole(el: Element): string | null {
 }
 
 /**
- * Checks explicit `role` attributes.
+ * Explicit `role` attributes (WAI-ARIA 1.2, WCAG 4.1.2).
  *
- * - 🔴 Error: role values that don't exist in WAI-ARIA (or are abstract roles).
- * - 🟣 Warning: redundant roles that repeat the element's native role (e.g. <button role="button">).
+ * - Error: role values that don't exist in WAI-ARIA (or are abstract roles).
+ * - Warning: redundant roles that repeat the element's native role (e.g. <button role="button">).
  *
  * Native elements without a role attribute are not reported: their role is implicit,
  * and adding it explicitly goes against the first rule of ARIA.
  */
-export function checkAriaRolesWithSuggestions(enableCheckAriaRolesWithSuggestions: boolean): void {
-    if (!enableCheckAriaRolesWithSuggestions) return;
+export const ariaRoles: Rule = {
+    id: 'aria-roles',
+    category: 'a11y',
+    defaultSeverity: 'error',
+    wcag: ['4.1.2'],
+    run({ document, report }) {
+        queryTargets<HTMLElement>('[role]', document).forEach((el) => {
+            const roles = (el.getAttribute('role') || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
 
-    queryTargets<HTMLElement>('[role]').forEach((el) => {
-        const roles = (el.getAttribute('role') || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
+            if (roles.length === 0) {
+                report({
+                    element: el,
+                    message: `Empty role attribute on ${describeElement(el)}. Remove it or set a valid role.`,
+                    highlight: { outline: '2px dashed magenta', title: 'Empty role attribute' },
+                });
+                return;
+            }
 
-        if (roles.length === 0) {
-            logError(`Empty role attribute on ${describeElement(el)}. Remove it or set a valid role.`);
-            highlight(el, { outline: '2px dashed magenta', title: 'Empty role attribute' });
-            return;
-        }
+            const invalid = roles.filter((role) => !validRoles.includes(role)).join(', ');
+            if (invalid) {
+                report({
+                    element: el,
+                    message: `Invalid role(s) [${invalid}] on ${describeElement(el)}.`,
+                    highlight: { outline: '2px dashed magenta', title: `Invalid role(s): ${invalid}` },
+                });
+                return;
+            }
 
-        const invalidRoles = roles.filter((r) => !validRoles.includes(r));
-        if (invalidRoles.length > 0) {
-            logError(`Invalid role(s) [${invalidRoles.join(', ')}] on ${describeElement(el)}.`);
-            highlight(el, { outline: '2px dashed magenta', title: `Invalid role(s): ${invalidRoles.join(', ')}` });
-            return;
-        }
-
-        const native = implicitRole(el);
-        if (native && roles[0] === native) {
-            logWarning(`Redundant role="${native}" on ${describeElement(el)}: the element already has this role natively. Remove the attribute.`);
-            highlight(el, { outline: '2px dashed purple', title: `Redundant role: ${native}` });
-        }
-    });
-}
-
-function landmarkElements(selector: string, role: string, scoped = false): HTMLElement[] {
-    const native = queryTargets<HTMLElement>(selector).filter((el) => !scoped || !isScopedToSection(el));
-    const explicit = queryTargets<HTMLElement>(`[role="${role}"]`);
-    return Array.from(new Set([...native, ...explicit])).filter((el) => !el.hasAttribute('hidden'));
-}
-
-function hasLabel(el: Element): boolean {
-    return !!el.getAttribute('aria-label')?.trim() || el.hasAttribute('aria-labelledby');
-}
-
-/**
- * Checks page landmarks (WAI-ARIA landmark rules):
- *
- * - exactly one `main`;
- * - at most one page-level `banner` (<header>) and `contentinfo` (<footer>).
- *   Headers/footers inside article, aside, main, nav or section are not landmarks and are ignored;
- * - when there is more than one `navigation`, each needs an aria-label or aria-labelledby.
- */
-export function checkUniqueLandmarks(enableCheckUniqueLandmarks?: boolean): void {
-    if (!enableCheckUniqueLandmarks) return;
-
-    const mains = landmarkElements('main', 'main');
-    if (mains.length === 0) {
-        logError('Missing <main> landmark. Wrap the primary content of the page in <main>.');
-    } else if (mains.length > 1) {
-        mains.slice(1).forEach((el) => {
-            logError(`Multiple <main> landmarks (${mains.length}): ${describeElement(el)}. A page should have only one visible main.`);
-            highlight(el, { outline: '2px dashed orange', title: '❌ Duplicate main landmark' });
+            const native = implicitRole(el);
+            if (native && roles[0] === native) {
+                report({
+                    element: el,
+                    message: `Redundant role="${native}" on ${describeElement(el)}: the element already has this role natively. Remove the attribute.`,
+                    severity: 'warning',
+                    highlight: { outline: '2px dashed purple', title: `Redundant role: ${native}` },
+                });
+            }
         });
-    }
-
-    const singletons: Array<[string, string]> = [['header', 'banner'], ['footer', 'contentinfo']];
-    singletons.forEach(([tag, role]) => {
-        const elements = landmarkElements(tag, role, true);
-        if (elements.length > 1) {
-            elements.slice(1).forEach((el) => {
-                logError(`Multiple page-level <${tag}> (role ${role}) found (${elements.length}): ${describeElement(el)}. Only one is allowed per page.`);
-                highlight(el, { outline: '2px dashed orange', title: `❌ Duplicate ${role} landmark` });
-            });
-        }
-    });
-
-    const navs = landmarkElements('nav', 'navigation');
-    if (navs.length > 1) {
-        navs.filter((el) => !hasLabel(el)).forEach((el) => {
-            logWarning(`Multiple <nav> landmarks (${navs.length}) and ${describeElement(el)} has no aria-label/aria-labelledby to tell them apart.`);
-            highlight(el, { outline: '2px dashed orange', title: 'Add an aria-label to distinguish this navigation' });
-        });
-    }
-}
+    },
+};

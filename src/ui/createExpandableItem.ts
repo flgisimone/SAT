@@ -11,7 +11,7 @@ export function createExpandableItem(message: string, color: string): HTMLLIElem
     textSpan.textContent = isLong ? shortText : fullText;
 
     const toggleBtn = document.createElement("button");
-    toggleBtn.textContent = isLong ? "Mostra tutto" : "";
+    toggleBtn.textContent = isLong ? "Show all" : "";
     toggleBtn.style.marginLeft = "6px";
     toggleBtn.style.cursor = "pointer";
     toggleBtn.style.fontSize = "12px";
@@ -24,7 +24,7 @@ export function createExpandableItem(message: string, color: string): HTMLLIElem
     toggleBtn.addEventListener("click", () => {
         expanded = !expanded;
         textSpan.textContent = expanded ? fullText : shortText;
-        toggleBtn.textContent = expanded ? "Nascondi" : "Mostra tutto";
+        toggleBtn.textContent = expanded ? "Hide" : "Show all";
     });
 
     li.appendChild(textSpan);

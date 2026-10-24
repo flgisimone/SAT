@@ -1,24 +1,14 @@
 const dts = require('rollup-plugin-dts').default;
 
-module.exports = [
-    {
-        input: 'src/core/seoAccessibilityTool.ts',
-        output: { file: 'dist/index.d.ts', format: 'es' },
-        plugins: [dts()],
+// Same entry points as rollup.config.js.
+module.exports = {
+    input: {
+        index: 'src/core/seoAccessibilityTool.ts',
+        'sat-controller': 'src/sat/satChecker.ts',
+        react: 'src/integrations/react.ts',
+        vue: 'src/integrations/vue.ts',
     },
-    {
-        input: 'src/sat/satChecker.ts',
-        output: { file: 'dist/sat-controller.d.ts', format: 'es' },
-        plugins: [dts()],
-    },
-    {
-        input: 'src/integrations/react.ts',
-        output: { file: 'dist/react.d.ts', format: 'es' },
-        plugins: [dts()],
-    },
-    {
-        input: 'src/integrations/vue.ts',
-        output: { file: 'dist/vue.d.ts', format: 'es' },
-        plugins: [dts()],
-    },
-];
+    output: { dir: 'dist', format: 'es', entryFileNames: '[name].d.ts', chunkFileNames: 'chunks/[name].d.ts' },
+    external: ['react', 'vue'],
+    plugins: [dts()],
+};

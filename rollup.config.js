@@ -1,69 +1,29 @@
 import typescript from '@rollup/plugin-typescript';
 
-export default [
-    // Core (Vanilla / Shared)
-    {
-        input: 'src/core/seoAccessibilityTool.ts',
-        output: {
-            file: 'dist/index.js',
-            format: 'esm',
-            sourcemap: true
-        },
-        plugins: [
-            typescript({
-                tsconfig: './tsconfig.json',
-                declaration: false // Type declarations handled separately
-            })
-        ]
-    },
+// One build for all entry points: the shared code goes into a single chunk,
+// so importing two entry points loads (and keeps the state of) SAT once.
+const input = {
+    index: 'src/core/seoAccessibilityTool.ts',
+    'sat-controller': 'src/sat/satChecker.ts',
+    react: 'src/integrations/react.ts',
+    vue: 'src/integrations/vue.ts',
+};
 
-    // SAT Controller (UI button, toggle)
-    {
-        input: 'src/sat/satChecker.ts',
-        output: {
-            file: 'dist/sat-controller.js',
-            format: 'esm',
-            sourcemap: true,
-        },
-        plugins: [
-            typescript({
-                tsconfig: './tsconfig.json',
-                declaration: false,
-            }),
-        ],
+export default {
+    input,
+    output: {
+        dir: 'dist',
+        format: 'esm',
+        sourcemap: true,
+        entryFileNames: '[name].js',
+        chunkFileNames: 'chunks/[name].js',
     },
-
-    // React Hook
-    {
-        input: 'src/integrations/react.ts',
-        output: {
-            file: 'dist/react.js',
-            format: 'esm',
-            sourcemap: true,
-        },
-        external: ['react'],
-        plugins: [
-            typescript({
-                tsconfig: './tsconfig.json',
-                declaration: false,
-            }),
-        ],
-    },
-
-    // Vue Composable
-    {
-        input: 'src/integrations/vue.ts',
-        output: {
-            file: 'dist/vue.js',
-            format: 'esm',
-            sourcemap: true,
-        },
-        external: ['vue'],
-        plugins: [
-            typescript({
-                tsconfig: './tsconfig.json',
-                declaration: false,
-            }),
-        ],
-    },
-];
+    external: ['react', 'vue'],
+    plugins: [
+        typescript({
+            tsconfig: './tsconfig.json',
+            declaration: false, // type declarations (with the doc comments) are built by rollup.dts.config.cjs
+            removeComments: true,
+        }),
+    ],
+};

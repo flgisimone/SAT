@@ -1,83 +1,74 @@
-import {
-    checkH1,
-    checkH1Visible,
-    checkHeadingOrder,
-    checkJumpLevels
-} from './improvedHeadingControl/improvedHeadingControl';
+import { rules, type Rule, type Report } from './rules';
+import { cssSelector, type Issue } from '../sat/issue';
+import { highlight } from '../sat/satDom';
+import { LEGACY_OPTIONS, type LegacyOptions, type RuleSetting, type SATOptions } from '../sat/satOptions';
 
-import { checkTextElementContrast } from './accessibilityA11y/colorContrastChecker';
-import { checkAriaRolesWithSuggestions, checkUniqueLandmarks } from './accessibilityA11y/ariaRolesChecker';
-import { checkAriaLabel } from "./accessibilityA11y/ariaLabelChecker";
-import { checkInputLabels } from "./accessibilityA11y/inputLabelChecker";
-import { checkFocusManagement } from "./accessibilityA11y/focusManagementChecker";
-import { checkImageAlt } from "./accessibilityA11y/imageAltChecker";
-
-import { checkEmptyLinks } from "./improvedLinksControl/emptyLinksChecker";
-import { checkTabindexNegativeOne } from "./improvedLinksControl/tabIndexNegativeOneChecker";
-import { checkExternalLinksRel } from "./improvedLinksControl/externalLinksRelChecker";
-import { checkNonDescriptiveLinks } from "./improvedLinksControl/nonDescriptiveLinksChecker";
-import { checkBrokenInternalLinks } from "./improvedLinksControl/brokenInternalLinksChecker";
-
-import { checkHtmlLang, checkSeoMeta } from "./seo/seoMetaChecker";
-
-import { resetSatLogStats, getSatLogStats, logError } from "../sat/satLogger";
-import { satOptions, SATOptions } from "../sat/satOptions";
-
-export type { SATOptions } from "../sat/satOptions";
+export type { SATOptions, RuleSetting } from '../sat/satOptions';
+export type { Issue, Severity, Category } from '../sat/issue';
+export type { RuleId } from './rules';
+export { satReset } from '../sat/satReset';
 
 export interface SATResult {
+    issues: Issue[];
     errors: number;
     warnings: number;
+    /** @deprecated Use `issues`. */
     errorMessages: string[];
+    /** @deprecated Use `issues`. */
     warningMessages: string[];
 }
 
+/** `rules` wins over the 1.x `enableCheck*` option, which wins over the rule's default. */
+function settingFor(rule: Rule, options: Partial<SATOptions>): RuleSetting | 'default' {
+    const explicit = options.rules?.[rule.id];
+    if (explicit) return explicit;
+
+    const legacyKey = (Object.keys(LEGACY_OPTIONS) as Array<keyof LegacyOptions>).find((key) => LEGACY_OPTIONS[key] === rule.id);
+    const legacy = legacyKey && options[legacyKey];
+    if (legacy !== undefined) return legacy ? 'default' : 'off';
+
+    return rule.defaultOff ? 'off' : 'default';
+}
+
 /**
- * Runs all enabled SEO and accessibility checks on the current page.
+ * Runs the enabled SEO and accessibility rules on a document (the current page by default).
+ * Each run has its own results, so runs on different documents can overlap.
  *
- * @param customOptions - (Optional) Override default options for individual checks.
+ * @param customOptions - (Optional) Severity per rule and rule options.
+ * @param doc - (Optional) The document to check.
  */
-export async function seoAccessibilityTool(customOptions?: Partial<SATOptions>): Promise<SATResult> {
-    const options = { ...satOptions, ...customOptions };
+export async function seoAccessibilityTool(customOptions: Partial<SATOptions> = {}, doc: Document = document): Promise<SATResult> {
+    const issues: Issue[] = [];
 
-    resetSatLogStats();
+    for (const rule of rules) {
+        const setting = settingFor(rule, customOptions);
+        if (setting === 'off') continue;
 
-    const syncChecks: Array<[string, () => void]> = [
-        ['checkH1', () => checkH1(options.enableCheckH1)],
-        ['checkH1Visible', () => checkH1Visible(options.enableCheckH1Visible)],
-        ['checkHeadingOrder', () => checkHeadingOrder(options.enableCheckHeadingOrder)],
-        ['checkJumpLevels', () => checkJumpLevels(options.enableCheckJumpLevels)],
-        ['checkAriaLabel', () => checkAriaLabel(options.enableCheckAriaLabel)],
-        ['checkAriaRoles', () => checkAriaRolesWithSuggestions(options.enableCheckAriaRolesWithSuggestions)],
-        ['checkUniqueLandmarks', () => checkUniqueLandmarks(options.enableCheckUniqueLandmarks)],
-        ['checkTextElementContrast', () => checkTextElementContrast(options.enableCheckTextElementContrast)],
-        ['checkInputLabels', () => checkInputLabels(options.enableCheckInputLabel)],
-        ['checkFocusManagement', () => checkFocusManagement(options.enableCheckFocusManagement)],
-        ['checkImageAlt', () => checkImageAlt(options.enableCheckImageAlt)],
-        ['checkEmptyLinks', () => checkEmptyLinks(options.enableCheckEmptyLinks)],
-        ['checkExternalLinksRel', () => checkExternalLinksRel(options.enableCheckExternalLinksRel)],
-        ['checkTabindexNegativeOne', () => checkTabindexNegativeOne(options.enableCheckTabindexNegativeOne)],
-        ['checkNonDescriptiveLinks', () => checkNonDescriptiveLinks(options.enableCheckNonDescriptiveLinks, options.allowedLinkTexts)],
-        ['checkHtmlLang', () => checkHtmlLang(options.enableCheckHtmlLang)],
-        ['checkSeoMeta', () => checkSeoMeta(options.enableCheckSeoMeta)],
-    ];
+        const report = ({ message, element, severity, wcag, highlight: style }: Report) => {
+            issues.push({
+                ruleId: rule.id,
+                severity: setting === 'default' ? severity ?? rule.defaultSeverity : setting,
+                category: rule.category,
+                message,
+                wcag: wcag ?? rule.wcag,
+                element,
+                selector: element && cssSelector(element),
+            });
+            if (element && style) highlight(element, style);
+        };
 
-    // A failing check is reported but doesn't stop the others.
-    for (const [name, run] of syncChecks) {
+        // A failing rule is reported but doesn't stop the others.
         try {
-            run();
+            await rule.run({ document: doc, allowedLinkTexts: customOptions.allowedLinkTexts ?? [], report, highlight });
         } catch (error) {
-            logError(`SAT internal error in ${name}: ${error instanceof Error ? error.message : String(error)}`);
+            const detail = error instanceof Error ? error.message : String(error);
+            issues.push({ ruleId: rule.id, severity: 'error', category: rule.category, message: `SAT internal error in ${rule.id}: ${detail}` });
         }
     }
 
-    if (options.enableCheckBrokenInternalLinks) {
-        try {
-            await checkBrokenInternalLinks(true);
-        } catch (error) {
-            logError(`SAT internal error in checkBrokenInternalLinks: ${error instanceof Error ? error.message : String(error)}`);
-        }
-    }
+    const messagesOf = (severity: Issue['severity']) => issues.filter((issue) => issue.severity === severity).map((issue) => issue.message);
+    const errorMessages = messagesOf('error');
+    const warningMessages = messagesOf('warning');
 
-    return getSatLogStats();
+    return { issues, errors: errorMessages.length, warnings: warningMessages.length, errorMessages, warningMessages };
 }
