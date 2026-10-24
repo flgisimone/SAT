@@ -1,12 +1,15 @@
 {
   "name": "seo-accessibility-tool",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "author": "Giulio Simone Floresta",
   "license": "MIT",
   "type": "module",
   "description": "Universal Accessibility & SEO Checker (React, Vue, Vanilla)",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "sat-check": "./dist/cli.js"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -27,6 +30,10 @@
     "./axe": {
       "import": "./dist/axe.js",
       "types": "./dist/axe.d.ts"
+    },
+    "./playwright": {
+      "import": "./dist/playwright.js",
+      "types": "./dist/playwright.d.ts"
     }
   },
   "typesVersions": {
@@ -51,7 +58,9 @@
     "aria",
     "checker",
     "devtools",
-    "axe-core"
+    "axe-core",
+    "playwright",
+    "ci"
   ],
   "repository": {
     "type": "git",
@@ -76,7 +85,8 @@
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
     "vue": "^3.0.0",
-    "axe-core": "^4.10.0"
+    "axe-core": "^4.10.0",
+    "@playwright/test": ">=1.40.0"
   },
   "peerDependenciesMeta": {
     "react": {
@@ -86,6 +96,9 @@
       "optional": true
     },
     "axe-core": {
+      "optional": true
+    },
+    "@playwright/test": {
       "optional": true
     }
   },

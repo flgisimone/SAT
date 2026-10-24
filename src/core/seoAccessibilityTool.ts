@@ -90,3 +90,22 @@ export async function seoAccessibilityTool(customOptions: Partial<SATOptions> = 
 
     return { issues, errors: errorMessages.length, warnings: warningMessages.length, errorMessages, warningMessages };
 }
+
+/** An issue without its `element`: what `runSAT` returns, ready for `JSON.stringify`. */
+export type IssueData = Omit<Issue, 'element'>;
+
+export interface SATReport {
+    issues: IssueData[];
+    summary: { errors: number; warnings: number };
+}
+
+/**
+ * Same checks as `seoAccessibilityTool`, with a result that holds no DOM nodes, so it passes
+ * through `JSON.stringify` and out of the page (Playwright, CI). Each issue keeps its `selector`.
+ */
+export async function runSAT(customOptions: Partial<SATOptions> = {}, doc: Document = document): Promise<SATReport> {
+    const { issues, errors, warnings } = await seoAccessibilityTool(customOptions, doc);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const data = issues.map(({ element, ...issue }) => issue);
+    return { issues: data, summary: { errors, warnings } };
+}
