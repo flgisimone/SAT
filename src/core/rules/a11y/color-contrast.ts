@@ -156,6 +156,7 @@ const TEXT_SELECTORS = 'h1, h2, h3, h4, h5, h6, p, span, a, button, label, li, t
  */
 export const colorContrast: Rule = {
     id: 'color-contrast',
+    title: 'Text has enough contrast',
     category: 'a11y',
     defaultSeverity: 'error',
     wcag: ['1.4.3'],

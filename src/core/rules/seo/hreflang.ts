@@ -16,6 +16,8 @@ const LANGUAGE_CODE = /^[a-z]{2,3}(-[a-z]{4})?(-([a-z]{2}|\d{3}))?$/i;
  */
 export const hreflang: Rule = {
     id: 'hreflang',
+    title: 'Language alternates are valid',
+    source: 'Google',
     category: 'seo',
     defaultSeverity: 'error',
     run({ document, report }) {

@@ -14,6 +14,7 @@ const NATIVE_INTERACTIVE = ['A', 'BUTTON', 'INPUT', 'TEXTAREA', 'SELECT', 'SUMMA
  */
 export const focusManagement: Rule = {
     id: 'focus-management',
+    title: 'Tab order skips hidden elements',
     category: 'a11y',
     defaultSeverity: 'error',
     wcag: ['2.4.3'],

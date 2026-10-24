@@ -8,6 +8,8 @@ import type { Rule } from "../rule";
  */
 export const linkTargetBlank: Rule = {
     id: 'link-target-blank',
+    title: 'New-tab links do not use opener',
+    source: 'HTML',
     category: 'seo',
     defaultSeverity: 'warning',
     defaultOff: true,

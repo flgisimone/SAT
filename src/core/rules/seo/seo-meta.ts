@@ -11,6 +11,8 @@ import type { Rule } from "../rule";
  */
 export const seoMeta: Rule = {
     id: 'seo-meta',
+    title: 'Title and description are set',
+    source: 'Google',
     category: 'seo',
     defaultSeverity: 'error',
     run({ document, report }) {

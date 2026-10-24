@@ -11,6 +11,7 @@ import type { Rule } from "../rule";
  */
 export const linkHref: Rule = {
     id: 'link-href',
+    title: 'Links have a usable href',
     category: 'a11y',
     defaultSeverity: 'error',
     wcag: ['2.1.1'],

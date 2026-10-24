@@ -25,6 +25,8 @@ function httpUrls(el: Element): string[] {
  */
 export const mixedContent: Rule = {
     id: 'mixed-content',
+    title: 'No insecure resources',
+    source: 'W3C',
     category: 'seo',
     defaultSeverity: 'error',
     run({ document, report }) {

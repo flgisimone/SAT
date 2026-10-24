@@ -14,6 +14,8 @@ const FIXED_LENGTH = /^\d*\.?\d+(px|r?em|vw|vh|ch)$/;
  */
 export const imageSize: Rule = {
     id: 'image-size',
+    title: 'Images have width and height',
+    source: 'web.dev',
     category: 'seo',
     defaultSeverity: 'warning',
     run({ document, report }) {

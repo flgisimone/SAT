@@ -41,6 +41,7 @@ export function isValidAutocomplete(value: string): boolean {
  */
 export const autocompleteValid: Rule = {
     id: 'autocomplete-valid',
+    title: 'Autocomplete values are valid',
     category: 'a11y',
     defaultSeverity: 'error',
     wcag: ['1.3.5'],

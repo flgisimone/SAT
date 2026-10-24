@@ -63,6 +63,7 @@ function containsInOrder(name: string[], label: string[]): boolean {
  */
 export const labelInName: Rule = {
     id: 'label-in-name',
+    title: 'Name contains the visible label',
     category: 'a11y',
     defaultSeverity: 'error',
     wcag: ['2.5.3'],

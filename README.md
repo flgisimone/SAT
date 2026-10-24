@@ -11,7 +11,7 @@ Detects common issues in heading usage (`<h1>`-`<h6>`), ARIA roles, contrast, la
 ✅ Validates heading structure, ARIA roles and attributes, names and labels, contrast, target size, tables, forms, media, images, SEO meta tags, canonical, hreflang, Open Graph, JSON-LD and image loading, with the W3C ACT test cases as specification  
 ✅ Optional axe-core engine for about 90 more accessibility rules  
 ✅ Injects a floating toggle button to analyze any page  
-✅ Results panel grouped by rule, with filters and a heading map; click an issue to jump to the element  
+✅ Results panel in light and dark theme: counters that filter, issues by category and rule with their WCAG criterion or source, a heading map; click an issue to jump to the element  
 ✅ Never changes your page: highlights are drawn on SAT's own layer  
 ✅ Follows single-page apps: route changes rerun the checks  
 ✅ Supports progressive checks via custom options  
@@ -108,13 +108,22 @@ A click on the SAT button in the toolbar adds the panel to the open tab. The ext
 
 ## 🖱️ UI Behavior
 
-- 🚀 runs the checks, 🛑 turns SAT off, 🔃 runs them again; the counts button opens the results panel
-- **Issues**: grouped by rule with their count, filtered by severity and category. Click an issue to scroll to the element, focus it (when it can take focus) and flash its box
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/panel-dark.png">
+  <img src="docs/images/panel-light.png" alt="The SAT panel next to a page: counters, issues by rule with WCAG criteria, and a box on an image with its tag">
+</picture>
+
+- The play button runs the checks and becomes a stop button that turns SAT off; the arrow runs them again; the counts button opens the results panel
+- **Summary**: errors, warnings, accessibility and SEO counters; each is a toggle button that hides or shows those issues in the list and on the page
+- **Issues**: by category, then by rule, rules with errors first. Each rule shows its title, its count, its WCAG criteria (or its source, such as Google, for rules without one) and a link to its page, "Why and how to fix". Messages are visible in the list: the first five per rule, then "Show N more". Click an issue to scroll to the element, focus it (when it can take focus) and flash its box
 - **Structure**: the H1–H6 tree of the page, with skipped levels marked; click a heading to jump to it
-- Boxes over the page show each issue (red: error, orange dashed: warning). They are drawn in SAT's own layer, so the page's elements, styles and attributes are never changed
+- Boxes over the page show each issue (red: error, amber dashed: warning). Pointing at a box, or clicking it, shows a tag with the severity and title of its issues. Boxes and tags are drawn in SAT's own layer, so the page's elements, styles and attributes are never changed
+- Light and dark theme from the system setting (`prefers-color-scheme`); short transitions, off with `prefers-reduced-motion`
+- The arrow in the panel header moves SAT to the other side of the window; the side is remembered in `localStorage`
 - The panel lives in a Shadow DOM: the page's CSS doesn't affect it and its CSS doesn't leak into the page
 - Single-page apps: when SAT is on, a route change (`pushState`, `replaceState`, back/forward) runs the checks again. Use `observeDom` to rerun them on any DOM change
 - Keyboard: Tab through the dock and the panel, Escape closes the panel and returns focus to the counts button
+- The panel passes SAT's own rules and axe-core in both themes (contrast, target size, names), checked in the tests
 - SAT stays on across reloads until you stop it (a flag in `localStorage`)
 - Runs only when `process.env.NODE_ENV === "development"` (set by Vite, webpack, Next, etc.); the Vite plugin and the browser extension start it anyway
 
@@ -187,7 +196,7 @@ Each rule follows an official source, cited on its page in [`docs/rules/`](docs/
 | `image-lazy-load`   | seo      | `loading="lazy"` on images visible when the page opens                    | warning    | — |
 | `link-broken`       | seo      | HEAD request to each internal link to find 4xx/5xx (skips logout-like URLs); `sat-check --depth` finds SPA 404s too | off | `enableCheckBrokenInternalLinks` |
 
-Each rule has a page in [docs/rules](docs/rules) on what it checks, why and how to fix it; the panel links to it from every group, and each issue has its URL in `help`.
+Each rule has a page in [docs/rules](docs/rules) on what it checks, why and how to fix it; the panel links to it from every rule, and each issue has its URL in `help`, the rule's readable name in `title` and, for rules without a WCAG criterion, its source in `source`.
 
 The 1.x options `enableCheck*` still work (`true` turns the rule on, `false` off) but are deprecated; `rules` takes precedence.
 
@@ -223,7 +232,7 @@ With React or Vue pass the same option: `useSATChecker({ engines: [axe()] })`.
 import { seoAccessibilityTool } from "seo-accessibility-tool";
 
 const { issues, errors, warnings } = await seoAccessibilityTool({ rules: { "link-text": "warning" } });
-// issues: [{ ruleId, severity, category, message, wcag?, element?, selector?, help? }]
+// issues: [{ ruleId, severity, category, message, title?, wcag?, source?, element?, selector?, help? }]
 ```
 
 The page is not changed. `selector` matches only the element of the issue. `satReset` is deprecated and does nothing. `errorMessages` and `warningMessages` (lists of strings) are still returned but deprecated.
@@ -234,7 +243,7 @@ The page is not changed. `selector` matches only the element of the issue. `satR
 import { runSAT } from "seo-accessibility-tool";
 
 const { issues, summary } = await runSAT();
-// issues: [{ ruleId, severity, category, message, wcag?, selector?, help? }], summary: { errors, warnings }
+// issues: [{ ruleId, severity, category, message, title?, wcag?, source?, selector?, help? }], summary: { errors, warnings }
 ```
 
 ---

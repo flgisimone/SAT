@@ -24,6 +24,7 @@ function fieldHasLabel(field: FormField): boolean {
  */
 export const formLabel: Rule = {
     id: 'form-label',
+    title: 'Form fields have a label',
     category: 'a11y',
     defaultSeverity: 'error',
     wcag: ['1.3.1', '4.1.2'],

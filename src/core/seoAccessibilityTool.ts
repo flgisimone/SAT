@@ -51,7 +51,9 @@ export async function seoAccessibilityTool(customOptions: Partial<SATOptions> = 
                 severity: setting === 'default' ? severity ?? rule.defaultSeverity : setting,
                 category: rule.category,
                 message,
+                title: rule.title,
                 wcag: wcag ?? rule.wcag,
+                source: rule.source,
                 element,
                 selector: element && cssSelector(element),
                 help: ruleHelp(rule.id),
@@ -63,7 +65,7 @@ export async function seoAccessibilityTool(customOptions: Partial<SATOptions> = 
             await rule.run({ document: doc, allowedLinkTexts: customOptions.allowedLinkTexts ?? [], wcagLevel: customOptions.wcagLevel ?? 'AA', report });
         } catch (error) {
             const detail = error instanceof Error ? error.message : String(error);
-            issues.push({ ruleId: rule.id, severity: 'error', category: rule.category, message: `SAT internal error in ${rule.id}: ${detail}`, help: ruleHelp(rule.id) });
+            issues.push({ ruleId: rule.id, severity: 'error', category: rule.category, message: `SAT internal error in ${rule.id}: ${detail}`, title: rule.title, help: ruleHelp(rule.id) });
         }
     }
 

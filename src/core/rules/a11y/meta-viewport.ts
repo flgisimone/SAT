@@ -16,6 +16,7 @@ function viewportNumber(value: string): number {
  */
 export const metaViewport: Rule = {
     id: 'meta-viewport',
+    title: 'Zoom is not disabled',
     category: 'a11y',
     defaultSeverity: 'error',
     wcag: ['1.4.4'],

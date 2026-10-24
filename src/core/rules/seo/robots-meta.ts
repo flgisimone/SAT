@@ -10,6 +10,8 @@ const ROBOTS_META = 'meta[name="robots" i], meta[name="googlebot" i]';
  */
 export const robotsMeta: Rule = {
     id: 'robots-meta',
+    title: 'Page can be indexed',
+    source: 'Google',
     category: 'seo',
     defaultSeverity: 'warning',
     run({ document, report }) {

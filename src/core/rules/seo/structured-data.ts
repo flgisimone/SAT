@@ -36,6 +36,8 @@ function list(items: string[]): string {
  */
 export const structuredData: Rule = {
     id: 'structured-data',
+    title: 'Structured data is complete',
+    source: 'Google',
     category: 'seo',
     defaultSeverity: 'error',
     run({ document, report }) {

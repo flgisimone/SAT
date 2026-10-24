@@ -62,6 +62,16 @@ describe('rule registry', () => {
         expect(new Set(ids).size).toBe(36);
     });
 
+    it('every rule has a short title, and a source when it has no WCAG criterion; issues carry both', async () => {
+        expect(rules.filter((rule) => !rule.title || rule.title.length > 40).map((rule) => rule.id)).toEqual([]);
+        expect(rules.filter((rule) => !rule.wcag && !rule.source).map((rule) => rule.id)).toEqual([]);
+
+        document.body.innerHTML = '<img src="a.png">';
+        const { issues } = await seoAccessibilityTool();
+        expect(issues.find((i) => i.ruleId === 'image-alt')).toMatchObject({ title: 'Images have alternative text', wcag: ['1.1.1'] });
+        expect(issues.find((i) => i.ruleId === 'seo-meta')).toMatchObject({ title: 'Title and description are set', source: 'Google' });
+    });
+
     it('a failing rule becomes an issue and the others still run', async () => {
         vi.spyOn(rules.find((r) => r.id === 'h1')!, 'run').mockImplementation(() => {
             throw new Error('boom');

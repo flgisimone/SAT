@@ -8,6 +8,8 @@ import type { Rule } from "../rule";
  */
 export const imageLazyLoad: Rule = {
     id: 'image-lazy-load',
+    title: 'Visible images load eagerly',
+    source: 'web.dev',
     category: 'seo',
     defaultSeverity: 'warning',
     run({ document, report }) {

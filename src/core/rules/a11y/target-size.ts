@@ -70,6 +70,7 @@ function tooClose(small: Target, other: Target): boolean {
  */
 export const targetSize: Rule = {
     id: 'target-size',
+    title: 'Targets are large enough',
     category: 'a11y',
     defaultSeverity: 'error',
     wcag: ['2.5.8'],

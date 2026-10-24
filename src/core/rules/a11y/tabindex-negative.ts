@@ -12,6 +12,7 @@ const NATIVE_CONTROLS = 'a[href], button, input:not([type="hidden"]), select, te
  */
 export const tabindexNegative: Rule = {
     id: 'tabindex-negative',
+    title: 'Controls stay in the tab order',
     category: 'a11y',
     defaultSeverity: 'warning',
     wcag: ['2.1.1'],

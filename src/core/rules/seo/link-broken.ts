@@ -46,6 +46,8 @@ export function collectInternalLinks(doc: Document = document): Map<string, HTML
  */
 export const linkBroken: Rule = {
     id: 'link-broken',
+    title: 'Links are not broken',
+    source: 'Google',
     category: 'seo',
     defaultSeverity: 'error',
     defaultOff: true,

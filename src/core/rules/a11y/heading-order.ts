@@ -11,6 +11,7 @@ import type { Rule } from "../rule";
  */
 export const headingOrder: Rule = {
     id: 'heading-order',
+    title: 'Headings follow the outline',
     category: 'a11y',
     defaultSeverity: 'warning',
     wcag: ['1.3.1'],

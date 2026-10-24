@@ -8,6 +8,7 @@ import type { Rule } from "../rule";
  */
 export const iframeName: Rule = {
     id: 'iframe-name',
+    title: 'Frames have a title',
     category: 'a11y',
     defaultSeverity: 'error',
     wcag: ['4.1.2'],
