@@ -117,6 +117,20 @@ describe('accessible names', () => {
     });
 });
 
+describe('hidden elements', () => {
+    it('link-href, accessible-name and form-label skip what is hidden from assistive technologies', async () => {
+        render(`
+            <div style="display:none"><a href="#">a</a><button></button><input></div>
+            <div hidden><a href="#">b</a></div>
+            <nav style="visibility:hidden"><a href="javascript:void(0)">c</a><input></nav>
+            <div aria-hidden="true"><button></button></div>
+            <a href="#" style="opacity:0">still in the tree</a>`);
+        const r = await runOnly(['link-href', 'accessible-name', 'form-label']);
+        expect(r.errorMessages).toHaveLength(1);
+        expect(r.errorMessages[0]).toContain('still in the tree');
+    });
+});
+
 describe('images', () => {
     it('reports missing alt but accepts decorative images', async () => {
         render('<img src="a.png"><img src="b.png" alt=""><img src="c.png" alt="Logo"><img src="d.png" alt="photo.jpg">');

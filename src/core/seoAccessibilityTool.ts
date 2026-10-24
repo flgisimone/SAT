@@ -2,7 +2,7 @@ import { rules, type Rule, type Report } from './rules';
 import { cssSelector, ruleHelp, type Issue } from '../sat/issue';
 import { LEGACY_OPTIONS, type LegacyOptions, type RuleSetting, type SATOptions } from '../sat/satOptions';
 
-export type { SATOptions, RuleSetting } from '../sat/satOptions';
+export type { SATOptions, RuleSetting, Engine } from '../sat/satOptions';
 export type { Issue, Severity, Category } from '../sat/issue';
 export type { RuleId } from './rules';
 export { satReset } from '../sat/satReset';
@@ -17,7 +17,7 @@ export interface SATResult {
     warningMessages: string[];
 }
 
-/** `rules` wins over the 1.x `enableCheck*` option, which wins over the rule's default. */
+/** `rules` wins over the 1.x `enableCheck*` option, then over an engine that replaces the rule, then over the rule's default. */
 function settingFor(rule: Rule, options: Partial<SATOptions>): RuleSetting | 'default' {
     const explicit = options.rules?.[rule.id];
     if (explicit) return explicit;
@@ -25,6 +25,8 @@ function settingFor(rule: Rule, options: Partial<SATOptions>): RuleSetting | 'de
     const legacyKey = (Object.keys(LEGACY_OPTIONS) as Array<keyof LegacyOptions>).find((key) => LEGACY_OPTIONS[key] === rule.id);
     const legacy = legacyKey && options[legacyKey];
     if (legacy !== undefined) return legacy ? 'default' : 'off';
+
+    if (options.engines?.some((engine) => engine.replaces.includes(rule.id))) return 'off';
 
     return rule.defaultOff ? 'off' : 'default';
 }
@@ -62,6 +64,23 @@ export async function seoAccessibilityTool(customOptions: Partial<SATOptions> = 
         } catch (error) {
             const detail = error instanceof Error ? error.message : String(error);
             issues.push({ ruleId: rule.id, severity: 'error', category: rule.category, message: `SAT internal error in ${rule.id}: ${detail}`, help: ruleHelp(rule.id) });
+        }
+    }
+
+    for (const engine of customOptions.engines ?? []) {
+        try {
+            (await engine.run(doc)).forEach((issue) => {
+                const setting = customOptions.rules?.[issue.ruleId as keyof NonNullable<SATOptions['rules']>];
+                if (setting === 'off') return;
+                issues.push({
+                    ...issue,
+                    severity: setting ?? issue.severity,
+                    selector: issue.element && cssSelector(issue.element),
+                });
+            });
+        } catch (error) {
+            const detail = error instanceof Error ? error.message : String(error);
+            issues.push({ ruleId: engine.name, severity: 'error', category: 'a11y', message: `SAT internal error in ${engine.name}: ${detail}` });
         }
     }
 

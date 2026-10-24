@@ -2,7 +2,7 @@
 
 **Obiettivo**: decidere come coprire l'accessibilità (axe-core o regole proprie) e completare i controlli SEO, con documentazione per regola.
 
-> **Stato: in corso.** Fatti F4-02, F4-03, F4-05 e F4-06 (versione 1.10.0). F4-01: prototipo e confronto fatti (tabella sotto), **in attesa della decisione del maintainer**; F4-04 dipende dall'esito.
+> **Stato: completata.** F4-01 deciso: adattatore axe-core opzionale (`seo-accessibility-tool/axe`). F4-02, F4-03, F4-05, F4-06 fatti; F4-04 annullato (coperto da axe). Versione 1.10.0.
 >
 > Note di implementazione:
 > - 8 regole nuove, tutte `seo`, accese di default: `canonical`, `robots-meta`, `social-meta`, `hreflang`, `structured-data`, `mixed-content`, `image-size`, `image-lazy-load`. `seo-meta` segnala anche `<title>` e meta description duplicati. Le prestazioni di caricamento stanno in `seo` (Core Web Vitals) per non aggiungere una categoria al pannello.
@@ -10,6 +10,9 @@
 > - `structured-data` riporta il messaggio del parser: Chromium e Firefox includono la posizione, Safari no.
 > - `image-size` non vede le dimensioni date da una classe CSS (gli stili calcolati non le distinguono): per questo è un warning e salta `aspect-ratio`, dimensioni inline e posizionamento assoluto o fisso. `image-lazy-load` usa la posizione nella pagina, quindi non dipende dallo scroll; entrambe testate in Chromium (`tests/browser/images.spec.ts`).
 > - `Issue.help` è l'URL di `docs/rules/<id>.md` su GitHub (branch `develop`); il pannello lo mostra in ogni gruppo («How to fix …»). Un test confronta registro e pagine.
+> - Adattatore axe: `axe(options)` restituisce un `Engine` (`name`, `replaces`, `run(doc)`), passato con l'opzione `engines`; `core/` conosce solo l'interfaccia. Le violazioni diventano `Issue` `axe/<id>` (impatto critical/serious → error), con `help` = pagina di Deque; gli «incomplete» non si riportano. Le regole sostituite (`accessible-name`, `aria-roles`, `landmarks`, `color-contrast`, `form-label`, `focus-management`, `image-alt`, `html-lang`, `heading-levels`) si spengono, salvo impostazione esplicita in `rules`, che accetta anche gli id `axe/…`. Le esecuzioni di axe vanno in coda (axe lancia un errore se due si sovrappongono); axe gira solo sul documento della pagina.
+> - `axe-core` è peer dependency opzionale e devDependency (4.10.3, installata con `--force` per il conflitto di peer preesistente fra `rollup-plugin-dts` e TypeScript 6, che `--legacy-peer-deps` avrebbe risolto riscrivendo il lock). Rollup tiene `core/` e `sat/` in un solo chunk con `manualChunks`, altrimenti l'entry `axe` ne avrebbe staccato `satDom`.
+> - Dal confronto: `link-href`, `accessible-name` e `form-label` saltano gli elementi esclusi dall'albero di accessibilità (`isHiddenFromAssistiveTech` in `satDom.ts`); su Wikipedia i problemi trovati solo da SAT passano da 16 a 3. I warning AAA del contrasto restano come sono (scelta del maintainer).
 
 ---
 
@@ -17,7 +20,7 @@
 
 | Tema | Decisione | Motivo |
 |---|---|---|
-| Motore per l'accessibilità | **Da decidere in F4-01.** Proposta: adattatore opzionale `seo-accessibility-tool/axe` con `axe-core` come peer dependency opzionale; i risultati di axe diventano `Issue` e appaiono nel pannello | circa 90 regole mantenute da altri; SAT si concentra su interfaccia e SEO (00-analisi §4). axe pesa circa 500 KB, accettabile per uno strumento di sviluppo |
+| Motore per l'accessibilità | **Adattatore opzionale** (deciso in F4-01 dal maintainer, 24/10/2026): adattatore opzionale `seo-accessibility-tool/axe` con `axe-core` come peer dependency opzionale; i risultati di axe diventano `Issue` e appaiono nel pannello | circa 90 regole mantenute da altri; SAT si concentra su interfaccia e SEO (00-analisi §4). axe pesa circa 500 KB, accettabile per uno strumento di sviluppo |
 | Regole proprie | Le regole di SAT restano; con l'adattatore attivo, quelle duplicate da axe si spengono per non segnalare due volte | Un problema, un messaggio (CONVENTIONS §6.4) |
 
 ---
@@ -31,7 +34,7 @@
 
 **Criteri di accettazione**
 - [x] Tabella del confronto in questa sezione
-- [ ] Decisione presa dal maintainer.
+- [x] Decisione presa dal maintainer: adattatore axe-core opzionale; correzione dei falsi positivi sugli elementi nascosti.
 
 **Confronto (24/10/2026)**: SAT 1.10.0 (`dist/`) e axe-core 4.10.3 con le regole di default (WCAG A/AA e best practice), Chromium 1280×800, stessa pagina caricata. Il prototipo dell'adattatore converte ogni nodo di una violazione di axe in un `Issue` (`ruleId` `axe/<id>`, impatto critical/serious → error, moderate/minor → warning, criteri WCAG dai tag, `help` = `helpUrl`). «Solo SAT» sono i problemi di accessibilità di SAT su elementi che axe non segnala, esclusi i warning AAA del contrasto, che axe non controlla di default.
 
@@ -69,7 +72,7 @@ Osservazioni per la decisione:
 **Criteri di accettazione**
 - [x] Un JSON-LD malformato è un errore con la posizione dell'errore di parse.
 
-#### F4-04 · Accessibilità: regole mancanti — L
+#### ~~F4-04 · Accessibilità: regole mancanti — L~~ (annullato: la decisione di F4-01 è l'adattatore, e axe copre queste regole: `duplicate-id-aria`, `aria-valid-attr-value`, `aria-hidden-focus`, `frame-title`, `td-headers-attr`/`th-has-data-cells`, `list`/`listitem`, `bypass`, `no-autoplay-audio`)
 **Dipendenze**: F4-01 (solo se la decisione è «regole proprie»)
 - Id duplicati, riferimenti ARIA verso id inesistenti, `aria-hidden` su focalizzabili, titolo degli `iframe`, intestazioni delle tabelle, struttura delle liste, skip link, media in autoplay.
 

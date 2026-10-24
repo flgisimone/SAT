@@ -7,8 +7,9 @@ module.exports = {
         'sat-controller': 'src/sat/satChecker.ts',
         react: 'src/integrations/react.ts',
         vue: 'src/integrations/vue.ts',
+        axe: 'src/engines/axe.ts',
     },
     output: { dir: 'dist', format: 'es', entryFileNames: '[name].d.ts', chunkFileNames: 'chunks/[name].d.ts' },
-    external: ['react', 'vue'],
+    external: ['react', 'vue', 'axe-core'],
     plugins: [dts()],
 };

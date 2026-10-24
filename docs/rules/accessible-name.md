@@ -4,7 +4,7 @@
 
 ## What it checks
 
-Buttons and links have an accessible name: text, `aria-label`, `aria-labelledby`, `title` or a labelled image or icon inside. `<svg role="img">` needs a `<title>`, `aria-label` or `aria-labelledby` (WCAG 1.1.1). Form fields are covered by [`form-label`](form-label.md).
+Buttons and links have an accessible name: text, `aria-label`, `aria-labelledby`, `title` or a labelled image or icon inside. `<svg role="img">` needs a `<title>`, `aria-label` or `aria-labelledby` (WCAG 1.1.1). Form fields are covered by [`form-label`](form-label.md). Elements hidden from assistive technologies (`display: none`, `visibility: hidden`, `hidden`, `aria-hidden="true"`) are skipped.
 
 ## Why
 
@@ -22,5 +22,7 @@ Add visible text, or an `aria-label` for icon-only controls.
 ## References
 
 - [WAI-ARIA APG: Providing accessible names](https://www.w3.org/WAI/ARIA/apg/practices/names-and-descriptions/)
+
+With the [axe-core engine](../../README.md#-axe-core-engine-optional) this rule is off: axe checks the same thing.
 
 [All rules](../../README.md#rules)

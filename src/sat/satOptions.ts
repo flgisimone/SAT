@@ -1,5 +1,5 @@
 import type { RuleId } from '../core/rules/rule';
-import type { Severity } from './issue';
+import type { Issue, Severity } from './issue';
 
 /** A severity forces every issue of the rule to it; 'off' turns the rule off. */
 export type RuleSetting = Severity | 'off';
@@ -66,9 +66,26 @@ export const LEGACY_OPTIONS: Record<keyof LegacyOptions, RuleId> = {
     enableCheckSeoMeta: 'seo-meta',
 };
 
+/**
+ * Another checker whose issues join SAT's, e.g. axe-core through `seo-accessibility-tool/axe`.
+ * Its rule ids carry its name as prefix (`axe/image-alt`), so `rules` can set them too.
+ */
+export interface Engine {
+    name: string;
+    /** SAT rules that check the same things: off while the engine is used, unless set in `rules`. */
+    replaces: RuleId[];
+    /** Issues without `selector`: SAT adds it. */
+    run(doc: Document): Promise<Array<Omit<Issue, 'selector'>>>;
+}
+
 export interface SATOptions extends LegacyOptions {
-    /** Severity per rule, or 'off'. Takes precedence over the 1.x `enableCheck*` options. */
-    rules?: Partial<Record<RuleId, RuleSetting>>;
+    /**
+     * Severity per rule, or 'off'. Takes precedence over the 1.x `enableCheck*` options.
+     * Rules of an engine are named with its prefix, e.g. `"axe/region": "off"`.
+     */
+    rules?: Partial<Record<RuleId | `${string}/${string}`, RuleSetting>>;
+    /** Other checkers to run with SAT's rules, e.g. `engines: [axe()]`. */
+    engines?: Engine[];
     /** Link texts `link-text` accepts anyway (case-insensitive). */
     allowedLinkTexts?: string[];
     /**

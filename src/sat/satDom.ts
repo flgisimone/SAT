@@ -39,6 +39,23 @@ export function isAriaHidden(el: Element): boolean {
 }
 
 /**
+ * Not in the accessibility tree (HTML-AAM): aria-hidden, or not rendered (display: none on the
+ * element or an ancestor, visibility: hidden). Transparent elements are still in the tree.
+ * Without checkVisibility (jsdom) the computed styles of the ancestors are read instead.
+ */
+export function isHiddenFromAssistiveTech(el: Element): boolean {
+    if (isAriaHidden(el)) return true;
+
+    const withCheck = el as Element & { checkVisibility?: (options?: Record<string, boolean>) => boolean };
+    if (typeof withCheck.checkVisibility === 'function') return !withCheck.checkVisibility({ visibilityProperty: true });
+
+    for (let node: Element | null = el; node; node = node.parentElement) {
+        if (computedStyle(node).display === 'none') return true;
+    }
+    return computedStyle(el).visibility === 'hidden';
+}
+
+/**
  * Approximates the accessible name of an element: aria-label, aria-labelledby,
  * text content, title, or labelled images/icons inside it.
  */

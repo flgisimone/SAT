@@ -4,7 +4,7 @@
 
 ## What it checks
 
-`href=""`, `href="#"` and `href="javascript:…"` are errors; `<a>` without `href` is a warning (it isn't focusable).
+`href=""`, `href="#"` and `href="javascript:…"` are errors; `<a>` without `href` is a warning (it isn't focusable). Elements hidden from assistive technologies (`display: none`, `visibility: hidden`, `hidden`, `aria-hidden="true"`) are skipped.
 
 ## Why
 

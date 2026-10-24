@@ -1,4 +1,4 @@
-import { describeElement, queryTargets } from '../../../sat/satDom';
+import { describeElement, isHiddenFromAssistiveTech, queryTargets } from '../../../sat/satDom';
 import type { Rule } from '../rule';
 
 const FIELD_SELECTOR =
@@ -20,6 +20,7 @@ function fieldHasLabel(field: FormField): boolean {
  * Form fields have an accessible label (WCAG 1.3.1, 4.1.2):
  * <label for>, wrapping <label>, aria-label, aria-labelledby or title.
  * A placeholder alone is not a label. Image buttons need an alt text.
+ * Fields hidden from assistive technologies are skipped.
  */
 export const formLabel: Rule = {
     id: 'form-label',
@@ -29,7 +30,7 @@ export const formLabel: Rule = {
     run({ document, report }) {
 
         queryTargets<FormField>(FIELD_SELECTOR, document).forEach((field) => {
-            if (fieldHasLabel(field)) return;
+            if (isHiddenFromAssistiveTech(field) || fieldHasLabel(field)) return;
 
             const name = field.getAttribute('name') || 'unnamed';
             const placeholderNote = field.getAttribute('placeholder') ? ' A placeholder is not a replacement for a label.' : '';
@@ -41,7 +42,7 @@ export const formLabel: Rule = {
         });
 
         queryTargets<HTMLInputElement>('input[type="image"]', document).forEach((input) => {
-            if (input.getAttribute('alt')?.trim() || input.getAttribute('aria-label')?.trim()) return;
+            if (isHiddenFromAssistiveTech(input) || input.getAttribute('alt')?.trim() || input.getAttribute('aria-label')?.trim()) return;
 
             report({
                 element: input,

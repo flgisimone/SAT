@@ -18,4 +18,6 @@ Remove hidden elements from the tab order (`hidden`, `inert`, or `tabindex="-1"`
 
 - [Understanding SC 2.4.3](https://www.w3.org/WAI/WCAG22/Understanding/focus-order.html)
 
+With the [axe-core engine](../../README.md#-axe-core-engine-optional) this rule is off: axe checks the same thing.
+
 [All rules](../../README.md#rules)

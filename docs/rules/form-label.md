@@ -4,7 +4,7 @@
 
 ## What it checks
 
-Form fields have a label: `<label for>`, a wrapping `<label>`, `aria-label`, `aria-labelledby` or `title`. A placeholder alone is not a label. Image buttons (`<input type="image">`) need an `alt` (WCAG 1.1.1). Hidden and submit inputs are ignored.
+Form fields have a label: `<label for>`, a wrapping `<label>`, `aria-label`, `aria-labelledby` or `title`. A placeholder alone is not a label. Image buttons (`<input type="image">`) need an `alt` (WCAG 1.1.1). Hidden and submit inputs are ignored. Elements hidden from assistive technologies (`display: none`, `visibility: hidden`, `hidden`, `aria-hidden="true"`) are skipped.
 
 ## Why
 
@@ -20,5 +20,7 @@ Without a label, screen readers announce just "edit text". Placeholders disappea
 ## References
 
 - [WAI tutorial: Labeling controls](https://www.w3.org/WAI/tutorials/forms/labels/)
+
+With the [axe-core engine](../../README.md#-axe-core-engine-optional) this rule is off: axe checks the same thing.
 
 [All rules](../../README.md#rules)

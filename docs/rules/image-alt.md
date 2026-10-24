@@ -21,4 +21,6 @@ Screen readers read the file name of images without `alt`. Search engines use th
 
 - [WAI tutorial: Images](https://www.w3.org/WAI/tutorials/images/)
 
+With the [axe-core engine](../../README.md#-axe-core-engine-optional) this rule is off: axe checks the same thing.
+
 [All rules](../../README.md#rules)
