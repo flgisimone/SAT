@@ -1,64 +1,47 @@
-import {logError, logWarning} from "../../sat/satLogger";
+import { logError, logWarning } from "../../sat/satLogger";
+import { describeElement, highlight, isElementVisible, queryTargets } from "../../sat/satDom";
+
+const FOCUSABLE_SELECTOR = 'a[href], button, input, textarea, select, summary, [tabindex], [contenteditable="true"]';
+const NATIVE_INTERACTIVE = ['A', 'BUTTON', 'INPUT', 'TEXTAREA', 'SELECT', 'SUMMARY'];
 
 /**
  * Checks focus management on interactive elements:
- * - Ensures focusable elements are reachable via keyboard.
- * - Warns about improper use of tabindex.
- * - Highlights potential focus issues.
+ * - hidden or disabled elements that are still in the tab order;
+ * - positive tabindex values, which override the natural tab order;
+ * - non-interactive elements placed in the tab order without a role.
+ *
+ * tabindex="-1" on non-interactive elements is fine (programmatic focus) and is not reported here.
  */
 export function checkFocusManagement(enableCheckFocusManagement?: boolean): void {
     if (!enableCheckFocusManagement) return;
 
-    const focusableSelectors = [
-        'a[href]', 'button', 'input', 'textarea', 'select',
-        '[tabindex]', '[contenteditable="true"]'
-    ];
+    queryTargets<HTMLElement>(FOCUSABLE_SELECTOR).forEach((el) => {
+        const tabIndexAttr = el.getAttribute('tabindex');
+        const tabIndex = tabIndexAttr === null ? null : parseInt(tabIndexAttr, 10);
+        const isDisabled = (el as HTMLInputElement).disabled === true;
 
-    const elements = Array.from(document.querySelectorAll<HTMLElement>(focusableSelectors.join(',')));
-
-    elements.forEach((el) => {
-        const computedStyle = window.getComputedStyle(el);
-        const isVisible = computedStyle.display !== 'none' &&
-            computedStyle.visibility !== 'hidden' &&
-            el.offsetParent !== null;
-
-        const isDisabled = (el as HTMLInputElement).disabled;
-        const tabIndex = el.getAttribute('tabindex');
-        const role = el.getAttribute('role') || '';
-        const tag = el.tagName;
-        const text = el.textContent?.trim() || '[no text]';
-
-        // ❌ 1. Focusable but hidden or disabled
-        if (!isVisible || isDisabled) {
-            if (tabIndex !== null && parseInt(tabIndex) >= 0) {
-                const msg = `${tag} "${text}" is hidden or disabled but has tabindex="${tabIndex}". It should not be focusable.`;
+        if (isDisabled || !isElementVisible(el)) {
+            if (tabIndex !== null && tabIndex >= 0) {
+                const msg = `${describeElement(el)} is hidden or disabled but has tabindex="${tabIndexAttr}". It should not be focusable.`;
                 logError(msg);
-
-                el.style.outline = '2px dashed orange';
-                el.title = msg;
+                highlight(el, { outline: '2px dashed orange', title: msg });
             }
             return;
         }
 
-        // ⚠️ 2. Tabindex > 0
-        if (tabIndex !== null && parseInt(tabIndex) > 0) {
-            const msg = `${tag} "${text}" has tabindex="${tabIndex}". Manual tab order can confuse keyboard users.`;
+        if (tabIndex !== null && tabIndex > 0) {
+            const msg = `${describeElement(el)} has tabindex="${tabIndexAttr}". Positive tabindex values change the tab order and confuse keyboard users; use 0.`;
             logWarning(msg);
-
-            el.style.outline = '2px dashed blue';
-            el.title = msg;
+            highlight(el, { outline: '2px dashed blue', title: msg });
         }
 
-        // ⚠️ 3. Non-interactive element with tabindex but no role/onClick
-        const isSemanticallyInteractive = ['A', 'BUTTON', 'INPUT', 'TEXTAREA', 'SELECT'].includes(tag);
-        const isExplicitlyInteractive = role !== '' || el.hasAttribute('onclick');
+        const isNativeInteractive = NATIVE_INTERACTIVE.includes(el.tagName) || el.isContentEditable;
+        const hasRole = !!el.getAttribute('role')?.trim();
 
-        if (!isSemanticallyInteractive && !isExplicitlyInteractive && tabIndex !== null) {
-            const msg = `${tag} "${text}" has tabindex="${tabIndex}" but is not a semantic or interactive element. Consider removing tabindex or adding a role.`;
+        if (!isNativeInteractive && !hasRole && tabIndex !== null && tabIndex >= 0) {
+            const msg = `${describeElement(el)} is in the tab order (tabindex="${tabIndexAttr}") but is not interactive. Use a native control (e.g. <button>) or add a role.`;
             logWarning(msg);
-
-            el.style.outline = '2px dashed yellow';
-            el.title = msg;
+            highlight(el, { outline: '2px dashed yellow', title: msg });
         }
     });
 }

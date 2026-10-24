@@ -1,35 +1,45 @@
 import { logError } from '../../sat/satLogger';
+import { describeElement, highlight, queryTargets } from '../../sat/satDom';
+
+const FIELD_SELECTOR =
+    'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="image"]), textarea, select';
+
+type FormField = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+
+function fieldHasLabel(field: FormField): boolean {
+    const labels = field.labels ? Array.from(field.labels) : [];
+    return (
+        labels.some((label) => (label.textContent || '').trim().length > 0) ||
+        !!field.getAttribute('aria-label')?.trim() ||
+        field.hasAttribute('aria-labelledby') ||
+        !!field.getAttribute('title')?.trim()
+    );
+}
 
 /**
- * Checks all input fields for associated labels.
- * Logs errors if an input is missing an accessible label.
+ * Checks that form fields have an accessible label
+ * (<label for>, wrapping <label>, aria-label, aria-labelledby or title).
+ * A placeholder alone is not a label. Image buttons need an alt text.
  */
 export function checkInputLabels(enableCheckInputLabel?: boolean): void {
     if (!enableCheckInputLabel) return;
 
-    const inputs = Array.from(document.querySelectorAll('input, textarea, select')) as HTMLElement[];
+    queryTargets<FormField>(FIELD_SELECTOR).forEach((field) => {
+        if (fieldHasLabel(field)) return;
 
-    inputs.forEach((el) => {
-        const hasId = el.hasAttribute('id');
-        const id = el.getAttribute('id');
-        const hasAriaLabel = el.hasAttribute('aria-label');
-        const hasAriaLabelledBy = el.hasAttribute('aria-labelledby');
+        const name = field.getAttribute('name') || 'unnamed';
+        const placeholderNote = field.getAttribute('placeholder')
+            ? ' A placeholder is not a replacement for a label.'
+            : '';
 
-        const labelFor = hasId ? document.querySelector(`label[for="${id}"]`) : null;
-        const isWrappedInLabel = el.closest('label');
+        logError(`Missing label for form field ${describeElement(field)} (name="${name}").${placeholderNote}`);
+        highlight(field, { outline: '2px dashed green', title: '❌ Missing accessible label' });
+    });
 
-        const name = el.getAttribute('name') || 'Unnamed';
-        const placeholder = el.getAttribute('placeholder') || '';
-        const fieldId = el.getAttribute('id') || 'No ID';
+    queryTargets<HTMLInputElement>('input[type="image"]').forEach((input) => {
+        if (input.getAttribute('alt')?.trim() || input.getAttribute('aria-label')?.trim()) return;
 
-        const fieldInfo = `name="${name}", id="${fieldId}", placeholder="${placeholder}"`;
-
-        if (!labelFor && !isWrappedInLabel && !hasAriaLabel && !hasAriaLabelledBy) {
-            const msg = `Missing accessible label for input field (${el.tagName}): ${fieldInfo}`;
-            logError(msg);
-
-            el.style.outline = '2px dashed green';
-            el.title = '❌ Missing accessible label';
-        }
+        logError(`<input type="image"> without alt text: ${describeElement(input)}.`);
+        highlight(input, { outline: '2px dashed green', title: '❌ Missing alt text' });
     });
 }

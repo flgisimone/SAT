@@ -15,6 +15,7 @@ export function createPanel(titleText: string, color: string): {
 
     const toggleBtn = document.createElement("button");
     toggleBtn.textContent = "✖";
+    toggleBtn.setAttribute("aria-label", `Close ${titleText}`);
     toggleBtn.style.position = "absolute";
     toggleBtn.style.top = "4px";
     toggleBtn.style.right = "4px";

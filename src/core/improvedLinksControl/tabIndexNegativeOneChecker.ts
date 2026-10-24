@@ -1,29 +1,24 @@
-import {logWarning} from "../../sat/satLogger";
+import { logWarning } from "../../sat/satLogger";
+import { describeElement, highlight, isAriaHidden, isElementVisible, queryTargets } from "../../sat/satDom";
+
+const NATIVE_CONTROLS = 'a[href], button, input:not([type="hidden"]), select, textarea, summary';
+
 /**
- * Checks for elements that have `tabindex="-1"` applied.
+ * Checks for visible native controls taken out of the tab order with tabindex="-1".
+ * Such controls can be clicked with a mouse but not reached with the keyboard.
  *
- * ✅ Purpose:
- * - Ensures elements with `tabindex="-1"` are intentionally removed from keyboard navigation.
- * - Warns if an element is still visible and potentially interactive without `aria-hidden="true"`.
+ * tabindex="-1" on non-interactive elements (modals, skip-link targets, headings
+ * focused by code) is the correct pattern and is not reported.
  */
 export function checkTabindexNegativeOne(enableCheckTabindexNegativeOne?: boolean): void {
     if (!enableCheckTabindexNegativeOne) return;
 
-    const elements = document.querySelectorAll('[tabindex="-1"]');
+    queryTargets<HTMLElement>('[tabindex="-1"]').forEach((el) => {
+        if (!el.matches(NATIVE_CONTROLS)) return;
+        if ((el as HTMLButtonElement).disabled || isAriaHidden(el) || !isElementVisible(el)) return;
 
-    elements.forEach((el) => {
-        const tag = el.tagName;
-        const ariaHidden = el.getAttribute('aria-hidden');
-
-        if (ariaHidden !== 'true') {
-            const msg = `Accessibility warning: <${tag}> has tabindex="-1" but is still visible and lacks aria-hidden="true". ` +
-                `Ensure this element doesn't block keyboard navigation or confuse screen reader users.`;
-
-            logWarning(msg);
-
-            const element = el as HTMLElement;
-            element.style.outline = '2px dashed #FFA500'; // orange warning
-            element.title = '⚠️ tabindex="-1" without aria-hidden';
-        }
+        const msg = `${describeElement(el)} is visible and interactive but has tabindex="-1", so keyboard users can't reach it.`;
+        logWarning(msg);
+        highlight(el, { outline: '2px dashed #FFA500', title: '⚠️ Interactive element removed from tab order' });
     });
 }

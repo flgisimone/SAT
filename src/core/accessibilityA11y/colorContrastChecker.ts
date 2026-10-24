@@ -1,84 +1,103 @@
 import { logError, logWarning } from '../../sat/satLogger';
+import { describeElement, highlight, isElementVisible, queryTargets } from '../../sat/satDom';
 
-type RGB = [number, number, number];
+export type RGB = [number, number, number];
+export type RGBA = [number, number, number, number];
 
-/**
- * Converts a CSS color string to an RGB tuple.
- * Supports: rgb(), rgba(), hex, color names (via computed styles fallback).
- *
- * @param {string} color - The color string (e.g., 'rgb(255, 255, 255)', '#ffffff', 'red').
- * @returns {RGB} A tuple of RGB values [r, g, b].
- */
-export function colorToRgbArray(color: string): RGB {
-    // 1. Check if color is rgb() or rgba()
-    if (color.startsWith('rgb')) {
-        const rgbValues = color.match(/\d+/g);
-        if (rgbValues && rgbValues.length >= 3) {
-            return [
-                parseInt(rgbValues[0], 10),
-                parseInt(rgbValues[1], 10),
-                parseInt(rgbValues[2], 10)
-            ];
+let canvasContext: CanvasRenderingContext2D | null | undefined;
+
+function getCanvasContext(): CanvasRenderingContext2D | null {
+    if (canvasContext === undefined) {
+        try {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1;
+            canvas.height = 1;
+            canvasContext = canvas.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D | null;
+        } catch {
+            canvasContext = null;
         }
     }
+    return canvasContext;
+}
 
-    // 2. Check if color is hex
-    if (color.startsWith('#')) {
-        return hexToRgb(color);
+function parseAlpha(value: string | undefined): number {
+    if (value === undefined) return 1;
+    const alpha = value.endsWith('%') ? parseFloat(value) / 100 : parseFloat(value);
+    return Number.isNaN(alpha) ? 1 : Math.min(Math.max(alpha, 0), 1);
+}
+
+/**
+ * Converts a CSS color string to an RGBA tuple (alpha 0..1).
+ * Supports rgb()/rgba() (comma or space syntax), hex (3, 4, 6, 8 digits), and,
+ * through a 1px canvas, any other color the browser understands (named colors,
+ * hsl(), oklch(), color(), ...). Returns null if the color can't be resolved.
+ */
+export function parseColor(color: string): RGBA | null {
+    const value = color.trim().toLowerCase();
+    if (value === 'transparent') return [0, 0, 0, 0];
+
+    const rgb = value.match(
+        /^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)(?:\s*[,/]\s*([\d.]+%?))?\s*\)$/
+    );
+    if (rgb) {
+        return [parseFloat(rgb[1]), parseFloat(rgb[2]), parseFloat(rgb[3]), parseAlpha(rgb[4])];
     }
 
-    // 3. Fallback for named colors or any unknown format
-    const tempEl = document.createElement('div');
-    tempEl.style.color = color;
-    document.body.appendChild(tempEl);
+    const hex = value.match(/^#([0-9a-f]{3,8})$/);
+    if (hex && [3, 4, 6, 8].includes(hex[1].length)) {
+        let digits = hex[1];
+        if (digits.length <= 4) digits = digits.split('').map((d) => d + d).join('');
+        const r = parseInt(digits.slice(0, 2), 16);
+        const g = parseInt(digits.slice(2, 4), 16);
+        const b = parseInt(digits.slice(4, 6), 16);
+        const a = digits.length === 8 ? parseInt(digits.slice(6, 8), 16) / 255 : 1;
+        return [r, g, b, a];
+    }
 
-    const computedColor = window.getComputedStyle(tempEl).color;
-    document.body.removeChild(tempEl);
+    const ctx = getCanvasContext();
+    if (!ctx) return null;
 
-    // Try again recursively with the computed RGB value
-    return colorToRgbArray(computedColor);
+    const sentinel = 'rgba(1, 2, 3, 0)';
+    ctx.fillStyle = sentinel;
+    ctx.fillStyle = value;
+    if (ctx.fillStyle === sentinel) return null; // the browser rejected the color
+
+    ctx.clearRect(0, 0, 1, 1);
+    ctx.fillRect(0, 0, 1, 1);
+    const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+    return [r, g, b, a / 255];
 }
 
 /**
- * Converts a hex color string to an RGB tuple.
- *
- * @param {string} hex - The hex color string (e.g., '#ffffff').
- * @returns {RGB} A tuple of RGB values [r, g, b].
+ * Kept for backwards compatibility. Returns black when the color can't be parsed.
  */
+export function colorToRgbArray(color: string): RGB {
+    const parsed = parseColor(color);
+    return parsed ? [parsed[0], parsed[1], parsed[2]] : [0, 0, 0];
+}
+
 export function hexToRgb(hex: string): RGB {
-    const parsed = hex.replace('#', '');
-    const bigint = parseInt(parsed, 16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
-    return [r, g, b];
+    return colorToRgbArray(hex.startsWith('#') ? hex : `#${hex}`);
 }
 
-/**
- * Calculates the relative luminance of an RGB color.
- *
- * @param {number} r - Red value (0-255).
- * @param {number} g - Green value (0-255).
- * @param {number} b - Blue value (0-255).
- * @returns {number} The relative luminance (0.0 - 1.0).
- */
+/** Composites a semi-transparent color over an opaque one. */
+export function blend(top: RGBA, bottom: RGB): RGB {
+    const a = top[3];
+    return [
+        top[0] * a + bottom[0] * (1 - a),
+        top[1] * a + bottom[1] * (1 - a),
+        top[2] * a + bottom[2] * (1 - a),
+    ];
+}
+
 export function luminance(r: number, g: number, b: number): number {
     const a = [r, g, b].map((v) => {
         v /= 255;
-        return v <= 0.03928
-            ? v / 12.92
-            : Math.pow((v + 0.055) / 1.055, 2.4);
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
     });
     return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
 }
 
-/**
- * Calculates the contrast ratio between two RGB colors.
- *
- * @param {RGB} rgb1 - The first RGB color tuple.
- * @param {RGB} rgb2 - The second RGB color tuple.
- * @returns {number} The contrast ratio.
- */
 export function contrast(rgb1: RGB, rgb2: RGB): number {
     const lum1 = luminance(...rgb1);
     const lum2 = luminance(...rgb2);
@@ -88,70 +107,80 @@ export function contrast(rgb1: RGB, rgb2: RGB): number {
 }
 
 /**
- * Tries to find an effective background color for an element.
- * Walks up the DOM tree until it finds a non-transparent background, or defaults to body.
- *
- * @param {HTMLElement} el - The element to check.
- * @returns {string} A CSS color string.
+ * Computes the background actually behind an element by walking up the DOM and
+ * blending semi-transparent layers over white.
+ * Returns null when a background image is involved, since its color can't be known.
  */
-export function getEffectiveBackground(el: HTMLElement): string {
-    let current: HTMLElement | null = el;
+export function getEffectiveBackground(el: Element): RGB | null {
+    const layers: RGBA[] = [];
+    let current: Element | null = el;
 
-    while (current && current !== document.body) {
-        const bg = window.getComputedStyle(current).backgroundColor;
-        if (bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
-            return bg;
+    while (current) {
+        const style = window.getComputedStyle(current);
+        if (style.backgroundImage && style.backgroundImage !== 'none') return null;
+
+        const bg = parseColor(style.backgroundColor || 'transparent');
+        if (bg && bg[3] > 0) {
+            layers.push(bg);
+            if (bg[3] >= 1) break;
         }
         current = current.parentElement;
     }
 
-    // fallback: background color of body or white
-    const bodyBg = window.getComputedStyle(document.body).backgroundColor;
-    return (bodyBg !== 'rgba(0, 0, 0, 0)' && bodyBg !== 'transparent') ? bodyBg : 'rgb(255, 255, 255)';
+    let result: RGB = [255, 255, 255];
+    for (let i = layers.length - 1; i >= 0; i--) {
+        result = blend(layers[i], result);
+    }
+    return result;
 }
 
+function hasOwnText(el: Element): boolean {
+    return Array.from(el.childNodes).some(
+        (node) => node.nodeType === Node.TEXT_NODE && (node.textContent || '').trim().length > 0
+    );
+}
+
+/** WCAG "large text": at least 24px, or at least 18.66px (14pt) and bold. */
+export function isLargeText(fontSize: string, fontWeight: string): boolean {
+    const size = parseFloat(fontSize);
+    const weight = parseInt(fontWeight, 10) || (fontWeight === 'bold' ? 700 : 400);
+    return size >= 24 || (size >= 18.66 && weight >= 700);
+}
+
+const TEXT_SELECTORS = 'h1, h2, h3, h4, h5, h6, p, span, a, button, label, li, td, th, strong, em, small';
+
 /**
- * Checks contrast ratio for text elements according to WCAG 2.1 standards.
- * Targets: headings (`h1`-`h6`), `span`, `a`, `button`.
- * Logs warnings when contrast is below AA (4.5) or AAA (7.0) thresholds.
- * Highlights elements with insufficient contrast (adds red dashed outline).
- *
- * @returns {void}
+ * Checks text contrast against WCAG 2.1.
+ * Only elements that directly contain visible text are checked.
+ * Thresholds: AA 4.5 (3 for large text), AAA 7 (4.5 for large text).
  */
 export function checkTextElementContrast(enableCheckTextElementContrast?: boolean): void {
     if (!enableCheckTextElementContrast) return;
 
-    const selectors = 'h1, h2, h3, h4, h5, h6, span, a, button';
-    const elements = Array.from(document.querySelectorAll(selectors)) as HTMLElement[];
+    queryTargets<HTMLElement>(TEXT_SELECTORS).forEach((el) => {
+        if (!hasOwnText(el) || !isElementVisible(el)) return;
 
-    elements.forEach((el) => {
-        const computedStyle = window.getComputedStyle(el);
-        const color = computedStyle.color;
-        let backgroundColor = computedStyle.backgroundColor;
+        const style = window.getComputedStyle(el);
+        const background = getEffectiveBackground(el);
+        const textColor = parseColor(style.color);
+        if (!background || !textColor) return;
 
-        if (backgroundColor === 'rgba(0, 0, 0, 0)' || backgroundColor === 'transparent') {
-            backgroundColor = getEffectiveBackground(el);
-        }
+        const ratio = contrast(blend(textColor, background), background);
+        const large = isLargeText(style.fontSize, style.fontWeight);
+        const aa = large ? 3 : 4.5;
+        const aaa = large ? 4.5 : 7;
+        const sizeNote = large ? ' (large text)' : '';
 
-        const rgbText = colorToRgbArray(color);
-        const rgbBackground = colorToRgbArray(backgroundColor);
-
-        const contrastRatio = contrast(rgbText, rgbBackground);
-        const text = el.textContent?.trim() || '[no text]';
-        const tag = el.tagName;
-
-        if (contrastRatio < 4.5) {
-            const msg = `Insufficient contrast on <${tag}> ("${text}"): contrast ratio ${contrastRatio.toFixed(2)}. Minimum AA requirement is 4.5.`;
-            logError(msg);
-
-            el.title = `❌ Contrast ratio too low: ${contrastRatio.toFixed(2)}`;
-            el.style.outline = '2px dashed red';
-        } else if (contrastRatio < 7) {
-            const msg = `Suboptimal contrast on <${tag}> ("${text}"): ratio ${contrastRatio.toFixed(2)}. Meets AA but not AAA.`;
-            logWarning(msg);
-
-            el.title = `⚠️ Contrast ratio: ${contrastRatio.toFixed(2)}`;
-            el.style.outline = '1px dashed orange';
+        if (ratio < aa) {
+            logError(
+                `Insufficient contrast on ${describeElement(el)}: ratio ${ratio.toFixed(2)}. Minimum AA${sizeNote} is ${aa}.`
+            );
+            highlight(el, { outline: '2px dashed red', title: `❌ Contrast ratio too low: ${ratio.toFixed(2)}` });
+        } else if (ratio < aaa) {
+            logWarning(
+                `Suboptimal contrast on ${describeElement(el)}: ratio ${ratio.toFixed(2)}. Meets AA but not AAA${sizeNote} (${aaa}).`
+            );
+            highlight(el, { outline: '1px dashed orange', title: `⚠️ Contrast ratio: ${ratio.toFixed(2)}` });
         }
     });
 }

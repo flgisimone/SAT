@@ -1,51 +1,33 @@
-import { logError } from "../../sat/satLogger";
+import { logError, logWarning } from "../../sat/satLogger";
+import { describeElement, highlight, queryTargets } from "../../sat/satDom";
 
 /**
- * Checks for anchor tags (<a>) with empty or invalid href attributes.
- * Logs errors for:
- * - <a> elements without href
- * - href="#" or href=""
- * Suggests replacing with a <button> if it acts as an action trigger.
+ * Checks <a> elements that don't point anywhere.
+ * - Error: href="", href="#" or href="javascript:…" (an action disguised as a link).
+ * - Warning: <a> without href, which is not keyboard-focusable.
+ *
+ * Framework click handlers (React onClick, Vue @click) aren't visible in the DOM,
+ * so in both cases the suggestion is to use a <button> for actions.
  */
 export function checkEmptyLinks(enableCheckEmptyLinks?: boolean): void {
     if (!enableCheckEmptyLinks) return;
 
-    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('a'));
-
-    links.forEach(link => {
+    queryTargets<HTMLAnchorElement>('a').forEach((link) => {
         const href = link.getAttribute('href');
-        const text = link.textContent?.trim() || '[no text]';
-        const role = link.getAttribute('role') || '';
 
-        // Case 1: <a> without href
-        if (!href) {
-            const msg = `<a> tag with no href found: "${text}". Consider using <button> if it triggers an action.`;
-            logError(msg);
-
-            link.style.outline = '2px dashed orange';
-            link.title = msg;
-
+        if (href === null) {
+            if (link.hasAttribute('name')) return; // legacy in-page anchor target
+            const msg = `${describeElement(link)} has no href, so keyboard users can't reach it. If it triggers an action, use a <button>.`;
+            logWarning(msg);
+            highlight(link, { outline: '2px dashed orange', title: msg });
             return;
         }
 
-        // Case 2: href="#" or empty string
-        if (href === '#' || href === '') {
-            const hasOnClick = link.hasAttribute('onclick');
-            const isProperRole = role === 'button' || role === 'link';
-
-            if (!hasOnClick && !isProperRole) {
-                const msg = `<a href="${href}"> without event handling: "${text}". Add preventDefault or consider using a <button>.`;
-                logError(msg);
-
-                link.style.outline = '2px dashed brown';
-                link.title = msg;
-            } else {
-                const msg = `<a href="${href}"> has onclick, but consider using a <button> for semantic clarity: "${text}".`;
-                logError(msg);
-
-                link.style.outline = '2px dashed brown';
-                link.title = msg;
-            }
+        const value = href.trim();
+        if (value === '' || value === '#' || /^javascript:/i.test(value)) {
+            const msg = `${describeElement(link)} has href="${href}", which doesn't lead anywhere. Use a real URL, or a <button> for actions.`;
+            logError(msg);
+            highlight(link, { outline: '2px dashed brown', title: msg });
         }
     });
 }

@@ -9,6 +9,9 @@ export function createLogPanel(): {
     setVisibility: (hasErrors: boolean, hasWarnings: boolean) => void;
 } {
     const logPanel = document.createElement("div");
+    logPanel.setAttribute("data-sat-ignore", "true");
+    logPanel.setAttribute("role", "region");
+    logPanel.setAttribute("aria-label", "SAT results");
 
     Object.assign(logPanel.style, {
         position: "fixed",
