@@ -5,6 +5,8 @@ import { rules } from '../src/core/rules';
 import { blend, isLargeText, parseColor } from '../src/core/rules/a11y/color-contrast';
 import { collectInternalLinks } from '../src/core/rules/seo/link-broken';
 import { headingOutline } from '../src/core/rules/headings';
+import { GOOGLE_TYPES, NESTED_TYPES } from '../src/core/rules/seo/google-structured-data';
+import googleExamples from './google-structured-data.json';
 
 function render(html: string) {
     document.body.innerHTML = html;
@@ -356,6 +358,94 @@ describe('SEO: contents', () => {
         expect(r.errorMessages).toHaveLength(2);
         expect(r.errorMessages[0]).toContain('1 item(s) without "@type"');
     });
+});
+
+describe('structured-data: properties Google requires', () => {
+    const jsonLd = (...items: unknown[]) => items.map((item) => `<script type="application/ld+json">${JSON.stringify(item)}</script>`).join('');
+    const product = { '@context': 'https://schema.org', '@type': 'Product', name: 'Anvil', offers: { '@type': 'Offer', price: 0 } };
+
+    it('the table is well formed', () => {
+        for (const [type, entry] of Object.entries({ ...GOOGLE_TYPES, ...NESTED_TYPES })) {
+            expect(entry.page, type).toMatch(/^https:\/\/developers\.google\.com\/search\/docs\/appearance\/structured-data\/[a-z-]+$/);
+            expect(entry.updated, type).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+            expect(entry.required.length, type).toBeGreaterThan(0);
+            entry.required.flat().forEach((path) => expect(path, type).toMatch(/^[A-Za-z]+(\.[A-Za-z]+)*$/));
+            entry.notRequiredOnLast?.forEach((path) => expect(entry.required.flat(), type).toContain(path));
+        }
+    });
+
+    it.each(Object.entries(googleExamples.examples))('Google examples are valid: %s', async (_, examples) => {
+        render(jsonLd(...examples));
+        const r = await runOnly(['structured-data']);
+        expect(r.errorMessages).toEqual([]);
+    });
+
+    it('removing a required property from a Google example is an error that names it', async () => {
+        let removed = 0;
+        for (const item of Object.values(googleExamples.examples).flat() as Record<string, unknown>[]) {
+            const requirements = GOOGLE_TYPES[item['@type'] as string];
+            for (const [path] of requirements?.required.filter((alternatives) => alternatives.length === 1) ?? []) {
+                const [property] = path.split('.');
+                render(jsonLd({ ...item, [property]: undefined }));
+                const r = await runOnly(['structured-data']);
+                expect(r.errorMessages, `${item['@type']} without ${property}`).toEqual([expect.stringContaining(`Missing ${item['@type']} > ${path.split('.').join(' > ')}`)]);
+                removed++;
+            }
+        }
+        expect(removed).toBeGreaterThan(20);
+    });
+
+    it.each([
+        ['Product name',{ ...product, name: undefined }, 'Missing Product > name'],
+        ['Product review, rating or offer', { ...product, offers: undefined }, 'Missing Product > review, aggregateRating or offers'],
+        ['offer price', { ...product, offers: [{ '@type': 'Offer', price: 1 }, { '@type': 'Offer', priceCurrency: 'EUR' }] }, 'Missing Product > offers[1] > price or priceSpecification > price'],
+        ['aggregate rating count', { ...product, aggregateRating: { '@type': 'AggregateRating', ratingValue: 4 } }, 'Missing Product > aggregateRating > ratingCount or reviewCount'],
+        ['review author', { ...product, review: { '@type': 'Review', reviewRating: { '@type': 'Rating', ratingValue: 4 } } }, 'Missing Product > review > author'],
+        ['event address', { '@type': 'Event', name: 'A', startDate: '2026-11-01', location: { '@type': 'Place', name: 'B' } }, 'Missing Event > location > address'],
+        ['video upload date', { '@type': 'VideoObject', name: 'A', thumbnailUrl: 'https://example.com/a.jpg' }, 'Missing VideoObject > uploadDate'],
+        ['app price', { '@type': ['MobileApplication', 'Thing'], name: 'A', review: { '@type': 'Review', author: 'B' } }, 'Missing MobileApplication > offers > price'],
+        ['business address', { '@type': 'https://schema.org/Restaurant', name: 'A' }, 'Missing Restaurant > address'],
+    ])('reports a missing required property: %s', async (_, item, message) => {
+        render(jsonLd(item));
+        const r = await runOnly(['structured-data']);
+        expect(r.errorMessages).toHaveLength(1);
+        expect(r.errorMessages[0]).toContain(message);
+        expect(r.errorMessages[0]).toContain('https://developers.google.com/search/docs/appearance/structured-data/');
+    });
+
+    it('breadcrumbs: every item but the last needs item; name may come from item', async () => {
+        render(jsonLd({
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+                { '@type': 'ListItem', position: 1, item: { '@id': 'https://example.com/books', name: 'Books' } },
+                { '@type': 'ListItem', position: 2, name: 'Fiction' },
+                { '@type': 'ListItem', position: 3, name: 'Award winners' },
+            ],
+        }));
+        const r = await runOnly(['structured-data']);
+        expect(r.errorMessages).toEqual([expect.stringContaining('Missing BreadcrumbList > itemListElement[1] > item')]);
+    });
+
+    it('nodes with the same @id are merged across @graph and blocks', async () => {
+        render(jsonLd(
+            { '@context': 'https://schema.org', '@graph': [{ '@type': 'Product', '@id': '#p', name: 'Anvil', offers: { '@id': '#o' } }, { '@id': '#p', image: 'a.png' }] },
+            { '@type': 'Offer', '@id': '#o' },
+        ));
+        const r = await runOnly(['structured-data']);
+        expect(r.errorMessages).toEqual([expect.stringContaining('Missing Product > offers > price')]);
+    });
+
+    it('types Google requires nothing for, unknown types and Event offers are not checked', async () => {
+        render(jsonLd(
+            { '@type': 'Article' }, { '@type': 'Organization' }, { '@type': 'WebSite' },
+            { '@type': 'Event', name: 'A', startDate: '2026-11-01', location: { '@type': 'Place', address: 'B' }, offers: { '@type': 'Offer' } },
+        ));
+        const r = await runOnly(['structured-data']);
+        expect(r.errorMessages).toEqual([]);
+    });
+});
+
+describe('SEO: contents (mixed content)', () => {
 
     it('mixed content: active resources are errors, images warnings, links and http pages ignored', async () => {
         const html = `<!doctype html><head>

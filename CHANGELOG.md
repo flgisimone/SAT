@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.15.0 — unreleased
+
+`structured-data` checks the properties Google requires for rich results, as listed on the pages of Google's structured data gallery. A missing one is an error with its path (`Product > offers > price`) and the link to Google's page. Recommended properties are not checked. To turn the rule off, set it to `"off"` in `rules`.
+
+### Added
+- `structured-data`: required properties of `BreadcrumbList`, `Event`, `LocalBusiness` (`Restaurant`, `Store`), `Product` (with `Offer`, `AggregateOffer`, `Review`, `AggregateRating`), `Recipe`, `VideoObject` (with `Clip`), software apps, `Review` and `AggregateRating`. Google requires nothing for `Article` and `Organization`, so they are not reported. Google's own examples are part of the tests.
+
+### Changed
+- `structured-data`: nodes with the same `@id` are one node, also across blocks, so a node whose `@type` is on another node with its `@id` is no longer counted as an item without `@type`.
+
 ## 1.14.0 — unreleased
 
 Ten new accessibility rules from WCAG 2.2 and the W3C ACT rules, on by default. The ACT rules' own test cases are part of SAT's tests (`tests/act/`): failed cases are reported, passed and inapplicable ones are not. With the axe-core engine the new rules are off, except `target-size` (axe's rule is off by default). To turn a rule off, set it to `"off"` in `rules`.
