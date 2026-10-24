@@ -308,10 +308,11 @@ src/
     satOptions.ts             SATOptions, rule settings, 1.x options mapped to rules
     satReset.ts               deprecated no-op (SAT no longer changes the page)
   ui/                         panel in a shadow root (satUI.ts), boxes over the page (overlay.ts), styles (DOM built by hand, no framework)
-  integrations/               react.ts, vue.ts: thin wrappers around satChecker
+  integrations/               react.ts, vue.ts: thin wrappers around satChecker; vite.ts: Vite plugin that adds it to `vite dev` pages (entry: "./vite")
   engines/                    axe.ts: other checkers as `Engine`s (entry: "./axe"), with their package as optional peer dependency
   headless/                   runs in Node with Playwright: playwright.ts (entry: "./playwright"), cli.ts (bin `sat-check`), report.ts;
                               inject.ts is the standalone script (dist/sat-inject.js) they add to the page under test
+  extension/                  browser extension (dist/extension): background.ts adds sat.ts, satChecker on, to the tab on a click
   types/                      global declarations
 tests/                        Vitest (jsdom) unit tests, setup
 tests/browser/                Playwright tests on the built bundle in Chromium
@@ -325,7 +326,8 @@ plan/                         backlog and phases (plan/README.md)
 - Integrations stay thin: lifecycle wiring and options passthrough, no logic of their own. Logic shared by React and Vue lives in `sat/`.
 - Engines translate another checker's results into `Issue`s and list the SAT rules they replace; `core/` knows only the `Engine` interface, never the checker's package.
 - `headless/` runs SAT only inside the page, through `dist/sat-inject.js`: Node code never calls the rules directly and imports `core/` and `sat/` only for types and pure helpers.
-- The public API is what the six entry points in `package.json` `exports` and the `sat-check` command expose. Anything else is internal and may change.
+- The public API is what the seven entry points in `package.json` `exports`, the `sat-check` command and the browser extension expose. Anything else is internal and may change.
+- The browser extension asks only for `activeTab` and `scripting`: it reads a tab only when its button is clicked there, and sends nothing anywhere.
 
 ## 6. Writing Checks
 
@@ -371,7 +373,7 @@ New rules get no `enableCheck*` option: those exist only for 1.x compatibility.
 
 ## 7. SAT User Interface
 
-- Every SAT element is inside the `<sat-panel data-sat-ignore>` host, in its open shadow root; styles live in `ui/styles.ts`, and `:host { all: initial }` stops inherited page styles.
+- Every SAT element is inside the `<sat-panel data-sat-ignore>` host, in its open shadow root; styles live in `ui/styles.ts`, applied as a constructed sheet (`adoptedStyleSheets`, which a page's CSP doesn't block, unlike `<style>`), and `:host { all: initial }` stops inherited page styles.
 - SAT's UI must pass SAT's own checks: buttons have accessible names, controls work with the keyboard, Escape closes the panel and returns focus (tested in `tests/browser/panel.spec.ts`).
 - The UI never depends on the host's CSS and must not leak styles into the host.
 - UI strings and messages are in English only (no localization).
@@ -390,7 +392,7 @@ Any change to defaults, severities or what a check reports is listed under **Beh
 
 ### 8.3 Dependencies and Activation
 
-- Runtime dependencies: none besides `tslib`. React, Vue, axe-core and `@playwright/test` are **optional** peer dependencies, imported only by their entry point (and `sat-check`).
+- Runtime dependencies: none besides `tslib`. React, Vue, Vite, axe-core and `@playwright/test` are **optional** peer dependencies, imported only by their entry point (and `sat-check`).
 - SAT is a development tool: the controller starts only when `process.env.NODE_ENV === "development"`, unless the `enabled` option says otherwise.
 - Publishing to npm is done by the maintainer, never by an agent.
 
@@ -533,7 +535,7 @@ Consider other consumers of shared components, hooks, services, and types before
 
 ### 12.1 Build
 
-- Rollup builds the ESM entry points and `dist/cli.js` in one pass (`rollup.config.js`), with the shared code of `core/` and `sat/` in one chunk (`dist/chunks/seoAccessibilityTool.js`, `manualChunks`), and their declarations (`rollup.dts.config.cjs`). A second build makes `dist/sat-inject.js` (IIFE, axe-core read from `window.axe`). Keep `exports` in `package.json` and both configs in sync. Chunk names have no hash, so a new build overwrites the old files.
+- Rollup builds the ESM entry points and `dist/cli.js` in one pass (`rollup.config.js`), with the shared code of `core/` and `sat/` in one chunk (`dist/chunks/seoAccessibilityTool.js`, `manualChunks`), and their declarations (`rollup.dts.config.cjs`). A second build makes `dist/sat-inject.js` (IIFE, axe-core read from `window.axe`), two more the browser extension in `dist/extension/` (IIFE scripts and `manifest.json` with the package's version). Keep `exports` in `package.json` and both configs in sync. Chunk names have no hash, so a new build overwrites the old files.
 - Browser tests serve `dist/` from a fake origin (`tests/browser/serve.ts`) and import the entry points as an app does.
 - TypeScript in strict mode, `moduleResolution: "bundler"`, Node types only for `process.env.NODE_ENV`.
 

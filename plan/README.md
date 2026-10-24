@@ -10,9 +10,11 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | `seo-accessibility-tool/sat-controller` | `satChecker(options)`: bottone e pannello nella pagina | Vanilla JS |
 | `seo-accessibility-tool/react` | `useSATChecker(options)` | App React |
 | `seo-accessibility-tool/vue` | `useSatChecker(options)` | App Vue 3 |
+| `seo-accessibility-tool/vite` | `sat(options)`: plugin che aggiunge SAT alle pagine di `vite dev` | Progetti Vite (Svelte, Solid, React, Vue…) |
 | `seo-accessibility-tool/axe` | `axe(options)`: axe-core come motore aggiuntivo (`engines: [axe()]`) | Chi vuole le circa 90 regole di axe |
 | `seo-accessibility-tool/playwright` | `checkPage(page, options)`, `expect(page).toHaveNoSATErrors()` | Test end-to-end |
 | `sat-check` (bin) | CLI: report in console, JSON e HTML, soglie, crawler dei link interni | CI |
+| `dist/extension` | Estensione per Chrome/Edge: SAT su qualsiasi pagina | Chi controlla siti senza installare SAT |
 
 ## Decisioni
 
@@ -21,10 +23,12 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | Precisione | Meglio un problema mancato che un falso positivo: ogni controllo segue la specifica (WCAG, WAI-ARIA, HTML-AAM) e non segnala i pattern validi | Se il tool segnala cose corrette, gli sviluppatori smettono di guardarlo (F1-01) |
 | Pagina ospite | SAT non modifica la pagina: i riquadri stanno in uno strato proprio, `satReset` è deprecato e non fa nulla | Il reset cancellava stili e tooltip dell'app (F1-01); i re-render cancellavano le evidenziazioni (F3-02) |
 | Link rotti | Controllo spento di default, una richiesta per URL, massimo 5 alla volta, URL tipo logout/delete esclusi | Le richieste dal browser hanno effetti collaterali e nelle SPA non trovano i 404 (F1-01); la versione completa è nella CLI, `sat-check --depth` (F5-04) |
-| Peer dependency | `react`, `vue`, `axe-core` e `@playwright/test` opzionali | npm 7+ installava entrambe in ogni progetto (F1-02) |
+| Peer dependency | `react`, `vue`, `vite`, `axe-core` e `@playwright/test` opzionali | npm 7+ installava entrambe in ogni progetto (F1-02) |
 | Strumenti | Gli stessi di oneoffice: Vitest 5 con jsdom, Playwright 1.64, ESLint 10 con typescript-eslint, TypeScript 6, tokensave, `npm run verify` / `verify:e2e` / `usage` | Un solo modo di lavorare fra i progetti (F1-06) |
 | Test | Unit test in jsdom per la logica; test in Chromium sul bundle per tutto ciò che dipende da layout, colori e visibilità | jsdom non ha layout né canvas (F1-04) |
 | Rilascio | Semver; i cambi di comportamento vanno in `CHANGELOG.md`; la pubblicazione su npm la fa il maintainer | CONVENTIONS §8 |
+| Versione dopo F6 | **1.12.0**: plugin Vite, estensione per il browser, stili del pannello che passano la CSP | Funzioni nuove senza rotture di API (F6) |
+| Integrazioni Svelte e Angular | Nessun wrapper: `satChecker` con una riga nell'entry point, esempi nel README | Un wrapper non aggiungerebbe nulla (F6-02) |
 | Versione dopo F5 | **1.11.0**: `runSAT`, helper per Playwright, CLI `sat-check` con crawler dei link | Funzioni nuove senza rotture di API (F5) |
 | Versione dopo F4 | **1.10.0**: 8 regole SEO e di caricamento nuove, accese di default, documentazione per regola (`Issue.help`), adattatore axe-core | Funzioni nuove senza rotture di API (F4) |
 | Versione dopo F3 | **1.9.0**: pannello nuovo, nessuna modifica alla pagina, `satReset` deprecato | Funzioni nuove senza rotture di API (F3) |
@@ -42,7 +46,7 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | F3 | [03-pannello.md](03-pannello.md) | Pannello in Shadow DOM, evidenziazioni sovrapposte, clic su un problema → elemento, filtri, mappa dei titoli, SPA | F2 |
 | F4 | [04-copertura-regole.md](04-copertura-regole.md) | Decisione su axe-core, nuove regole SEO e di accessibilità, documentazione per regola | F2 |
 | F5 | [05-ci-automazione.md](05-ci-automazione.md) | API senza interfaccia, helper per Playwright, CLI con report e soglie, link rotti nella CLI | F2 (meglio dopo F4) |
-| F6 | [06-ecosistema.md](06-ecosistema.md) | Plugin Vite, altre integrazioni, sito di documentazione (facoltativa) | F3, F5 |
+| F6 | [06-ecosistema.md](06-ecosistema.md) | Plugin Vite, estensione per il browser, Svelte e Angular, documentazione | F3, F5 |
 
 ```
 F1 ─► F2 ─┬─► F3 ──────────┬─► F6

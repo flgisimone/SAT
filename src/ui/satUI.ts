@@ -87,7 +87,11 @@ export function createSATUI(onToggle: () => void, onRerun: () => void): SATUI {
     panel.setAttribute('aria-label', 'SAT results');
 
     const dock = el('div', { className: 'dock' }, runButton, rerunButton, resultsButton);
-    root.append(el('style', { textContent: STYLES }), layer, dock, panel);
+    // A constructed sheet instead of <style>: a page's CSP `style-src` doesn't block it (e.g. under the browser extension).
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(STYLES);
+    root.adoptedStyleSheets = [sheet];
+    root.append(layer, dock, panel);
 
     let issues: Issue[] = [];
     const openGroups = new Set<string>();
