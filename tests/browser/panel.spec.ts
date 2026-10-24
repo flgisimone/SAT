@@ -163,7 +163,7 @@ test('keyboard: every control is reached with Tab and works with Enter; Escape c
     await expect(results(page)).toHaveAttribute('aria-expanded', 'true');
 
     const names: string[] = [];
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 11; i++) {
         await page.keyboard.press('Tab');
         names.push(await page.evaluate(() => {
             const active = document.querySelector('sat-panel')!.shadowRoot!.activeElement;
@@ -173,6 +173,7 @@ test('keyboard: every control is reached with Tab and works with Enter; Escape c
     expect(names).toEqual([
         'Move SAT to the right', 'Close SAT results', '1 Errors', '0 Warnings', '1 Accessibility', '0 SEO',
         'Issues 1', 'Structure 1', 'Why and how to fix: Elements have an accessible name (opens in a new tab)',
+        'Copy prompt for all: Elements have an accessible name',
         'Missing accessible name on <button id="b">. Add visible text, aria-label or aria-labelledby.',
     ]);
 
@@ -236,13 +237,76 @@ test('with reduced motion the panel and the reveal box do not animate', async ({
     expect(await page.locator('sat-panel').evaluate((host) => host.shadowRoot!.getAnimations().length)).toBe(0);
 });
 
+/** What `fixPrompt` returns in the page for the issues of a rule. */
+function expectedPrompt(page: Page, ruleId: string): Promise<string> {
+    return page.evaluate(async (ruleId) => {
+        const { fixPrompt, seoAccessibilityTool } = await import('/index.js');
+        const { issues } = await seoAccessibilityTool();
+        return fixPrompt(issues.filter((issue: { ruleId: string }) => issue.ruleId === ruleId), { url: location.href });
+    }, ruleId);
+}
+
+test('"Copy fix prompt" copies the prompt of an issue, "Copy prompt for all" the one of the rule', async ({ page }) => {
+    await start(page, `${UNNAMED}<button id="c"></button>`, only(['accessible-name']));
+    // The test page (http://sat.test) is not a secure context, so it has no clipboard: a stub keeps what SAT writes.
+    await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: async (text: string) => void ((window as unknown as { copied: string }).copied = text) },
+    }));
+    await results(page).click();
+    const clipboard = () => page.evaluate(() => (window as unknown as { copied: string }).copied);
+
+    await page.locator('.row').first().getByRole('button', { name: 'Copy fix prompt' }).click();
+    await expect(page.getByRole('status')).toHaveText('Copied');
+    const one = await clipboard();
+    expect(one).toMatch(/^Fix this issue/);
+    expect(one).toContain('Selector: [id="b"]');
+
+    await page.getByRole('button', { name: 'Copy prompt for all: Elements have an accessible name' }).click();
+    expect(await clipboard()).toBe(await expectedPrompt(page, 'accessible-name'));
+});
+
+test('without the clipboard the prompt appears selected in a text box', async ({ page }) => {
+    await start(page, UNNAMED, only(['accessible-name']));
+    await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', { value: { writeText: () => Promise.reject(new Error('denied')) } }));
+    await results(page).click();
+    await page.getByRole('button', { name: 'Copy fix prompt' }).click();
+
+    const box = page.getByLabel('Clipboard unavailable: copy the fix prompt from here');
+    await expect(box).toBeFocused();
+    expect(await box.inputValue()).toBe(await expectedPrompt(page, 'accessible-name'));
+    expect(await box.evaluate((textarea: HTMLTextAreaElement) => textarea.selectionEnd - textarea.selectionStart)).toBe(await box.evaluate((textarea: HTMLTextAreaElement) => textarea.value.length));
+    await page.getByRole('button', { name: 'Close fix prompt' }).click();
+    await expect(box).toBeHidden();
+});
+
+test('Fix with AI: a stream that ends without a result says the connection was lost', async ({ page }) => {
+    const stream = JSON.stringify({ type: 'message', text: 'Reading src/App.vue' });
+    await openPage(page, html(UNNAMED, { ...only(['accessible-name']), aiFix: { url: '/__sat/fix', token: 't' } }), { '/__sat/fix': stream });
+    await page.locator('#sat-run-button').click();
+    await results(page).click();
+    await page.getByRole('button', { name: 'Fix with AI', exact: true }).click();
+
+    await expect(page.locator('.fix-status')).toHaveText('Fix failed · Elements have an accessible name');
+    await expect(page.locator('.fix-summary')).toHaveText('The connection to the dev server was lost.');
+    await expect(page.getByRole('status')).toHaveText('Fix failed Elements have an accessible name');
+});
+
 const AXE = readFileSync(new URL('../../node_modules/axe-core/axe.min.js', import.meta.url), 'utf8');
 
 for (const colorScheme of ['light', 'dark'] as const) {
     test(`SAT and axe-core report no issues on their own panel (${colorScheme} theme)`, async ({ page, context }) => {
         await page.emulateMedia({ colorScheme });
-        await start(page, `<main><h1>A</h1><h3>B</h3>${UNNAMED}<img src="data:,"><p style="color: #bbb">Low</p></main>`);
+        // With "Fix with AI" on and the result of a fix shown (a stub endpoint that streams a finished fix).
+        const fix = [
+            { type: 'warning', message: 'The repository has uncommitted changes.' },
+            { type: 'file', path: 'src/App.vue' },
+            { type: 'end', ok: true, summary: 'Added the alt text.', files: ['src/App.vue'] },
+        ].map((event) => JSON.stringify(event)).join('\n');
+        await openPage(page, html(`<main><h1>A</h1><h3>B</h3>${UNNAMED}<img src="data:,"><p style="color: #bbb">Low</p></main>`, { aiFix: { url: '/__sat/fix', token: 't' } }), { '/__sat/fix': fix });
+        await page.locator('#sat-run-button').click();
         await results(page).click();
+        await page.locator('.rule', { hasText: 'Images have alternative text' }).getByRole('button', { name: 'Fix with AI', exact: true }).click();
+        await expect(page.locator('.fix-status')).toHaveText('Still present · Images have alternative text');
         const panel = await page.locator('sat-panel').evaluate((host) => {
             const copy = document.createElement('div');
             copy.innerHTML = host.shadowRoot!.innerHTML;

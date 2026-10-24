@@ -1,4 +1,5 @@
 import type { RuleId, WcagLevel } from '../core/rules/rule';
+import type { AIFixEndpoint } from './aiFix';
 import type { Issue, Severity } from './issue';
 
 /** A severity forces every issue of the rule to it; 'off' turns the rule off. */
@@ -100,4 +101,6 @@ export interface SATOptions extends LegacyOptions {
      * after the page's DOM stops changing. Off by default; route changes always rerun them.
      */
     observeDom?: number;
+    /** Controller only: the endpoint of "Fix with AI". Set by the Vite plugin with `ai: true`. */
+    aiFix?: AIFixEndpoint;
 }

@@ -2,7 +2,7 @@
 
 **Obiettivo**: dal pannello si passa un problema a un agente IA che lo corregge nel sorgente. Ovunque si copia un prompt pronto o lo si apre nell'editor; con il plugin Vite, «Fix with AI» lancia Claude Code nel progetto, la pagina si ricarica e SAT conferma che il problema è sparito.
 
-> **Stato: da iniziare.**
+> **Stato: completata (24/10/2026), versione 1.17.0.** F12-03 chiuso senza link: vedi le note in fondo.
 
 ---
 
@@ -39,7 +39,7 @@
 - Più problemi della stessa regola vanno in un prompt unico.
 
 **Criteri di accettazione**
-- [ ] Test unitari: un problema, più problemi, elemento assente, HTML lungo tagliato, testo della pagina che contiene finte istruzioni (resta dentro il blocco dati).
+- [x] Test unitari: un problema, più problemi, elemento assente, HTML lungo tagliato, testo della pagina che contiene finte istruzioni (resta dentro il blocco dati).
 
 #### F12-02 · «Copy fix prompt» nel pannello — S
 **Dipendenze**: F12-01
@@ -47,7 +47,7 @@
 - Conferma «Copied» annunciata con `aria-live`. Se gli appunti non sono disponibili (pagina non sicura, permesso negato), il prompt compare in una textarea selezionata.
 
 **Criteri di accettazione**
-- [ ] Test in Chromium: il testo copiato è uguale a `fixPrompt`; il pannello passa ancora SAT e axe-core (F11-06) in entrambi i temi.
+- [x] Test in Chromium: il testo copiato è uguale a `fixPrompt`; il pannello passa ancora SAT e axe-core (F11-06) in entrambi i temi.
 
 #### F12-03 · Spike: link a Claude Code e Cursor — S
 **Dipendenze**: F12-01
@@ -58,7 +58,7 @@
 - Se reggono: un menu «Open in…» accanto a «Copy», con il prompt accorciato quando supera il limite. Se no, il task si chiude con le note e si scarta.
 
 **Criteri di accettazione**
-- [ ] Esito documentato nelle note della fase; se il link si tiene, c'è un test unitario sulla costruzione dell'URL.
+- [x] Esito documentato nelle note della fase; se il link si tiene, c'è un test unitario sulla costruzione dell'URL.
 
 #### F12-04 · Componente sorgente dove è gratis — S
 **Dipendenze**: F12-01
@@ -69,7 +69,7 @@
 - Solo lettura, niente trasformazioni del codice dell'app.
 
 **Criteri di accettazione**
-- [ ] Test con app Vue e Svelte di esempio in dev: il prompt contiene il file giusto; senza i metadati il campo manca.
+- [x] Test con app Vue e Svelte di esempio in dev: il prompt contiene il file giusto; senza i metadati il campo manca.
 
 #### F12-05 · Endpoint «Fix with AI» nel plugin Vite — M
 **Dipendenze**: F12-01
@@ -87,11 +87,11 @@
 - Avviso se il repository ha modifiche non salvate.
 
 **Criteri di accettazione**
-- [ ] Test con un `claude` finto nel `PATH`:
+- [x] Test con un `claude` finto nel `PATH`:
   - senza token, con un `Origin` diverso o con `ai` spento la richiesta viene rifiutata;
   - gli argomenti passati al processo sono quelli previsti;
   - lo streaming arriva al client.
-- [ ] `vite build` non contiene né l'endpoint né il token.
+- [x] `vite build` non contiene né l'endpoint né il token.
 
 #### F12-06 · «Fix with AI» nel pannello — M
 **Dipendenze**: F12-02, F12-05
@@ -103,8 +103,8 @@
   - «Fixed» se il problema (stessa regola e stesso selettore) non c'è più, altrimenti «Still present» con il riepilogo dell'agente.
 
 **Criteri di accettazione**
-- [ ] Test e2e con il `claude` finto che modifica un file della fixture: la pagina si ricarica, il problema sparisce e il pannello mostra «Fixed».
-- [ ] Il pannello passa ancora SAT e axe-core in entrambi i temi.
+- [x] Test e2e con il `claude` finto che modifica un file della fixture: la pagina si ricarica, il problema sparisce e il pannello mostra «Fixed».
+- [x] Il pannello passa ancora SAT e axe-core in entrambi i temi.
 
 #### F12-07 · Documentazione e rilascio — S
 **Dipendenze**: F12-01 … F12-06
@@ -115,4 +115,14 @@
 - Decisione sui dati aggiornata, `CHANGELOG.md`, versione 1.17.0.
 
 **Criteri di accettazione**
-- [ ] `npm run verify` e `npm run verify:e2e` passano.
+- [x] `npm run verify` e `npm run verify:e2e` passano.
+
+## 3. Note
+
+- **F12-03, link agli editor: scartato per ora.** `vscode://anthropic.claude-code/open?prompt=…` esiste dalla v2.1.72 ma non è nella documentazione ufficiale di Claude Code (segnalazioni anthropics/claude-code #29145, #32687). Il deeplink di Cursor è `cursor://anysphere.cursor-deeplink/prompt?text=…`, con un limite di 8.000 caratteri sull'URL codificato; il forum di Cursor riporta prompt sotto il limite che falliscono e testo perso dopo `&`, problemi di parsing noti e senza data di correzione. La prova a mano su macOS e Windows, che un agente non può fare, non è stata fatta. Si riapre se l'handler di VS Code entra nella documentazione e qualcuno lo prova sulle due piattaforme; nel frattempo «Copy fix prompt» copre lo stesso bisogno.
+- **Strumenti di Claude Code (F12-05)**: oltre ad `--allowedTools` si passa `--tools "Read,Edit,Grep,Glob"`. `--allowedTools` approva soltanto: da solo lascerebbe gli strumenti che le impostazioni dell'utente consentono (Bash compreso). Si aggiungono `--disallowedTools "mcp__*"` e `--strict-mcp-config` (nessun server MCP), `--no-session-persistence` e `--verbose`, che `stream-json` richiede in modalità `-p`.
+- **Il processo non dipende dalla connessione**: se l'agente modifica un file che Vite non aggiorna con l'HMR (`index.html`, un modulo senza confine HMR), la pagina si ricarica durante la correzione. Per questo `claude` continua anche se la connessione si chiude; la pagina ricaricata si ricollega con `POST /__sat/fix/stream`, che rimanda gli eventi dall'inizio, e l'annullamento è `POST /__sat/fix/cancel`. La correzione in corso è in `sessionStorage` (`sat-fix`). Tutte le richieste sono `POST`, perché le `GET` dalla stessa origine non mandano `Origin`.
+- **Origini accettate**: gli URL del dev server (`resolvedUrls`), e quelli locali anche come `localhost`, `127.0.0.1` e `[::1]`. Una pagina servita tramite DNS rebinding ha l'origine dell'attaccante e viene rifiutata.
+- **Verifica dopo l'HMR**: la nuova analisi parte un secondo dopo la fine della correzione. `ponytail:` un ritardo fisso; se non basta, si ascolta `vite:afterUpdate` nel modulo del plugin.
+- **F12-04 con Svelte reale**: `svelte` è una dipendenza di sviluppo, solo per il test che compila un componente in modalità dev e lo monta in jsdom (`__svelte_meta.loc` con `file`, `line` da 1, `column`). Per Vue basta il runtime già installato: `__file` lo aggiunge `@vitejs/plugin-vue` e il test lo imposta a mano sul componente.
+- **Annunci**: «Copied» è visibile nell'intestazione e annunciato (`role="status"`); lo stato della correzione è annunciato dalla stessa regione ma nascosto alla vista, perché è già nel riquadro della correzione.

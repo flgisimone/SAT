@@ -11,6 +11,8 @@ const ICONS = {
     close: [['path', { d: 'M4 4l8 8M12 4l-8 8' }]],
     left: [['path', { d: 'M13 8H3M7 4L3 8l4 4' }]],
     right: [['path', { d: 'M3 8h10M9 4l4 4-4 4' }]],
+    copy: [['rect', { x: '5.5', y: '5.5', width: '8', height: '8', rx: '1.5' }], ['path', { d: 'M10.5 3.5V3A1.5 1.5 0 0 0 9 1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5' }]],
+    fix: [['path', { d: 'M2.5 13.5l7-7M8.5 3.5l1-2 1 2 2 1-2 1-1 2-1-2-2-1zM12.5 9.5l.5 1 1 .5-1 .5-.5 1-.5-1-1-.5 1-.5z' }]],
     external: [['path', { d: 'M9.5 2.5h4v4M13.5 2.5L7.5 8.5M11.5 9.5v4h-9v-9h4' }]],
     error: [['circle', { cx: '8', cy: '8', r: '7', class: 'solid' }], ...ERROR_MARK],
     warning: [['path', { d: 'M8 1.25l7.1 13H.9z', class: 'solid' }], ['path', { d: 'M8 6v3.25', class: 'ink' }], ['circle', { cx: '8', cy: '11.6', r: '1', class: 'ink-dot' }]],

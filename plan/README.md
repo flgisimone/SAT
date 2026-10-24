@@ -31,6 +31,7 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | Correzione con l'IA | «Copy fix prompt» ovunque; «Fix with AI» solo con il plugin Vite e `ai: true`, che lancia Claude Code (`claude -p`) con strumenti limitati; nessun altro agente finché non viene chiesto | Serve un processo Node nel progetto; con un solo agente la sicurezza la controlla SAT (F12, decisione del 24/10/2026) |
 | Dati della pagina | Non si inviano a nessun servizio, salvo con la correzione con l'IA attivata esplicitamente: li manda l'agente dell'utente, non SAT | Eccezione opt-in (F12) |
 | Ordine dopo F7 | Prima le regole (F8, F9, F10), poi il pannello (F11), che mostra così titoli e fonti definitivi | Scelta del 24/10/2026 |
+| Versione dopo F12 | **1.17.0**: `fixPrompt`, «Copy fix prompt» nel pannello, «Fix with AI» con Claude Code dal plugin Vite (`ai: true`) | Funzioni nuove senza rotture di API (F12) |
 | Versione dopo F11 | **1.16.0**: pannello in stile DevTools con temi, contatori che filtrano, titoli e fonti delle regole (`Issue.title`, `Issue.source`) | Funzioni nuove senza rotture di API (F11) |
 | Versione dopo F10 | **1.15.0**: `structured-data` controlla le proprietà che Google dichiara obbligatorie | Funzione nuova senza rotture di API (F10) |
 | Versione dopo F9 | **1.14.0**: dieci regole nuove da WCAG 2.2 e ACT, accese di default; i casi di test ACT fanno parte dei test | Funzioni nuove senza rotture di API (F9) |

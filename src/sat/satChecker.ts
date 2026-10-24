@@ -3,6 +3,7 @@ import { headingOutline } from "../core/rules/headings";
 import type { Issue } from "./issue";
 import type { SATOptions } from "./satOptions";
 import { createSATUI } from "../ui/satUI";
+import { createFixController } from "./aiFix";
 
 let satHasRun = false;
 
@@ -90,6 +91,7 @@ export function satChecker(customOptions: Partial<SATOptions> = {}): void {
         // Stopped, or a newer run started while this one waited (e.g. on link-broken requests).
         if (!running || id !== runId) return;
         ui.showResults(issues, headingOutline(document), performance.now() - startTime);
+        fixer?.checked(issues);
     };
 
     const runSoon = (delay: number) => {
@@ -106,6 +108,7 @@ export function satChecker(customOptions: Partial<SATOptions> = {}): void {
         storeEnabled(true);
         ui.setRunning(true);
         domObserver?.observe(document.body, { childList: true, subtree: true, attributes: true, characterData: true });
+        fixer?.resume();
         return run();
     };
 
@@ -117,7 +120,11 @@ export function satChecker(customOptions: Partial<SATOptions> = {}): void {
         ui.setRunning(false);
     };
 
-    const ui = createSATUI(() => (running ? stop() : start()), run);
+    const ui = createSATUI(() => (running ? stop() : start()), run, customOptions.aiFix && {
+        fix: (issues) => fixer!.fix(issues),
+        cancel: () => fixer!.cancel(),
+    });
+    const fixer = customOptions.aiFix && createFixController(customOptions.aiFix, ui.showFix, run);
 
     onRouteChange(() => {
         if (!running) return;

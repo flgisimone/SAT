@@ -1,4 +1,6 @@
+import { fixPrompt } from '../core/fixPrompt';
 import type { OutlineHeading } from '../core/rules/headings';
+import type { FixView } from '../sat/aiFix';
 import type { Category, Issue, Severity } from '../sat/issue';
 import { icon, type IconName } from './icons';
 import { createOverlay } from './overlay';
@@ -11,6 +13,15 @@ export interface SATUI {
     /** `duration`: how long the checks took, in milliseconds. */
     showResults(issues: Issue[], outline: OutlineHeading[], duration?: number): void;
     clearHighlights(): void;
+    /** Shows the progress and result of "Fix with AI" (`null` hides it). */
+    showFix(view: FixView | null): void;
+}
+
+/** "Fix with AI" actions: present only when the Vite plugin runs with `ai: true`. */
+export interface FixActions {
+    fix(issues: Issue[]): void;
+    /** Stops the running fix, or dismisses the result of the last one. */
+    cancel(): void;
 }
 
 type Filter = Severity | Category;
@@ -31,6 +42,16 @@ const CATEGORIES: Array<[Category, string]> = [
 /** Issues listed per rule before "Show N more". */
 const FIRST_ISSUES = 5;
 const SIDE_KEY = 'sat-side';
+/** How long a confirmation such as "Copied" stays visible. */
+const NOTICE_TIME = 3000;
+
+const FIX_STATUS: Record<FixView['state'], (view: FixView) => string> = {
+    running: () => 'Fixing…',
+    checking: () => 'Checking the page again…',
+    fixed: () => 'Fixed',
+    'still-present': () => 'Still present',
+    failed: (view) => (view.summary === 'Cancelled.' ? 'Fix cancelled' : 'Fix failed'),
+};
 
 function el<K extends keyof HTMLElementTagNameMap>(
     tag: K,
@@ -85,7 +106,7 @@ function storeSide(side: Side): void {
  * whose counters filter the issues, the issues by category and rule, and the heading structure.
  * Built in a shadow root.
  */
-export function createSATUI(onToggle: () => void, onRerun: () => void): SATUI {
+export function createSATUI(onToggle: () => void, onRerun: () => void, fixActions?: FixActions): SATUI {
     const host = document.createElement('sat-panel');
     host.setAttribute('data-sat-ignore', '');
     const root = host.attachShadow({ mode: 'open' });
@@ -103,6 +124,19 @@ export function createSATUI(onToggle: () => void, onRerun: () => void): SATUI {
     const time = el('span', { className: 'time' });
     const sideButton = iconButton('ghost', 'right', '', () => setSide(side === 'left' ? 'right' : 'left'));
     const closeButton = iconButton('ghost', 'close', 'Close SAT results', () => setPanelOpen(false, true));
+    // Confirmations for screen readers: "Copied" is visible too, the fix status is already in its box.
+    const live = el('span', { className: 'live' });
+    live.setAttribute('role', 'status');
+
+    const promptText = el('textarea', { id: 'sat-prompt', readOnly: true, rows: 6 });
+    const promptBox = el('div', { className: 'prompt-box', hidden: true },
+        el('div', { className: 'box-head' },
+            el('label', { htmlFor: 'sat-prompt', textContent: 'Clipboard unavailable: copy the fix prompt from here' }),
+            iconButton('ghost', 'close', 'Close fix prompt', () => (promptBox.hidden = true)),
+        ),
+        promptText,
+    );
+    const fixBox = el('div', { className: 'fix', hidden: true });
 
     const shown = new Map<Filter, boolean>(FILTERS.map(([filter]) => [filter, true]));
     const counters = new Map<Filter, HTMLButtonElement>();
@@ -127,8 +161,10 @@ export function createSATUI(onToggle: () => void, onRerun: () => void): SATUI {
     const structureView = el('div', { className: 'view', hidden: true });
 
     const panel = el('section', { id: 'sat-results', className: 'panel', hidden: true },
-        el('div', { className: 'header' }, el('span', { className: 'brand' }, icon('brand'), 'SAT', time), sideButton, closeButton),
+        el('div', { className: 'header' }, el('span', { className: 'brand' }, icon('brand'), 'SAT', time), live, sideButton, closeButton),
         summary,
+        promptBox,
+        fixBox,
         el('div', { className: 'tabs' }, issuesTab, structureTab),
         issuesView,
         structureView,
@@ -144,7 +180,67 @@ export function createSATUI(onToggle: () => void, onRerun: () => void): SATUI {
 
     let issues: Issue[] = [];
     let side: Side = 'left';
+    let noticeTimer: ReturnType<typeof setTimeout> | undefined;
+    let fixState: FixView['state'] | undefined;
     const expanded = new Set<string>();
+
+    function announce(text: string, { keep = false, visible = true } = {}) {
+        clearTimeout(noticeTimer);
+        live.textContent = text;
+        live.classList.toggle('sr-only', !visible);
+        if (!keep) noticeTimer = setTimeout(() => (live.textContent = ''), NOTICE_TIME);
+    }
+
+    /** Copies the fix prompt; where the clipboard is unavailable (insecure page, permission denied) shows it selected. */
+    async function copyPrompt(list: Issue[]) {
+        const prompt = fixPrompt(list, { url: location.href });
+        try {
+            await navigator.clipboard.writeText(prompt);
+            promptBox.hidden = true;
+            announce('Copied');
+        } catch {
+            promptText.value = prompt;
+            promptBox.hidden = false;
+            promptText.focus();
+            promptText.select();
+        }
+    }
+
+    /** Copy (and, with AI, fix) buttons for one issue or all the issues of a rule. */
+    function issueActions(list: Issue[]): HTMLButtonElement[] {
+        const actions = [iconButton('ghost', 'copy', 'Copy fix prompt', () => void copyPrompt(list))];
+        if (fixActions) actions.push(iconButton('ghost', 'fix', 'Fix with AI', () => fixActions.fix(list)));
+        return actions;
+    }
+
+    function showFix(view: FixView | null) {
+        fixBox.hidden = !view;
+        if (!view) {
+            fixState = undefined;
+            fixBox.replaceChildren();
+            return;
+        }
+
+        const status = FIX_STATUS[view.state](view);
+        const running = view.state === 'running' || view.state === 'checking';
+        const parts: Node[] = [
+            el('div', { className: 'box-head' },
+                el('p', { className: `fix-status ${view.state}` }, el('strong', { textContent: status }), ` · ${view.title}`),
+                button('link', () => fixActions?.cancel(), running ? 'Cancel' : 'Dismiss'),
+            ),
+        ];
+        if (view.warning) parts.push(el('p', { className: 'fix-warning' }, severityIcon('warning'), ' ', view.warning));
+        if (running && view.messages.length) parts.push(el('ul', { className: 'fix-log' }, ...view.messages.map((text) => el('li', { textContent: text }))));
+        if (view.files.length) {
+            parts.push(el('p', { className: 'fix-label', textContent: 'Files changed:' }), el('ul', { className: 'fix-files' }, ...view.files.map((file) => el('li', { textContent: file }))));
+        }
+        if (view.summary && (view.state === 'still-present' || view.state === 'failed')) parts.push(el('p', { className: 'fix-summary', textContent: view.summary }));
+        fixBox.replaceChildren(...parts);
+
+        if (view.state !== fixState) announce(`${status} ${view.title}`, { keep: running, visible: false });
+        fixState = view.state;
+        if (panel.hidden) setPanelOpen(true);
+    }
 
     function setPanelOpen(open: boolean, returnFocus = false) {
         panel.hidden = !open;
@@ -173,7 +269,7 @@ export function createSATUI(onToggle: () => void, onRerun: () => void): SATUI {
         const element = issue.element;
         const content = element ? button('item', () => overlay.reveal(element)) : el('div', { className: 'item' });
         content.append(severityIcon(issue.severity), ' ', el('span', { textContent: issue.message }));
-        return el('li', {}, content);
+        return el('li', { className: 'row' }, content, ...issueActions([issue]));
     }
 
     /** One rule: readable title, worst severity, count, WCAG criteria or source, docs link, the first issues. */
@@ -189,12 +285,21 @@ export function createSATUI(onToggle: () => void, onRerun: () => void): SATUI {
             el('span', { className: 'pill', textContent: String(list.length) }),
             ...labels.map((label) => el('span', { className: 'chip', textContent: label })),
         );
-        const card = el('div', { className: 'rule' }, head);
+        const actions = el('div', { className: 'rule-actions' });
         if (first.help) {
             const docs = el('a', { className: 'docs', href: first.help, target: '_blank', rel: 'noopener noreferrer' }, 'Why and how to fix', icon('external'));
             docs.setAttribute('aria-label', `Why and how to fix: ${title} (opens in a new tab)`);
-            card.append(docs);
+            actions.append(docs);
         }
+        const copyAll = button('link', () => void copyPrompt(list), icon('copy'), 'Copy prompt for all');
+        copyAll.setAttribute('aria-label', `Copy prompt for all: ${title}`);
+        actions.append(copyAll);
+        if (fixActions) {
+            const fixAll = button('link', () => fixActions.fix(list), icon('fix'), 'Fix all with AI');
+            fixAll.setAttribute('aria-label', `Fix all with AI: ${title}`);
+            actions.append(fixAll);
+        }
+        const card = el('div', { className: 'rule' }, head, actions);
 
         const all = expanded.has(ruleId);
         card.append(el('ul', {}, ...(all ? list : list.slice(0, FIRST_ISSUES)).map(issueItem)));
@@ -302,5 +407,6 @@ export function createSATUI(onToggle: () => void, onRerun: () => void): SATUI {
         },
 
         clearHighlights: () => overlay.clear(),
+        showFix,
     };
 }
