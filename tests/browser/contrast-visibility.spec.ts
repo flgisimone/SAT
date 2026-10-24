@@ -1,46 +1,24 @@
-import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
+import { rules } from '../../src/core/rules';
+import type { RuleId, SATResult } from '../../src/core/seoAccessibilityTool';
+import { openPage } from './serve';
 
-// Runs the built bundle (dist/index.js) in a real browser, where layout,
-// computed styles and canvas are available (unlike happy-dom).
-const bundle = readFileSync(new URL('../../dist/index.js', import.meta.url), 'utf8')
-    .replace(/export\s*\{\s*seoAccessibilityTool\s*\};?\s*$/m, 'window.seoAccessibilityTool = seoAccessibilityTool;');
+// Runs the built bundle in a real browser, where layout, computed styles and canvas
+// are available (unlike jsdom).
 
-const ONLY = (rule: string) => ({
-    enableCheckH1: false,
-    enableCheckH1Visible: false,
-    enableCheckHeadingOrder: false,
-    enableCheckJumpLevels: false,
-    enableCheckTextElementContrast: false,
-    enableCheckAriaLabel: false,
-    enableCheckAriaRolesWithSuggestions: false,
-    enableCheckUniqueLandmarks: false,
-    enableCheckInputLabel: false,
-    enableCheckFocusManagement: false,
-    enableCheckImageAlt: false,
-    enableCheckEmptyLinks: false,
-    enableCheckExternalLinksRel: false,
-    enableCheckTabindexNegativeOne: false,
-    enableCheckNonDescriptiveLinks: false,
-    enableCheckBrokenInternalLinks: false,
-    enableCheckHtmlLang: false,
-    enableCheckSeoMeta: false,
-    [rule]: true,
-});
+type Result = Omit<SATResult, 'issues'>;
 
-type Result = { errors: number; warnings: number; errorMessages: string[]; warningMessages: string[] };
-
-async function run(page: Page, body: string, rule: string): Promise<Result> {
-    await page.setContent(`<!doctype html><html lang="en"><body>${body}</body></html>`);
-    await page.addScriptTag({ content: bundle, type: 'module' });
-    await page.waitForFunction(() => 'seoAccessibilityTool' in window);
-    return page.evaluate(
-        (options) => (window as unknown as { seoAccessibilityTool: (o: unknown) => Promise<Result> }).seoAccessibilityTool(options),
-        ONLY(rule)
-    );
+async function run(page: Page, body: string, rule: RuleId): Promise<Result> {
+    await openPage(page, `<!doctype html><html lang="en"><body>${body}</body></html>`);
+    const only = { rules: Object.fromEntries(rules.map((r) => [r.id, r.id === rule ? undefined : 'off'])) };
+    return page.evaluate(async (options) => {
+        const { seoAccessibilityTool } = await import('/index.js');
+        const { errors, warnings, errorMessages, warningMessages } = await seoAccessibilityTool(options);
+        return { errors, warnings, errorMessages, warningMessages };
+    }, only);
 }
 
-const contrast = 'enableCheckTextElementContrast';
+const contrast = 'color-contrast';
 
 test.describe('contrast', () => {
     test('black on white passes', async ({ page }) => {
@@ -95,10 +73,10 @@ test.describe('contrast', () => {
 
 test.describe('visibility', () => {
     test('hidden h1 is reported, visible h1 is not', async ({ page }) => {
-        const hidden = await run(page, '<h1 style="display:none">Title</h1>', 'enableCheckH1Visible');
+        const hidden = await run(page, '<h1 style="display:none">Title</h1>', 'h1-visible');
         expect(hidden.errors).toBe(1);
 
-        const visible = await run(page, '<h1>Title</h1>', 'enableCheckH1Visible');
+        const visible = await run(page, '<h1>Title</h1>', 'h1-visible');
         expect(visible.errors).toBe(0);
     });
 
@@ -106,7 +84,7 @@ test.describe('visibility', () => {
         const r = await run(
             page,
             '<button style="position:fixed;top:0" tabindex="0">Fixed</button><div style="visibility:hidden"><button tabindex="0">Hidden</button></div>',
-            'enableCheckFocusManagement'
+            'focus-management'
         );
         expect(r.errors).toBe(1);
         expect(r.errorMessages[0]).toContain('Hidden');

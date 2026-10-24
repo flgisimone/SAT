@@ -60,62 +60,65 @@ useSatChecker(); // Call it directly in setup: SAT starts when the component is 
 
 ---
 
-## 🧩 Customization via SATOptions
+## 🧩 Configuration
 
-You can pass custom options to enable/disable specific checks.
+Turn rules off or change their severity with `rules`, as in ESLint:
 
 ```ts
 useSATChecker({
-  enableCheckH1: true,
-  enableCheckH1Visible: true,
-  enableCheckAriaLabel: false,
+  rules: {
+    "color-contrast": "warning", // every issue of the rule becomes a warning
+    "link-target-blank": "off",
+    "link-text": "warning",      // rules that are off by default are turned on by a severity
+  },
   allowedLinkTexts: ["Read more", "Learn more"],
 });
 ```
 
+| Option             | Description                                                                                      | Default |
+|--------------------|--------------------------------------------------------------------------------------------------|---------|
+| `rules`            | `{ [ruleId]: "error" \| "warning" \| "off" }`. A severity applies to every issue of that rule   | `{}`    |
+| `allowedLinkTexts` | Link texts `link-text` accepts anyway (case-insensitive)                                         | `[]`    |
+| `enabled`          | Controller only: `true` starts SAT without a bundler, `false` never starts it                    | starts when `NODE_ENV === "development"` |
+
+### Rules
+
+| Rule                | Category | Checks                                                                    | Default    | 1.x option |
+|---------------------|----------|---------------------------------------------------------------------------|------------|------------|
+| `h1`                | seo      | Exactly one `<h1>`                                                        | error      | `enableCheckH1` |
+| `h1-visible`        | seo      | The first `<h1>` is rendered (not hidden)                                 | error      | `enableCheckH1Visible` |
+| `heading-order`     | a11y     | Highlights headings by level; warns if the first heading is not an `<h1>` | warning    | `enableCheckHeadingOrder` |
+| `heading-levels`    | a11y     | Skipped heading levels (e.g. H2 → H4)                                     | error      | `enableCheckJumpLevels` |
+| `accessible-name`   | a11y     | Buttons, links and `svg[role="img"]` have an accessible name              | error      | `enableCheckAriaLabel` |
+| `aria-roles`        | a11y     | Invalid `role` values (error), redundant roles (warning)                  | error      | `enableCheckAriaRolesWithSuggestions` |
+| `landmarks`         | a11y     | One `<main>`, one page-level header/footer; labelled navs when repeated (warning) | error | `enableCheckUniqueLandmarks` |
+| `color-contrast`    | a11y     | WCAG text contrast: below AA (error), below AAA (warning)                 | error      | `enableCheckTextElementContrast` |
+| `form-label`        | a11y     | Form fields have a label (placeholder is not enough)                      | error      | `enableCheckInputLabel` |
+| `focus-management`  | a11y     | Hidden focusable elements (error), positive tabindex and non-interactive tab stops (warning) | error | `enableCheckFocusManagement` |
+| `image-alt`         | a11y     | `<img>` without `alt` (error), alt text that looks like a file name (warning) | error  | `enableCheckImageAlt` |
+| `link-href`         | a11y     | `href=""`, `#` or `javascript:` (error), `<a>` without href (warning)     | error      | `enableCheckEmptyLinks` |
+| `link-target-blank` | seo      | `target="_blank"` without `rel="noopener noreferrer"`                     | warning    | `enableCheckExternalLinksRel` |
+| `tabindex-negative` | a11y     | Visible native controls removed from the tab order with `tabindex="-1"`   | warning    | `enableCheckTabindexNegativeOne` |
+| `link-text`         | a11y     | Vague link texts ("click here", "more")                                    | off        | `enableCheckNonDescriptiveLinks` |
+| `html-lang`         | a11y     | `<html>` has a `lang` attribute                                           | error      | `enableCheckHtmlLang` |
+| `seo-meta`          | seo      | `<title>` and meta description (error), lengths and meta viewport (warning) | error    | `enableCheckSeoMeta` |
+| `link-broken`       | seo      | HEAD request to each internal link to find 4xx/5xx (skips logout-like URLs) | off      | `enableCheckBrokenInternalLinks` |
+
+The 1.x options `enableCheck*` still work (`true` turns the rule on, `false` off) but are deprecated; `rules` takes precedence.
+
 ---
 
-## 🧠 Available Options
+## 🔎 Results without the panel
 
-| Option                                | Description                                                                 | Default |
-|---------------------------------------|-----------------------------------------------------------------------------|---------|
-| `enableCheckH1`                       | Detect multiple/missing H1 tags                                             | `true`  |
-| `enableCheckH1Visible`                | Ensure the first H1 is rendered (not hidden)                                | `true`  |
-| `enableCheckHeadingOrder`             | Highlight headings by level; warn if the first heading is not an H1         | `true`  |
-| `enableCheckJumpLevels`               | Detect skipped heading levels (e.g. H2 → H4)                                | `true`  |
-| `enableCheckAriaLabel`                | Buttons, links and `svg[role="img"]` need an accessible name                | `true`  |
-| `enableCheckAriaRolesWithSuggestions` | Report invalid and redundant `role` attributes                              | `true`  |
-| `enableCheckUniqueLandmarks`          | One `<main>`, one page-level header/footer, labelled navs when repeated     | `true`  |
-| `enableCheckTextElementContrast`      | WCAG 2.1 text contrast (AA/AAA, large-text thresholds)                       | `true`  |
-| `enableCheckInputLabel`               | Form fields have a label (placeholder is not enough)                        | `true`  |
-| `enableCheckFocusManagement`          | Hidden focusable elements, positive tabindex, non-interactive tab stops     | `true`  |
-| `enableCheckImageAlt`                 | Images have an `alt` attribute (`alt=""` for decorative ones)               | `true`  |
-| `enableCheckEmptyLinks`               | Links with `href=""`, `#` or `javascript:`, and links without href          | `true`  |
-| `enableCheckExternalLinksRel`         | Check for missing `rel="noopener noreferrer"` on `target="_blank"`          | `true`  |
-| `enableCheckTabindexNegativeOne`      | Visible native controls removed from the tab order with `tabindex="-1"`     | `true`  |
-| `enableCheckNonDescriptiveLinks`      | Warn about vague link texts                                                 | `false` |
-| `allowedLinkTexts`                    | Link texts to allow anyway (case-insensitive)                               | `[]`    |
-| `enableCheckBrokenInternalLinks`      | HEAD request to each internal link to find 404/500 (skips logout-like URLs) | `false` |
-| `enableCheckHtmlLang`                 | `<html>` has a `lang` attribute                                             | `true`  |
-| `enableCheckSeoMeta`                  | `<title>`, meta description and meta viewport                               | `true`  |
+```ts
+import { seoAccessibilityTool, satReset } from "seo-accessibility-tool";
 
------------------------------------|-----------------------------------------------------------|---------|
-| `enableCheckH1`                   | Detect multiple/missing H1 tags                           | `true`  |
-| `enableCheckH1Visible`            | Ensure first H1 is visible                                | `true`  |
-| `enableCheckHeadingOrder`        | Validate heading hierarchy (H1 > H2 > H3...)              | `true`  |
-| `enableCheckJumpLevels`          | Detect jumps or regressions in heading levels             | `true`  |
-| `enableCheckAriaLabel`           | Validate ARIA labels on interactive elements              | `true`  |
-| `enableCheckAriaRolesWithSuggestions` | Suggest improved ARIA roles                          | `true`  |
-| `enableCheckUniqueLandmarks`     | Ensure unique use of landmark elements (`<main>`)         | `true`  |
-| `enableCheckTextElementContrast` | Validate WCAG 2.1 text contrast                           | `true`  |
-| `enableCheckInputLabel`          | Check that inputs are labeled                             | `true`  |
-| `enableCheckFocusManagement`     | Validate focus order and tabindex                         | `true`  |
-| `enableCheckEmptyLinks`          | Detect anchor tags with empty href or `#`                 | `true`  |
-| `enableCheckExternalLinksRel`    | Check for missing `rel="noopener noreferrer"`             | `true`  |
-| `enableCheckTabindexNegativeOne` | Detect invalid tabindex="-1" on focusable elements        | `true`  |
-| `enableCheckNonDescriptiveLinks` | Warn about vague link texts                               | `false` |
-| `enableCheckBrokenInternalLinks` | Detect internal links that return 404/500                 | `true`  |
-| `allowedLinkTexts`               | Array of allowed phrases for non-descriptive link bypass  | `[]`    |
+const { issues, errors, warnings } = await seoAccessibilityTool({ rules: { "link-text": "warning" } });
+// issues: [{ ruleId, severity, category, message, wcag?, element?, selector? }]
+satReset(); // removes the highlights
+```
+
+`selector` matches only the element of the issue. `errorMessages` and `warningMessages` (lists of strings) are still returned but deprecated.
 
 ---
 

@@ -1,5 +1,5 @@
-import { logError, logWarning } from '../../sat/satLogger';
-import { describeElement, highlight, isElementVisible, queryTargets } from '../../sat/satDom';
+import { computedStyle, describeElement, isElementVisible, queryTargets } from '../../../sat/satDom';
+import type { Rule } from '../rule';
 
 export type RGB = [number, number, number];
 export type RGBA = [number, number, number, number];
@@ -116,7 +116,7 @@ export function getEffectiveBackground(el: Element): RGB | null {
     let current: Element | null = el;
 
     while (current) {
-        const style = window.getComputedStyle(current);
+        const style = computedStyle(current);
         if (style.backgroundImage && style.backgroundImage !== 'none') return null;
 
         const bg = parseColor(style.backgroundColor || 'transparent');
@@ -150,37 +150,46 @@ export function isLargeText(fontSize: string, fontWeight: string): boolean {
 const TEXT_SELECTORS = 'h1, h2, h3, h4, h5, h6, p, span, a, button, label, li, td, th, strong, em, small';
 
 /**
- * Checks text contrast against WCAG 2.1.
+ * Text contrast (WCAG 1.4.3 AA as error, 1.4.6 AAA as warning).
  * Only elements that directly contain visible text are checked.
  * Thresholds: AA 4.5 (3 for large text), AAA 7 (4.5 for large text).
  */
-export function checkTextElementContrast(enableCheckTextElementContrast?: boolean): void {
-    if (!enableCheckTextElementContrast) return;
+export const colorContrast: Rule = {
+    id: 'color-contrast',
+    category: 'a11y',
+    defaultSeverity: 'error',
+    wcag: ['1.4.3'],
+    run({ document, report }) {
+        queryTargets<HTMLElement>(TEXT_SELECTORS, document).forEach((el) => {
+            if (!hasOwnText(el) || !isElementVisible(el)) return;
 
-    queryTargets<HTMLElement>(TEXT_SELECTORS).forEach((el) => {
-        if (!hasOwnText(el) || !isElementVisible(el)) return;
+            const style = computedStyle(el);
+            const background = getEffectiveBackground(el);
+            const textColor = parseColor(style.color);
+            if (!background || !textColor) return;
 
-        const style = window.getComputedStyle(el);
-        const background = getEffectiveBackground(el);
-        const textColor = parseColor(style.color);
-        if (!background || !textColor) return;
+            const ratio = contrast(blend(textColor, background), background);
+            const shown = ratio.toFixed(2);
+            const large = isLargeText(style.fontSize, style.fontWeight);
+            const aa = large ? 3 : 4.5;
+            const aaa = large ? 4.5 : 7;
+            const sizeNote = large ? ' (large text)' : '';
 
-        const ratio = contrast(blend(textColor, background), background);
-        const large = isLargeText(style.fontSize, style.fontWeight);
-        const aa = large ? 3 : 4.5;
-        const aaa = large ? 4.5 : 7;
-        const sizeNote = large ? ' (large text)' : '';
-
-        if (ratio < aa) {
-            logError(
-                `Insufficient contrast on ${describeElement(el)}: ratio ${ratio.toFixed(2)}. Minimum AA${sizeNote} is ${aa}.`
-            );
-            highlight(el, { outline: '2px dashed red', title: `❌ Contrast ratio too low: ${ratio.toFixed(2)}` });
-        } else if (ratio < aaa) {
-            logWarning(
-                `Suboptimal contrast on ${describeElement(el)}: ratio ${ratio.toFixed(2)}. Meets AA but not AAA${sizeNote} (${aaa}).`
-            );
-            highlight(el, { outline: '1px dashed orange', title: `⚠️ Contrast ratio: ${ratio.toFixed(2)}` });
-        }
-    });
-}
+            if (ratio < aa) {
+                report({
+                    element: el,
+                    message: `Insufficient contrast on ${describeElement(el)}: ratio ${shown}. Minimum AA${sizeNote} is ${aa}.`,
+                    highlight: { outline: '2px dashed red', title: `❌ Contrast ratio too low: ${shown}` },
+                });
+            } else if (ratio < aaa) {
+                report({
+                    element: el,
+                    message: `Suboptimal contrast on ${describeElement(el)}: ratio ${shown}. Meets AA but not AAA${sizeNote} (${aaa}).`,
+                    severity: 'warning',
+                    wcag: ['1.4.6'],
+                    highlight: { outline: '1px dashed orange', title: `⚠️ Contrast ratio: ${shown}` },
+                });
+            }
+        });
+    },
+};

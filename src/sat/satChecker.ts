@@ -6,6 +6,8 @@ import { createExpandableItem } from "../ui/createExpandableItem";
 
 let satHasRun = false;
 
+const RUN_FAILED = "Error while running SAT.";
+
 /**
  * Bundlers (Vite, webpack, Next…) replace `process.env.NODE_ENV` at build time.
  * Without a bundler `process` doesn't exist, so SAT stays off instead of throwing.
@@ -44,9 +46,9 @@ function writeStored(kind: "errors" | "warnings", messages: string[] | null): vo
     }
 }
 
-export function satChecker(customOptions?: Partial<SATOptions>): void {
+export function satChecker(customOptions: Partial<SATOptions> = {}): void {
     if (satHasRun) return;
-    if (!isDevelopment()) return;
+    if (!(customOptions.enabled ?? isDevelopment())) return;
     if (document.getElementById("sat-run-button")) return;
 
     satHasRun = true;
@@ -90,7 +92,6 @@ export function satChecker(customOptions?: Partial<SATOptions>): void {
             ));
 
             const result = await seoAccessibilityTool(customOptions);
-            if (!result) throw new Error("Nessun risultato dal tool");
 
             const { errors, warnings, errorMessages, warningMessages } = result;
 
@@ -107,11 +108,11 @@ export function satChecker(customOptions?: Partial<SATOptions>): void {
 
             renderMessages(errorMessages, warningMessages);
         } catch {
-            const fallbackMsg = createExpandableItem("⚠️ Errore durante l'esecuzione del SAT.", "red");
+            const fallbackMsg = createExpandableItem(`⚠️ ${RUN_FAILED}`, "red");
             errorListPanel.innerHTML = "";
             errorListPanel.appendChild(fallbackMsg);
 
-            writeStored("errors", ["Errore durante l'esecuzione del SAT."]);
+            writeStored("errors", [RUN_FAILED]);
             writeStored("warnings", null);
 
             updateLogCounts(1, 0);

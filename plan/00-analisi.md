@@ -44,7 +44,7 @@ satChecker(options)                     solo con NODE_ENV=development
 | A3 | Elenco dei controlli e 19 flag cablati in tre file | Aggiungere una regola tocca 3 file; nessun livello di gravità per regola | F2-02, F2-03 |
 | A4 | Rollup produce 4 bundle indipendenti | Core copiato 4 volte; chi importa `index` e `react` ha due stati | F2-05 |
 | A5 | Attivazione solo con `process.env.NODE_ENV === "development"` | Senza bundler SAT non parte; non si può forzare | F2-06 |
-| A6 | UI e messaggi mescolano italiano e inglese | Esperienza incoerente | F2-07 |
+| A6 | UI e messaggi mescolano italiano e inglese | Esperienza incoerente | F2-07 (solo inglese) |
 | A7 | UI con stili inline nel DOM della pagina | Il CSS dell'app (es. `button {…}` globale) altera il pannello | F3-01 |
 | A8 | Evidenziazioni scritte sugli elementi dell'app | Spariscono al re-render di React/Vue; invisibili con `outline: none !important` | F3-02 |
 | A9 | Il controllo gira solo al clic | Nelle SPA, cambiando route, i risultati sono vecchi | F3-06 |

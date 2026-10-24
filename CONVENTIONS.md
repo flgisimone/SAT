@@ -295,16 +295,17 @@ Keep check-specific types next to the check. Shared types (`SATOptions`, results
 ```
 src/
   core/
-    seoAccessibilityTool.ts   runs the enabled checks, returns the results (entry: ".")
-    accessibilityA11y/        accessibility checks
-    improvedHeadingControl/   heading checks
-    improvedLinksControl/     link checks
-    seo/                      SEO meta checks
+    seoAccessibilityTool.ts   runs the enabled rules, returns the issues (entry: ".")
+    rules/
+      index.ts                the registry: every rule, in result order
+      rule.ts                 Rule, RuleContext, RuleId
+      a11y/, seo/             one file per rule, named after its id
+      headings.ts             helpers shared by the heading rules
   sat/
     satChecker.ts             in-page controller: button, run/stop, storage (entry: "./sat-controller")
-    satDom.ts                 DOM helpers shared by every check
-    satLogger.ts              collects errors and warnings
-    satOptions.ts             SATOptions and defaults
+    satDom.ts                 DOM helpers shared by every rule (queryTargets, highlight, describeElement)
+    issue.ts                  Issue, Severity, Category, cssSelector
+    satOptions.ts             SATOptions, rule settings, 1.x options mapped to rules
     satReset.ts               restores the page
   ui/                         SAT panel and buttons (DOM built by hand, no framework)
   integrations/               react.ts, vue.ts: thin wrappers around satChecker
@@ -317,7 +318,7 @@ plan/                         backlog and phases (plan/README.md)
 ### 5.1 Boundaries
 
 - `core/` never imports from `ui/` or `integrations/`: it must run without the panel (tests, CI, future headless API).
-- Checks import only from `sat/satDom.ts`, `sat/satLogger.ts` and their own folder.
+- Rules import only from `sat/satDom.ts`, `core/rules/` and type modules. They keep no module-level state: results go through `ctx.report`, so runs never mix.
 - Integrations stay thin: lifecycle wiring and options passthrough, no logic of their own. Logic shared by React and Vue lives in `sat/`.
 - The public API is what the four entry points in `package.json` `exports` expose. Anything else is internal and may change.
 
@@ -342,10 +343,10 @@ Changing the severity or the default state of a check is a behavior change (§8.
 
 SAT runs inside someone else's application.
 
-- Select elements with `queryTargets` so SAT's own UI (`[data-sat-ignore]`) is excluded.
+- Select elements with `queryTargets(selector, ctx.document)` so SAT's own UI (`[data-sat-ignore]`) is excluded and the checked document is the one of the run.
 - Change the page only through `highlight` (outline, background, title). It saves the original values so `satReset` can restore them. Never write other styles or attributes on host elements.
 - Checks are read-only otherwise: no network requests, no navigation, no storage writes. The broken-links check is the only one that makes requests; it is off by default and skips state-changing URLs.
-- Do not print to the console from checks; results go through the logger.
+- Do not print to the console from rules; results go through `ctx.report`.
 
 ### 6.4 Messages
 
@@ -354,18 +355,21 @@ SAT runs inside someone else's application.
 
 ### 6.5 Adding a Check
 
-1. One file in the matching `core/` folder, exporting `check<Name>(enabled: boolean, …)`.
-2. An option in `SATOptions` with its default, documented in the README table.
-3. A call in `seoAccessibilityTool.ts` (inside the per-check error guard).
-4. Unit tests with passing and failing markup; browser tests if the check depends on layout, computed colors or visibility.
-5. An entry in `CHANGELOG.md`.
+1. One file `core/rules/<category>/<id>.ts` exporting a `Rule`: `id` (kebab-case, added to `RuleId`), `category`, `defaultSeverity`, `wcag` when a criterion applies, `defaultOff: true` if it must be turned on explicitly, and `run(ctx)`.
+2. `run` selects elements from `ctx.document` and calls `ctx.report({ message, element, highlight })` once per problem; `severity` and `wcag` only when they differ from the rule's defaults.
+3. The rule added to the array in `core/rules/index.ts`; the runner already wraps each rule in an error guard and applies the `rules` option.
+4. A row in the README rules table.
+5. Unit tests with passing and failing markup; browser tests if the rule depends on layout, computed colors or visibility.
+6. An entry in `CHANGELOG.md`.
+
+New rules get no `enableCheck*` option: those exist only for 1.x compatibility.
 
 ## 7. SAT User Interface
 
 - Every SAT element is inside a container with `data-sat-ignore`.
 - SAT's UI must pass SAT's own checks: buttons have accessible names, controls work with the keyboard.
 - The UI never depends on the host's CSS and must not leak styles into the host.
-- UI strings are currently mixed Italian/English; new strings follow the language of the surrounding UI until localization (backlog) lands.
+- UI strings and messages are in English only (no localization).
 
 ## 8. Public API, Compatibility and Releases
 
@@ -382,7 +386,7 @@ Any change to defaults, severities or what a check reports is listed under **Beh
 ### 8.3 Dependencies and Activation
 
 - Runtime dependencies: none besides `tslib`. React and Vue are **optional** peer dependencies.
-- SAT is a development tool: the controller starts only when `process.env.NODE_ENV === "development"`.
+- SAT is a development tool: the controller starts only when `process.env.NODE_ENV === "development"`, unless the `enabled` option says otherwise.
 - Publishing to npm is done by the maintainer, never by an agent.
 
 ## 9. Performance and Reliability
@@ -524,7 +528,8 @@ Consider other consumers of shared components, hooks, services, and types before
 
 ### 12.1 Build
 
-- Rollup builds four ESM entry points (`rollup.config.js`) and their declarations (`rollup.dts.config.cjs`). Keep `exports` in `package.json` and both configs in sync.
+- Rollup builds the four ESM entry points in one pass (`rollup.config.js`), with the shared code in `dist/chunks/`, and their declarations (`rollup.dts.config.cjs`). Keep `exports` in `package.json` and both configs in sync. Chunk names have no hash, so a new build overwrites the old files.
+- Browser tests serve `dist/` from a fake origin (`tests/browser/serve.ts`) and import the entry points as an app does.
 - TypeScript in strict mode, `moduleResolution: "bundler"`, Node types only for `process.env.NODE_ENV`.
 
 ### 12.2 Quality Tools

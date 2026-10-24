@@ -22,7 +22,8 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | Strumenti | Gli stessi di oneoffice: Vitest 5 con jsdom, Playwright 1.64, ESLint 10 con typescript-eslint, TypeScript 6, tokensave, `npm run verify` / `verify:e2e` / `usage` | Un solo modo di lavorare fra i progetti (F1-06) |
 | Test | Unit test in jsdom per la logica; test in Chromium sul bundle per tutto ciò che dipende da layout, colori e visibilità | jsdom non ha layout né canvas (F1-04) |
 | Rilascio | Semver; i cambi di comportamento vanno in `CHANGELOG.md`; la pubblicazione su npm la fa il maintainer | CONVENTIONS §8 |
-| Versione dopo F2 | **Da decidere prima di F2**: restare su 1.x accettando ancora le opzioni `enableCheck*`, oppure 2.0 con il nuovo formato dei risultati e delle regole | F2 cambia la forma dei risultati (F2 §1) |
+| Versione dopo F2 | **1.8.0 compatibile**: `issues` e `rules` accanto a `enableCheck*` ed `errorMessages`/`warningMessages`, deprecati; si tolgono in una 2.0 | Nessuna rottura per chi usa 1.x (F2 §1) |
+| Lingua | Solo inglese, per messaggi e UI; niente localizzazione | Un solo insieme di testi da mantenere (F2-07 annullato) |
 | Motore per l'accessibilità | **Da decidere in F4-01**: adattatore opzionale per axe-core (proposta) oppure solo regole proprie | axe-core copre circa 90 regole mantenute da Deque; il valore distintivo di SAT è nell'interfaccia in pagina e nei controlli SEO (F4 §1) |
 
 ## Fasi
@@ -87,7 +88,7 @@ Vale `CONVENTIONS.md` §14. In più, per ogni task:
 | Regole cablate, 19 flag di configurazione | F2-02, F2-03 |
 | Bundle duplicati | F2-05 |
 | Attivazione solo con `NODE_ENV` | F2-06 |
-| Lingue mescolate | F2-07 |
+| Lingue mescolate | F2-07 (risolto con il solo inglese) |
 | UI non isolata, evidenziazioni sugli elementi | F3-01, F3-02 |
 | Dalla lista non si arriva all'elemento | F3-03 |
 | Liste lunghe, nessun filtro | F3-04 |

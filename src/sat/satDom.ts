@@ -62,6 +62,11 @@ export function clearHighlights(): void {
     originals.clear();
 }
 
+/** Computed style from the element's own window, so elements of other documents (iframes) work too. */
+export function computedStyle(el: Element): CSSStyleDeclaration {
+    return (el.ownerDocument.defaultView ?? window).getComputedStyle(el);
+}
+
 export function isElementVisible(el: Element): boolean {
     const withCheck = el as Element & { checkVisibility?: (options?: Record<string, boolean>) => boolean };
     if (typeof withCheck.checkVisibility === 'function') {
@@ -73,7 +78,7 @@ export function isElementVisible(el: Element): boolean {
         });
     }
 
-    const style = window.getComputedStyle(el);
+    const style = computedStyle(el);
     if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return false;
     return el.getClientRects().length > 0;
 }
@@ -94,7 +99,7 @@ export function getAccessibleName(el: Element): string {
     if (labelledBy) {
         const text = labelledBy
             .split(/\s+/)
-            .map((id) => document.getElementById(id)?.textContent?.trim() || '')
+            .map((id) => el.ownerDocument.getElementById(id)?.textContent?.trim() || '')
             .join(' ')
             .trim();
         if (text) return text;

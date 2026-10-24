@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.8.0 — unreleased
+
+### Added
+- Structured results: `seoAccessibilityTool()` returns `issues`, each with `ruleId`, `severity`, `category`, `message`, WCAG criteria and, when there is one, the `element` and a unique CSS `selector`.
+- `rules` option: severity (`"error"`, `"warning"`) or `"off"` per rule, e.g. `rules: { "image-alt": "warning" }`. Rule ids are listed in the README.
+- `enabled` option: `satChecker({ enabled: true })` starts SAT without a bundler; `false` never starts it.
+- `seoAccessibilityTool(options, document)` checks another document (e.g. an iframe); `satReset` is exported from the main entry point.
+
+### Changed
+- The four entry points share one chunk: `dist` goes from about 200 KB to about 63 KB of JavaScript, and importing two entry points loads SAT once.
+- The panel's few Italian strings ("Mostra tutto", "Nascondi", the run error) are now in English, like the rest of the UI.
+- Internal errors name the rule (`SAT internal error in image-alt: …`).
+
+### Deprecated
+- The `enableCheck*` options (use `rules`) and the `errorMessages`/`warningMessages` result fields (use `issues`). They keep working in 1.x.
+
 ## 1.7.0 — unreleased
 
 ### Behavior changes
