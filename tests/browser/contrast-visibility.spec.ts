@@ -34,7 +34,10 @@ async function run(page: Page, body: string, rule: string): Promise<Result> {
     await page.setContent(`<!doctype html><html lang="en"><body>${body}</body></html>`);
     await page.addScriptTag({ content: bundle, type: 'module' });
     await page.waitForFunction(() => 'seoAccessibilityTool' in window);
-    return page.evaluate((options) => (window as any).seoAccessibilityTool(options), ONLY(rule));
+    return page.evaluate(
+        (options) => (window as unknown as { seoAccessibilityTool: (o: unknown) => Promise<Result> }).seoAccessibilityTool(options),
+        ONLY(rule)
+    );
 }
 
 const contrast = 'enableCheckTextElementContrast';

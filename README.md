@@ -119,6 +119,20 @@ useSATChecker({
 
 ---
 
+## 🛠️ Development
+
+```bash
+npm install
+npm run verify       # type check, lint, unit tests, build
+npm run verify:e2e   # build + browser tests (Chromium)
+```
+
+- Conventions: [CONVENTIONS.md](CONVENTIONS.md); agent rules: [AGENTS.md](AGENTS.md)
+- Roadmap and backlog by phase: [plan/README.md](plan/README.md)
+- Changes: [CHANGELOG.md](CHANGELOG.md)
+
+---
+
 ## 📄 License
 
 MIT License © 2025 [Giulio Simone Floresta](https://github.com/flgisimone)

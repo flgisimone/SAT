@@ -53,11 +53,13 @@ export function createLogPanel(): {
     const { panel: warningListPanel, toggleBtn: closeWarningBtn } = createPanel("Warnings", "orange");
 
     const toggleErrorList = () => {
-        errorListPanel.style.display === "none" ? fadeIn(errorListPanel) : fadeOut(errorListPanel);
+        if (errorListPanel.style.display === "none") fadeIn(errorListPanel);
+        else fadeOut(errorListPanel);
     };
 
     const toggleWarningList = () => {
-        warningListPanel.style.display === "none" ? fadeIn(warningListPanel) : fadeOut(warningListPanel);
+        if (warningListPanel.style.display === "none") fadeIn(warningListPanel);
+        else fadeOut(warningListPanel);
     };
 
     closeErrorBtn.addEventListener("click", () => fadeOut(errorListPanel));

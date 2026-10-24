@@ -54,7 +54,11 @@ export function satChecker(customOptions?: Partial<SATOptions>): void {
     let satEnabled = false;
 
     const handleRunClick = async () => {
-        satEnabled ? disableSAT() : await enableSAT();
+        if (satEnabled) {
+            disableSAT();
+        } else {
+            await enableSAT();
+        }
     };
 
     const handleReloadClick = async () => {
@@ -102,7 +106,7 @@ export function satChecker(customOptions?: Partial<SATOptions>): void {
             setVisibility(errors > 0, warnings > 0);
 
             renderMessages(errorMessages, warningMessages);
-        } catch (err) {
+        } catch {
             const fallbackMsg = createExpandableItem("⚠️ Errore durante l'esecuzione del SAT.", "red");
             errorListPanel.innerHTML = "";
             errorListPanel.appendChild(fallbackMsg);

@@ -59,9 +59,14 @@
   "scripts": {
     "build": "rollup -c && rollup -c rollup.dts.config.cjs",
     "dev": "rollup -c -w",
-    "test": "vitest run",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test:browser": "npm run build && playwright test"
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:e2e": "npm run build -- --silent && playwright test",
+    "verify": "tsc --noEmit && eslint . && vitest run --reporter=agent --silent=passed-only && rollup -c --silent && rollup -c rollup.dts.config.cjs --silent",
+    "verify:e2e": "rollup -c --silent && playwright test --reporter=dot",
+    "usage": "node scripts/token-usage.mjs"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
@@ -79,16 +84,20 @@
     "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "@playwright/test": "1.52",
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.0",
     "@rollup/plugin-typescript": "^12.1.2",
     "@types/node": "^22.13.10",
     "@types/react": "^18.2.14",
-    "happy-dom": "^17.6.3",
+    "eslint": "^10.12.0",
+    "globals": "^17.13.0",
+    "jsdom": "^29.1.1",
     "react": "^18.3.1",
     "rollup": "^4.35.0",
     "rollup-plugin-dts": "^6.1.0",
-    "typescript": "^5.8.2",
-    "vitest": "^3.2.7",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.2",
+    "vitest": "^5.0.4",
     "vue": "^3.5.44"
   }
 }
