@@ -44,19 +44,23 @@ export function createSATUI(
 
     const runButton = document.createElement("button");
     runButton.textContent = "🚀";
+    runButton.setAttribute("aria-label", "Run SAT checks");
     Object.assign(runButton.style, buttonStyle);
 
     const reloadButton = document.createElement("button");
     reloadButton.textContent = "🔃";
+    reloadButton.setAttribute("aria-label", "Run SAT checks again");
     Object.assign(reloadButton.style, buttonStyle);
 
     const errorToggleButton = document.createElement("button");
     errorToggleButton.textContent = "❗ 0";
+    errorToggleButton.setAttribute("aria-label", "Show errors (0)");
     Object.assign(errorToggleButton.style, buttonStyle);
     errorToggleButton.style.display = "none";
 
     const warningToggleButton = document.createElement("button");
     warningToggleButton.textContent = "⚠️ 0";
+    warningToggleButton.setAttribute("aria-label", "Show warnings (0)");
     Object.assign(warningToggleButton.style, buttonStyle);
     warningToggleButton.style.display = "none";
 
@@ -79,6 +83,8 @@ export function createSATUI(
     const updateLogCounts = (errors: number, warnings: number) => {
         errorToggleButton.textContent = `❗ ${errors}`;
         warningToggleButton.textContent = `⚠️ ${warnings}`;
+        errorToggleButton.setAttribute("aria-label", `Show errors (${errors})`);
+        warningToggleButton.setAttribute("aria-label", `Show warnings (${warnings})`);
 
         errorToggleButton.style.display = errors > 0 ? "block" : "none";
         warningToggleButton.style.display = warnings > 0 ? "block" : "none";

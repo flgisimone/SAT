@@ -9,12 +9,16 @@ export interface SATOptions {
     enableCheckUniqueLandmarks: boolean;
     enableCheckInputLabel: boolean;
     enableCheckFocusManagement: boolean;
+    enableCheckImageAlt: boolean;
     enableCheckEmptyLinks: boolean;
     enableCheckExternalLinksRel: boolean;
     enableCheckTabindexNegativeOne: boolean;
     enableCheckNonDescriptiveLinks: boolean;
     allowedLinkTexts: string[];
-    enableCheckBrokenInternalLinks: boolean,
+    /** Sends a HEAD request for every internal link. Off by default. */
+    enableCheckBrokenInternalLinks: boolean;
+    enableCheckHtmlLang: boolean;
+    enableCheckSeoMeta: boolean;
 }
 
 export const satOptions: SATOptions = {
@@ -28,10 +32,13 @@ export const satOptions: SATOptions = {
     enableCheckUniqueLandmarks: true,
     enableCheckInputLabel: true,
     enableCheckFocusManagement: true,
+    enableCheckImageAlt: true,
     enableCheckEmptyLinks: true,
     enableCheckExternalLinksRel: true,
     enableCheckTabindexNegativeOne: true,
     enableCheckNonDescriptiveLinks: false,
     allowedLinkTexts: [],
-    enableCheckBrokenInternalLinks: true,
+    enableCheckBrokenInternalLinks: false,
+    enableCheckHtmlLang: true,
+    enableCheckSeoMeta: true,
 }

@@ -1,6 +1,6 @@
 {
   "name": "seo-accessibility-tool",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "author": "Giulio Simone Floresta",
   "license": "MIT",
   "type": "module",
@@ -27,7 +27,9 @@
   },
   "typesVersions": {
     "*": {
-      "*": ["dist/*"]
+      "*": [
+        "dist/*"
+      ]
     }
   },
   "files": [
@@ -56,21 +58,46 @@
   "homepage": "https://github.com/flgisimone/sat",
   "scripts": {
     "build": "rollup -c && rollup -c rollup.dts.config.cjs",
-    "dev": "rollup -c -w"
+    "dev": "rollup -c -w",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:e2e": "npm run build -- --silent && playwright test",
+    "verify": "tsc --noEmit && eslint . && vitest run --reporter=agent --silent=passed-only && rollup -c --silent && rollup -c rollup.dts.config.cjs --silent",
+    "verify:e2e": "rollup -c --silent && playwright test --reporter=dot",
+    "usage": "node scripts/token-usage.mjs"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
     "vue": "^3.0.0"
   },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
+  },
   "dependencies": {
     "tslib": "^2.8.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.0",
     "@rollup/plugin-typescript": "^12.1.2",
     "@types/node": "^22.13.10",
     "@types/react": "^18.2.14",
+    "eslint": "^10.12.0",
+    "globals": "^17.13.0",
+    "jsdom": "^29.1.1",
+    "react": "^18.3.1",
     "rollup": "^4.35.0",
     "rollup-plugin-dts": "^6.1.0",
-    "typescript": "^5.8.2"
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.2",
+    "vitest": "^5.0.4",
+    "vue": "^3.5.44"
   }
 }

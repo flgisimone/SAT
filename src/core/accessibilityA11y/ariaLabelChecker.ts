@@ -1,78 +1,43 @@
-import {logError} from "../../sat/satLogger";
+import { logError } from "../../sat/satLogger";
+import { describeElement, getAccessibleName, highlight, isAriaHidden, queryTargets } from "../../sat/satDom";
 
-const tags = [
-    'button',
-    'a',
-    'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"])',
-    'textarea',
-    'nav',
-    'header',
-    'footer',
-    'aside',
-    'section',
-    'main',
-    'form',
-    'svg'
-];
+const NAMED_CONTROLS = 'button, a[href], [role="button"], [role="link"], [role="menuitem"], [role="tab"]';
 
-const hasHeadingTags = ['nav', 'header', 'footer', 'aside', 'section', 'main', 'form'];
-
+/**
+ * Checks that interactive controls and meaningful icons have an accessible name.
+ *
+ * - Buttons and links need text, aria-label, aria-labelledby, title, or a labelled image/icon.
+ * - <svg role="img"> needs a <title>, aria-label or aria-labelledby.
+ * Form fields are covered by `checkInputLabels`.
+ */
 export function checkAriaLabel(enableCheckAriaLabel?: boolean) {
     if (!enableCheckAriaLabel) return;
 
-    const elements = document.querySelectorAll(tags.join(','));
+    queryTargets<HTMLElement>(NAMED_CONTROLS).forEach((el) => {
+        if (isAriaHidden(el)) return;
+        if (getAccessibleName(el)) return;
 
-    elements.forEach((el, index) => {
-        const tag = el.tagName.toLowerCase();
-        const hasAriaLabel = el.hasAttribute('aria-label');
-        const hasAriaLabelledby = el.hasAttribute('aria-labelledby');
+        logError(`Missing accessible name on ${describeElement(el)}. Add visible text, aria-label or aria-labelledby.`);
+        highlight(el, {
+            outline: '2px solid red',
+            backgroundColor: 'rgba(255, 0, 0, 0.1)',
+            title: '❌ Missing accessible name',
+        });
+    });
 
-        let isAccessible: boolean | Element | null = false;
+    queryTargets<SVGElement>('svg[role="img"]').forEach((svg) => {
+        if (isAriaHidden(svg)) return;
+        // Icons inside a named control are described by the control itself.
+        if (svg.parentElement?.closest(NAMED_CONTROLS)) return;
 
-        if (tag === 'button' || tag === 'a') {
-            const hasText = (el.textContent || '').trim().length > 0;
-            const hasImgWithAlt = el.querySelector('img[alt]');
-            const hasSvgWithAria = el.querySelector('svg[aria-label]');
+        const hasName =
+            !!svg.getAttribute('aria-label')?.trim() ||
+            svg.hasAttribute('aria-labelledby') ||
+            !!svg.querySelector('title')?.textContent?.trim();
 
-            isAccessible = hasAriaLabel || hasAriaLabelledby || hasText || hasImgWithAlt || hasSvgWithAria;
-
-        } else if (tag === 'input' || tag === 'textarea') {
-            const input = el as HTMLInputElement | HTMLTextAreaElement;
-            const hasAssociatedLabel = input.labels && input.labels.length > 0;
-
-            isAccessible = hasAriaLabel || hasAriaLabelledby || hasAssociatedLabel;
-
-        } else if (hasHeadingTags.includes(tag)) {
-            const hasHeading = el.querySelector('h1,h2,h3,h4,h5,h6');
-            isAccessible = hasAriaLabel || hasAriaLabelledby || !!hasHeading;
-
-        } else if (tag === 'svg') {
-            const hasTitle = el.querySelector('title');
-            const isDecorative = el.getAttribute('aria-hidden') === 'true';
-
-            isAccessible = hasTitle || hasAriaLabel || isDecorative;
-        }
-
-        if (!isAccessible) {
-            const elInfo = {
-                index: index + 1,
-                tag,
-                id: el.id || 'No ID',
-                class: el.className || 'No class',
-                text: (el.textContent || '').trim() || 'No text'
-            };
-
-            const message = `Missing accessible label on <${tag}> #${elInfo.index}:
-👉 ID: ${elInfo.id}
-👉 Class: ${elInfo.class}
-👉 Text: "${elInfo.text}"`;
-
-            logError(message);
-
-            const htmlEl = el as HTMLElement;
-            htmlEl.style.outline = '2px solid red';
-            htmlEl.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
-            htmlEl.title = '❌ Missing accessible label';
+        if (!hasName) {
+            logError(`<svg role="img"> without a <title> or aria-label: ${describeElement(svg)}. Add a name, or use aria-hidden="true" if decorative.`);
+            highlight(svg, { outline: '2px solid red', title: '❌ Missing accessible name' });
         }
     });
 }
