@@ -9,7 +9,7 @@
 > - **F8-03**: `h1` non segnala più i `<h1>` multipli; il consiglio di Google (titolo principale più evidente) è nella pagina della regola.
 > - **F8-05**: `wcagLevel` passa alle regole dal `RuleContext`; Vite e Playwright lo ricevono già con le altre opzioni JSON, la CLI ha `--wcag-level`.
 > - **F8-06**: oltre a `<main>`, anche più `role="main"` e più `<header>`/`<footer>` di pagina diventano avvisi: WAI-ARIA usa «should».
-> - **F8-07**: validità con `Intl.getCanonicalLocales` (tag BCP 47 ben formato) e `Intl.DisplayNames` per i codici di due lettere; i codici di tre lettere sono accettati. `ponytail:` niente copia del registro IANA finché non servono controlli sui codici di tre lettere. `hreflang` resta com'è: Google chiede codici ISO 639-1.
+> - **F8-07**: validità con `Intl.getCanonicalLocales` (tag BCP 47 ben formato) e `Intl.DisplayNames` per i codici di due lettere; i codici di tre lettere sono accettati. `ponytail:` niente copia del registro IANA finché non servono controlli sui codici di tre lettere. `hreflang` resta com'è: Google chiede codici ISO 639-1. I casi di test ufficiali ACT non sono stati importati: i test usano esempi presi dalle regole (`english`, `em`, `#!`); l'import dei casi ACT è previsto in F9.
 
 ---
 
