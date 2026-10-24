@@ -2,7 +2,7 @@
 
 Questo backlog descrive come far crescere SAT (SEO Accessibility Tool) da un insieme di controlli con un pannello a uno strumento affidabile per lo sviluppo e la CI. L'analisi di partenza è in [00-analisi.md](00-analisi.md).
 
-SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, non va in produzione e non invia dati della pagina a nessun servizio.
+SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, non va in produzione e non invia dati della pagina a nessun servizio. Fa eccezione la correzione con l'IA (F12), che va attivata esplicitamente: i dati li manda l'agente dell'utente, non SAT.
 
 | Entry point | Contenuto | Chi lo usa |
 |---|---|---|
@@ -28,6 +28,8 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | Test | Unit test in jsdom per la logica; test in Chromium sul bundle per tutto ciò che dipende da layout, colori e visibilità | jsdom non ha layout né canvas (F1-04) |
 | Rilascio | Semver; i cambi di comportamento vanno in `CHANGELOG.md`; la pubblicazione su npm la fa il maintainer | CONVENTIONS §8 |
 | Gravità | Errore per un requisito normativo (WCAG A/AA, «must» di HTML e WAI-ARIA, requisito di Google), avviso per una raccomandazione, niente per ciò che le fonti dichiarano valido; ogni regola cita la sua fonte | Revisione del 24/10/2026 sulle fonti ufficiali ([00-analisi-linee-guida.md](00-analisi-linee-guida.md)) |
+| Correzione con l'IA | «Copy fix prompt» ovunque; «Fix with AI» solo con il plugin Vite e `ai: true`, che lancia Claude Code (`claude -p`) con strumenti limitati; nessun altro agente finché non viene chiesto | Serve un processo Node nel progetto; con un solo agente la sicurezza la controlla SAT (F12, decisione del 24/10/2026) |
+| Dati della pagina | Non si inviano a nessun servizio, salvo con la correzione con l'IA attivata esplicitamente: li manda l'agente dell'utente, non SAT | Eccezione opt-in (F12) |
 | Ordine dopo F7 | Prima le regole (F8, F9, F10), poi il pannello (F11), che mostra così titoli e fonti definitivi | Scelta del 24/10/2026 |
 | Versione dopo F11 | **1.16.0**: pannello in stile DevTools con temi, contatori che filtrano, titoli e fonti delle regole (`Issue.title`, `Issue.source`) | Funzioni nuove senza rotture di API (F11) |
 | Versione dopo F10 | **1.15.0**: `structured-data` controlla le proprietà che Google dichiara obbligatorie | Funzione nuova senza rotture di API (F10) |
@@ -59,6 +61,7 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | F9 | [09-regole-wcag-act.md](09-regole-wcag-act.md) | Regole nuove dalle regole ACT e da WCAG 2.2 (`target-size`, `aria-attributes`…), casi di test ACT nei test, 1.14.0 | F8 |
 | F10 | [10-dati-strutturati-google.md](10-dati-strutturati-google.md) | Proprietà obbligatorie di Google nei dati strutturati, 1.15.0 | F8 |
 | F11 | [11-pannello-professionale.md](11-pannello-professionale.md) | Pannello in stile DevTools: token, tema scuro, icone SVG, riepilogo, problemi leggibili con fonte, 1.16.0 | F8, F9 |
+| F12 | [12-correzione-ia.md](12-correzione-ia.md) | Correzione con l'IA: prompt da copiare, link agli editor, «Fix with AI» con Claude Code dal plugin Vite, 1.17.0 | F11 |
 
 ```
 F1 ─► F2 ─┬─► F3 ──────────┬─► F6
