@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.10.0 — unreleased
+
+### Added
+- SEO rules for indexing and sharing: `canonical`, `robots-meta`, `social-meta` (Open Graph and Twitter card) and `hreflang`.
+- SEO rules for contents: `structured-data` (JSON-LD that doesn't parse, with the parser's position, or items without `@type`) and `mixed-content` (`http:` resources on `https:` pages).
+- Loading rules: `image-size` (images without `width` and `height`) and `image-lazy-load` (`loading="lazy"` on images visible when the page opens).
+- A documentation page for every rule in `docs/rules/`; each issue has its URL in `help`, and the panel links to it from every group.
+- Optional axe-core engine: `seo-accessibility-tool/axe` exports `axe()`, passed as `engines: [axe()]`. axe's violations become issues named `axe/<rule>`, and the SAT rules it covers are off while it runs. `axe-core` is an optional peer dependency.
+- `engines` option, and `rules` accepts the rules of an engine (`"axe/region": "off"`).
+
+### Behavior changes
+- The new rules are on by default. `canonical`, `robots-meta`, `social-meta`, `image-size` and `image-lazy-load` report warnings; turn a rule off with `rules: { "social-meta": "off" }`.
+- `seo-meta` reports a second `<title>` or `<meta name="description">` as an error.
+
+### Fixed
+- `link-href`, `accessible-name` and `form-label` no longer report elements hidden from assistive technologies (`display: none`, `visibility: hidden`, `hidden`, `aria-hidden`), such as closed menus and sticky headers.
+
 ## 1.9.0 — unreleased
 
 ### Added

@@ -1,6 +1,6 @@
 {
   "name": "seo-accessibility-tool",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "author": "Giulio Simone Floresta",
   "license": "MIT",
   "type": "module",
@@ -23,6 +23,10 @@
     "./sat-controller": {
       "import": "./dist/sat-controller.js",
       "types": "./dist/sat-controller.d.ts"
+    },
+    "./axe": {
+      "import": "./dist/axe.js",
+      "types": "./dist/axe.d.ts"
     }
   },
   "typesVersions": {
@@ -46,7 +50,8 @@
     "semantic",
     "aria",
     "checker",
-    "devtools"
+    "devtools",
+    "axe-core"
   ],
   "repository": {
     "type": "git",
@@ -70,13 +75,17 @@
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
-    "vue": "^3.0.0"
+    "vue": "^3.0.0",
+    "axe-core": "^4.10.0"
   },
   "peerDependenciesMeta": {
     "react": {
       "optional": true
     },
     "vue": {
+      "optional": true
+    },
+    "axe-core": {
       "optional": true
     }
   },
@@ -89,6 +98,7 @@
     "@rollup/plugin-typescript": "^12.1.2",
     "@types/node": "^22.13.10",
     "@types/react": "^18.2.14",
+    "axe-core": "^4.10.3",
     "eslint": "^10.12.0",
     "globals": "^17.13.0",
     "jsdom": "^29.1.1",

@@ -8,7 +8,8 @@ Detects common issues in heading usage (`<h1>`-`<h6>`), ARIA roles, contrast, la
 ## 🚀 Features
 
 ✅ Framework-agnostic core logic (React, Vue, Vanilla)  
-✅ Validates heading structure, ARIA roles, labels, contrast, images and SEO meta tags  
+✅ Validates heading structure, ARIA roles, labels, contrast, images, SEO meta tags, canonical, hreflang, Open Graph, JSON-LD and image loading  
+✅ Optional axe-core engine for about 90 more accessibility rules  
 ✅ Injects a floating toggle button to analyze any page  
 ✅ Results panel grouped by rule, with filters and a heading map; click an issue to jump to the element  
 ✅ Never changes your page: highlights are drawn on SAT's own layer  
@@ -85,6 +86,7 @@ useSATChecker({
 | `allowedLinkTexts` | Link texts `link-text` accepts anyway (case-insensitive)                                         | `[]`    |
 | `enabled`          | Controller only: `true` starts SAT without a bundler, `false` never starts it                    | starts when `NODE_ENV === "development"` |
 | `observeDom`       | Controller only: while SAT is on, reruns the checks this many ms after the DOM stops changing    | off     |
+| `engines`          | Other checkers run with SAT's rules, e.g. `[axe()]` (see below)                                  | `[]`    |
 
 ### Rules
 
@@ -106,10 +108,44 @@ useSATChecker({
 | `tabindex-negative` | a11y     | Visible native controls removed from the tab order with `tabindex="-1"`   | warning    | `enableCheckTabindexNegativeOne` |
 | `link-text`         | a11y     | Vague link texts ("click here", "more")                                    | off        | `enableCheckNonDescriptiveLinks` |
 | `html-lang`         | a11y     | `<html>` has a `lang` attribute                                           | error      | `enableCheckHtmlLang` |
-| `seo-meta`          | seo      | `<title>` and meta description (error), lengths and meta viewport (warning) | error    | `enableCheckSeoMeta` |
+| `seo-meta`          | seo      | One `<title>` and one meta description (error), lengths and meta viewport (warning) | error | `enableCheckSeoMeta` |
+| `canonical`         | seo      | Several or empty canonicals (error), missing or relative canonical (warning) | warning   | — |
+| `robots-meta`       | seo      | `noindex`, `nofollow` or `none` in a robots meta tag                      | warning    | — |
+| `social-meta`       | seo      | Required Open Graph properties, absolute `og:image`/`og:url`, `twitter:card` | warning | — |
+| `hreflang`          | seo      | Invalid language codes, relative URLs, one language with two URLs         | error      | — |
+| `structured-data`   | seo      | JSON-LD that doesn't parse (with the position) or items without `@type`   | error      | — |
+| `mixed-content`     | seo      | `http:` resources on an `https:` page: scripts, frames, styles (error), images and media (warning) | error | — |
+| `image-size`        | seo      | Visible `<img>` without `width` and `height` (layout shift)               | warning    | — |
+| `image-lazy-load`   | seo      | `loading="lazy"` on images visible when the page opens                    | warning    | — |
 | `link-broken`       | seo      | HEAD request to each internal link to find 4xx/5xx (skips logout-like URLs) | off      | `enableCheckBrokenInternalLinks` |
 
+Each rule has a page in [docs/rules](docs/rules) on what it checks, why and how to fix it; the panel links to it from every group, and each issue has its URL in `help`.
+
 The 1.x options `enableCheck*` still work (`true` turns the rule on, `false` off) but are deprecated; `rules` takes precedence.
+
+---
+
+## ♿ axe-core engine (optional)
+
+[axe-core](https://github.com/dequelabs/axe-core) checks about 90 accessibility rules. Install it and pass the engine:
+
+```bash
+npm install -D axe-core
+```
+
+```ts
+import { satChecker } from "seo-accessibility-tool/sat-controller";
+import { axe } from "seo-accessibility-tool/axe";
+
+satChecker({ engines: [axe()] });
+```
+
+- axe's violations appear in the panel as `axe/<rule>` (e.g. `axe/image-alt`), with a link to Deque's page on the rule. Critical and serious ones are errors, the others warnings; results axe can't decide are not shown.
+- The SAT rules axe covers are off while it runs, so a problem is reported once: `accessible-name`, `aria-roles`, `landmarks`, `color-contrast`, `form-label`, `focus-management`, `image-alt`, `html-lang`, `heading-levels`. Setting one in `rules` turns it back on.
+- `rules` sets axe rules too: `rules: { "axe/region": "off" }`. `axe(options)` takes axe's run options, e.g. `axe({ runOnly: ["wcag2a", "wcag2aa"] })`.
+- axe adds about 550 KB (150 KB gzipped) and makes a run slower: 0.1–1.5 s instead of 5–50 ms on real pages. It checks the page's own document only.
+
+With React or Vue pass the same option: `useSATChecker({ engines: [axe()] })`.
 
 ---
 
@@ -119,7 +155,7 @@ The 1.x options `enableCheck*` still work (`true` turns the rule on, `false` off
 import { seoAccessibilityTool } from "seo-accessibility-tool";
 
 const { issues, errors, warnings } = await seoAccessibilityTool({ rules: { "link-text": "warning" } });
-// issues: [{ ruleId, severity, category, message, wcag?, element?, selector? }]
+// issues: [{ ruleId, severity, category, message, wcag?, element?, selector?, help? }]
 ```
 
 The page is not changed. `selector` matches only the element of the issue. `satReset` is deprecated and does nothing. `errorMessages` and `warningMessages` (lists of strings) are still returned but deprecated.

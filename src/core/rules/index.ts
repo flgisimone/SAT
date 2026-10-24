@@ -16,6 +16,14 @@ import { tabindexNegative } from './a11y/tabindex-negative';
 import { linkText } from './a11y/link-text';
 import { htmlLang } from './a11y/html-lang';
 import { seoMeta } from './seo/seo-meta';
+import { canonical } from './seo/canonical';
+import { robotsMeta } from './seo/robots-meta';
+import { socialMeta } from './seo/social-meta';
+import { hreflang } from './seo/hreflang';
+import { structuredData } from './seo/structured-data';
+import { mixedContent } from './seo/mixed-content';
+import { imageSize } from './seo/image-size';
+import { imageLazyLoad } from './seo/image-lazy-load';
 import { linkBroken } from './seo/link-broken';
 
 export type { Rule, RuleContext, RuleId, Report } from './rule';
@@ -39,5 +47,13 @@ export const rules: Rule[] = [
     linkText,
     htmlLang,
     seoMeta,
+    canonical,
+    robotsMeta,
+    socialMeta,
+    hreflang,
+    structuredData,
+    mixedContent,
+    imageSize,
+    imageLazyLoad,
     linkBroken,
 ];

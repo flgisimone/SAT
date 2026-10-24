@@ -309,6 +309,7 @@ src/
     satReset.ts               deprecated no-op (SAT no longer changes the page)
   ui/                         panel in a shadow root (satUI.ts), boxes over the page (overlay.ts), styles (DOM built by hand, no framework)
   integrations/               react.ts, vue.ts: thin wrappers around satChecker
+  engines/                    axe.ts: other checkers as `Engine`s (entry: "./axe"), with their package as optional peer dependency
   types/                      global declarations
 tests/                        Vitest (jsdom) unit tests, setup
 tests/browser/                Playwright tests on the built bundle in Chromium
@@ -320,7 +321,8 @@ plan/                         backlog and phases (plan/README.md)
 - `core/` never imports from `ui/` or `integrations/`: it must run without the panel (tests, CI, future headless API).
 - Rules import only from `sat/satDom.ts`, `core/rules/` and type modules. They keep no module-level state: results go through `ctx.report`, so runs never mix.
 - Integrations stay thin: lifecycle wiring and options passthrough, no logic of their own. Logic shared by React and Vue lives in `sat/`.
-- The public API is what the four entry points in `package.json` `exports` expose. Anything else is internal and may change.
+- Engines translate another checker's results into `Issue`s and list the SAT rules they replace; `core/` knows only the `Engine` interface, never the checker's package.
+- The public API is what the five entry points in `package.json` `exports` expose. Anything else is internal and may change.
 
 ## 6. Writing Checks
 
@@ -385,7 +387,7 @@ Any change to defaults, severities or what a check reports is listed under **Beh
 
 ### 8.3 Dependencies and Activation
 
-- Runtime dependencies: none besides `tslib`. React and Vue are **optional** peer dependencies.
+- Runtime dependencies: none besides `tslib`. React, Vue and axe-core are **optional** peer dependencies, imported only by their entry point.
 - SAT is a development tool: the controller starts only when `process.env.NODE_ENV === "development"`, unless the `enabled` option says otherwise.
 - Publishing to npm is done by the maintainer, never by an agent.
 
@@ -528,7 +530,7 @@ Consider other consumers of shared components, hooks, services, and types before
 
 ### 12.1 Build
 
-- Rollup builds the four ESM entry points in one pass (`rollup.config.js`), with the shared code in `dist/chunks/`, and their declarations (`rollup.dts.config.cjs`). Keep `exports` in `package.json` and both configs in sync. Chunk names have no hash, so a new build overwrites the old files.
+- Rollup builds the five ESM entry points in one pass (`rollup.config.js`), with the shared code of `core/` and `sat/` in one chunk (`dist/chunks/seoAccessibilityTool.js`, `manualChunks`), and their declarations (`rollup.dts.config.cjs`). Keep `exports` in `package.json` and both configs in sync. Chunk names have no hash, so a new build overwrites the old files.
 - Browser tests serve `dist/` from a fake origin (`tests/browser/serve.ts`) and import the entry points as an app does.
 - TypeScript in strict mode, `moduleResolution: "bundler"`, Node types only for `process.env.NODE_ENV`.
 

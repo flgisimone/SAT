@@ -1,4 +1,4 @@
-import { describeElement, getAccessibleName, isAriaHidden, queryTargets } from "../../../sat/satDom";
+import { describeElement, getAccessibleName, isHiddenFromAssistiveTech, queryTargets } from "../../../sat/satDom";
 import type { Rule } from "../rule";
 
 const NAMED_CONTROLS = 'button, a[href], [role="button"], [role="link"], [role="menuitem"], [role="tab"]';
@@ -8,7 +8,7 @@ const NAMED_CONTROLS = 'button, a[href], [role="button"], [role="link"], [role="
  *
  * - Buttons and links need text, aria-label, aria-labelledby, title, or a labelled image/icon.
  * - <svg role="img"> needs a <title>, aria-label or aria-labelledby.
- * Form fields are covered by `form-label`.
+ * Form fields are covered by `form-label`. Elements hidden from assistive technologies are skipped.
  */
 export const accessibleName: Rule = {
     id: 'accessible-name',
@@ -17,7 +17,7 @@ export const accessibleName: Rule = {
     wcag: ['4.1.2'],
     run({ document, report }) {
         queryTargets<HTMLElement>(NAMED_CONTROLS, document).forEach((el) => {
-            if (isAriaHidden(el) || getAccessibleName(el)) return;
+            if (isHiddenFromAssistiveTech(el) || getAccessibleName(el)) return;
 
             report({
                 element: el,
@@ -26,7 +26,7 @@ export const accessibleName: Rule = {
         });
 
         queryTargets<SVGElement>('svg[role="img"]', document).forEach((svg) => {
-            if (isAriaHidden(svg)) return;
+            if (isHiddenFromAssistiveTech(svg)) return;
             // Icons inside a named control are described by the control itself.
             if (svg.parentElement?.closest(NAMED_CONTROLS)) return;
 

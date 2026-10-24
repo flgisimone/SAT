@@ -129,8 +129,10 @@ export function createSATUI(onToggle: () => void, onRerun: () => void): SATUI {
         groups.replaceChildren(...Array.from(byRule, ([ruleId, list]) => {
             const details = el('details', { open: openGroups.has(ruleId) },
                 el('summary', { textContent: `${ruleId} (${list.length})` }),
-                el('ul', {}, ...list.map(issueItem)),
             );
+            const help = list[0].help;
+            if (help) details.append(el('a', { className: 'docs', href: help, target: '_blank', rel: 'noopener noreferrer', textContent: `How to fix ${ruleId}` }));
+            details.append(el('ul', {}, ...list.map(issueItem)));
             details.addEventListener('toggle', () => (details.open ? openGroups.add(ruleId) : openGroups.delete(ruleId)));
             return details;
         }));

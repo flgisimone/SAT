@@ -12,6 +12,15 @@ export interface Issue {
     element?: Element;
     /** CSS selector that matches `element` and nothing else. */
     selector?: string;
+    /** Page that explains the rule and how to fix the issue (absent only when the whole run fails). */
+    help?: string;
+}
+
+const RULE_DOCS = 'https://github.com/flgisimone/SAT/blob/develop/docs/rules/';
+
+/** Documentation page of a rule. */
+export function ruleHelp(ruleId: string): string {
+    return `${RULE_DOCS}${ruleId}.md`;
 }
 
 function idSelector(id: string): string {

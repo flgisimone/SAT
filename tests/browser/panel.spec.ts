@@ -168,7 +168,10 @@ test('SAT reports no issues on its own panel', async ({ page, context }) => {
     const other = await context.newPage();
     await openPage(other, `<!doctype html><html lang="en"><head><title>SAT panel</title>
 <meta name="description" content="The SAT panel checked by SAT itself, with every rule turned on.">
-<meta name="viewport" content="width=device-width"></head><body><main><h1>SAT panel</h1>${panel}</main></body></html>`);
+<meta name="viewport" content="width=device-width"><link rel="canonical" href="https://example.com/">
+<meta property="og:title" content="SAT panel"><meta property="og:type" content="website">
+<meta property="og:image" content="https://example.com/a.png"><meta property="og:url" content="https://example.com/">
+<meta name="twitter:card" content="summary"></head><body><main><h1>SAT panel</h1>${panel}</main></body></html>`);
     const issues = await other.evaluate(async () => {
         const { seoAccessibilityTool } = await import('/index.js');
         return (await seoAccessibilityTool({ rules: { 'link-text': 'warning' } })).issues.map((issue) => issue.message);

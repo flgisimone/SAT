@@ -1,4 +1,4 @@
-import { describeElement, queryTargets } from "../../../sat/satDom";
+import { describeElement, isHiddenFromAssistiveTech, queryTargets } from "../../../sat/satDom";
 import type { Rule } from "../rule";
 
 /**
@@ -8,6 +8,7 @@ import type { Rule } from "../rule";
  *
  * Framework click handlers (React onClick, Vue @click) aren't visible in the DOM,
  * so in both cases the suggestion is to use a <button> for actions.
+ * Links hidden from assistive technologies (e.g. a closed menu) can't be reached and are skipped.
  */
 export const linkHref: Rule = {
     id: 'link-href',
@@ -17,6 +18,7 @@ export const linkHref: Rule = {
     run({ document, report }) {
 
         queryTargets<HTMLAnchorElement>('a', document).forEach((link) => {
+            if (isHiddenFromAssistiveTech(link)) return;
             const href = link.getAttribute('href');
 
             if (href === null) {

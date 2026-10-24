@@ -10,6 +10,7 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | `seo-accessibility-tool/sat-controller` | `satChecker(options)`: bottone e pannello nella pagina | Vanilla JS |
 | `seo-accessibility-tool/react` | `useSATChecker(options)` | App React |
 | `seo-accessibility-tool/vue` | `useSatChecker(options)` | App Vue 3 |
+| `seo-accessibility-tool/axe` | `axe(options)`: axe-core come motore aggiuntivo (`engines: [axe()]`) | Chi vuole le circa 90 regole di axe |
 
 ## Decisioni
 
@@ -18,14 +19,15 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | Precisione | Meglio un problema mancato che un falso positivo: ogni controllo segue la specifica (WCAG, WAI-ARIA, HTML-AAM) e non segnala i pattern validi | Se il tool segnala cose corrette, gli sviluppatori smettono di guardarlo (F1-01) |
 | Pagina ospite | SAT non modifica la pagina: i riquadri stanno in uno strato proprio, `satReset` è deprecato e non fa nulla | Il reset cancellava stili e tooltip dell'app (F1-01); i re-render cancellavano le evidenziazioni (F3-02) |
 | Link rotti | Controllo spento di default, una richiesta per URL, massimo 5 alla volta, URL tipo logout/delete esclusi | Le richieste dal browser hanno effetti collaterali e nelle SPA non trovano i 404 (F1-01); la versione completa va nella CLI (F5-04) |
-| Peer dependency | `react` e `vue` opzionali | npm 7+ installava entrambe in ogni progetto (F1-02) |
+| Peer dependency | `react`, `vue` e `axe-core` opzionali | npm 7+ installava entrambe in ogni progetto (F1-02) |
 | Strumenti | Gli stessi di oneoffice: Vitest 5 con jsdom, Playwright 1.64, ESLint 10 con typescript-eslint, TypeScript 6, tokensave, `npm run verify` / `verify:e2e` / `usage` | Un solo modo di lavorare fra i progetti (F1-06) |
 | Test | Unit test in jsdom per la logica; test in Chromium sul bundle per tutto ciò che dipende da layout, colori e visibilità | jsdom non ha layout né canvas (F1-04) |
 | Rilascio | Semver; i cambi di comportamento vanno in `CHANGELOG.md`; la pubblicazione su npm la fa il maintainer | CONVENTIONS §8 |
+| Versione dopo F4 | **1.10.0**: 8 regole SEO e di caricamento nuove, accese di default, documentazione per regola (`Issue.help`), adattatore axe-core | Funzioni nuove senza rotture di API (F4) |
 | Versione dopo F3 | **1.9.0**: pannello nuovo, nessuna modifica alla pagina, `satReset` deprecato | Funzioni nuove senza rotture di API (F3) |
 | Versione dopo F2 | **1.8.0 compatibile**: `issues` e `rules` accanto a `enableCheck*` ed `errorMessages`/`warningMessages`, deprecati; si tolgono in una 2.0 | Nessuna rottura per chi usa 1.x (F2 §1) |
 | Lingua | Solo inglese, per messaggi e UI; niente localizzazione | Un solo insieme di testi da mantenere (F2-07 annullato) |
-| Motore per l'accessibilità | **Da decidere in F4-01**: adattatore opzionale per axe-core (proposta) oppure solo regole proprie | axe-core copre circa 90 regole mantenute da Deque; il valore distintivo di SAT è nell'interfaccia in pagina e nei controlli SEO (F4 §1) |
+| Motore per l'accessibilità | **Adattatore opzionale per axe-core** (`seo-accessibility-tool/axe`, opzione `engines`), deciso in F4-01; le regole di SAT che axe copre si spengono quando gira | axe-core copre circa 90 regole mantenute da Deque e sulle pagine provate non ha dato falsi positivi; SAT è 20–30 volte più veloce; il valore distintivo di SAT è nell'interfaccia in pagina e nei controlli SEO (F4 §1) |
 
 ## Fasi
 
