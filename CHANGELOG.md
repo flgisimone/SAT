@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.12.0 — unreleased
+
+### Added
+- `seo-accessibility-tool/vite`: Vite plugin `sat(options)` that adds SAT to the pages of `vite dev` only, with the options from the config and `axe: true` for axe-core. The production build doesn't contain SAT. `vite` is an optional peer dependency.
+- Browser extension in `dist/extension` (Chrome, Edge): a click on its button adds SAT to the open tab, on any site, with only the `activeTab` and `scripting` permissions.
+- README: how to start SAT in Svelte and Angular apps.
+
+### Fixed
+- The panel keeps its styles on pages whose Content Security Policy blocks inline styles: they are now a constructed style sheet instead of a `<style>` element.
+
 ## 1.11.0 — unreleased
 
 ### Added

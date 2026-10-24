@@ -7,7 +7,7 @@ Detects common issues in heading usage (`<h1>`-`<h6>`), ARIA roles, contrast, la
 
 ## 🚀 Features
 
-✅ Framework-agnostic core logic (React, Vue, Vanilla)  
+✅ Framework-agnostic core logic (React, Vue, Svelte, Angular, Vanilla), a Vite plugin and a browser extension  
 ✅ Validates heading structure, ARIA roles, labels, contrast, images, SEO meta tags, canonical, hreflang, Open Graph, JSON-LD and image loading  
 ✅ Optional axe-core engine for about 90 more accessibility rules  
 ✅ Injects a floating toggle button to analyze any page  
@@ -52,6 +52,60 @@ useSatChecker(); // Call it directly in setup: SAT starts when the component is 
 
 ---
 
+## ⚡ Vite plugin
+
+Adds SAT to the pages of `vite dev` without touching the app's code. `vite build` and `vite preview` don't include it.
+
+```ts
+// vite.config.ts
+import { defineConfig } from "vite";
+import { sat } from "seo-accessibility-tool/vite";
+
+export default defineConfig({
+  plugins: [sat({ rules: { "link-text": "warning" } })],
+});
+```
+
+It takes the options that fit in JSON (`rules`, `allowedLinkTexts`, `observeDom`, the 1.x flags) and `axe: true` to run axe-core too (install `axe-core`). It works with any app Vite serves: Svelte, SvelteKit, Solid, Preact, Vue, React. `vite` is an optional peer dependency (5 or later).
+
+---
+
+## 🧡 Svelte and Angular
+
+No wrapper is needed: `satChecker` starts the panel from the app's entry point.
+
+```ts
+// Svelte (or SvelteKit, in a +layout.svelte onMount): with Vite, the plugin above is enough
+import { satChecker } from "seo-accessibility-tool/sat-controller";
+
+satChecker(); // starts when NODE_ENV is "development"
+```
+
+```ts
+// Angular: main.ts
+import { isDevMode } from "@angular/core";
+import { bootstrapApplication } from "@angular/platform-browser";
+import { satChecker } from "seo-accessibility-tool/sat-controller";
+import { AppComponent } from "./app/app.component";
+
+bootstrapApplication(AppComponent).then(() => satChecker({ enabled: isDevMode() }));
+```
+
+---
+
+## 🧭 Browser extension
+
+Checks any page, a public site included, without installing SAT in a project. Build it and load it unpacked in Chrome or Edge:
+
+```bash
+npm install && npm run build
+# chrome://extensions → Developer mode → Load unpacked → dist/extension
+```
+
+A click on the SAT button in the toolbar adds the panel to the open tab. The extension asks only for `activeTab` and `scripting`: it can read a tab only after its button is clicked there, and nothing leaves the browser. It also works on pages with a strict Content Security Policy.
+
+---
+
 ## 🖱️ UI Behavior
 
 - 🚀 runs the checks, 🛑 turns SAT off, 🔃 runs them again; the counts button opens the results panel
@@ -62,7 +116,7 @@ useSatChecker(); // Call it directly in setup: SAT starts when the component is 
 - Single-page apps: when SAT is on, a route change (`pushState`, `replaceState`, back/forward) runs the checks again. Use `observeDom` to rerun them on any DOM change
 - Keyboard: Tab through the dock and the panel, Escape closes the panel and returns focus to the counts button
 - SAT stays on across reloads until you stop it (a flag in `localStorage`)
-- Runs only when `process.env.NODE_ENV === "development"` (set by Vite, webpack, Next, etc.)
+- Runs only when `process.env.NODE_ENV === "development"` (set by Vite, webpack, Next, etc.); the Vite plugin and the browser extension start it anyway
 
 ---
 
