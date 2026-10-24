@@ -15,6 +15,7 @@ Checks each page in Chromium (Playwright) and exits with 1 when the limits are e
   --html <file>        writes the report as an HTML page
   --config <file>      JSON file with SAT options, e.g. { "rules": { "link-text": "warning" } }
   --axe                runs axe-core too (needs the axe-core package)
+  --wcag-level <level> AA (default) or AAA, which adds the AAA criteria as warnings
   --depth <n>          follows same-origin links this many levels deep and checks those pages too,
                        reporting broken links (default 0: only the given URLs)
   --max-pages <n>      stops after this many pages (default 100)
@@ -41,12 +42,17 @@ function readArgs(argv: string[]) {
             html: { type: 'string' },
             config: { type: 'string' },
             axe: { type: 'boolean' },
+            'wcag-level': { type: 'string' },
             depth: { type: 'string' },
             'max-pages': { type: 'string' },
             'not-found': { type: 'string' },
             help: { type: 'boolean', short: 'h' },
         },
     });
+    const wcagLevel = values['wcag-level'];
+    if (wcagLevel !== undefined && wcagLevel !== 'AA' && wcagLevel !== 'AAA') {
+        throw new UsageError(`--wcag-level must be AA or AAA, got "${wcagLevel}".`);
+    }
     const urls = positionals.map((url) => {
         try {
             return new URL(url).toString();
@@ -62,7 +68,11 @@ function readArgs(argv: string[]) {
         maxWarnings: count(values['max-warnings'], 'max-warnings', Infinity),
         json: values.json,
         html: values.html,
-        options: { ...(values.config ? JSON.parse(readFileSync(values.config, 'utf8')) : {}), axe: values.axe } as CheckPageOptions,
+        options: {
+            ...(values.config ? JSON.parse(readFileSync(values.config, 'utf8')) : {}),
+            axe: values.axe,
+            ...(wcagLevel && { wcagLevel }),
+        } as CheckPageOptions,
         depth: count(values.depth, 'depth', 0),
         maxPages: count(values['max-pages'], 'max-pages', 100),
         notFound: values['not-found'],

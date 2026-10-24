@@ -26,7 +26,7 @@ import { imageSize } from './seo/image-size';
 import { imageLazyLoad } from './seo/image-lazy-load';
 import { linkBroken } from './seo/link-broken';
 
-export type { Rule, RuleContext, RuleId, Report } from './rule';
+export type { Rule, RuleContext, RuleId, Report, WcagLevel } from './rule';
 
 /** Every rule, in the order the results are listed. */
 export const rules: Rule[] = [

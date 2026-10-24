@@ -1,18 +1,17 @@
 import { queryTargets } from "../../../sat/satDom";
 import type { Rule } from "../rule";
 
-/** The page has exactly one <h1>. */
+/**
+ * The page has an <h1> (warning). Several <h1> are valid HTML and Google sets no number of headings,
+ * so they are not reported.
+ */
 export const h1: Rule = {
     id: 'h1',
     category: 'seo',
-    defaultSeverity: 'error',
+    defaultSeverity: 'warning',
     run({ document, report }) {
-        const h1s = queryTargets<HTMLElement>('h1', document);
-
-        if (h1s.length === 0) {
-            report({ message: 'No <h1> found on the page.' });
-        } else if (h1s.length > 1) {
-            report({ element: h1s[1], message: `Multiple <h1> found on the page (${h1s.length}). Use a single <h1> for the main topic.` });
+        if (queryTargets('h1', document).length === 0) {
+            report({ message: 'No <h1> found on the page. Give the page a main heading that names its topic.' });
         }
     },
 };

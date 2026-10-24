@@ -1,4 +1,4 @@
-import type { RuleId } from '../core/rules/rule';
+import type { RuleId, WcagLevel } from '../core/rules/rule';
 import type { Issue, Severity } from './issue';
 
 /** A severity forces every issue of the rule to it; 'off' turns the rule off. */
@@ -86,6 +86,8 @@ export interface SATOptions extends LegacyOptions {
     rules?: Partial<Record<RuleId | `${string}/${string}`, RuleSetting>>;
     /** Other checkers to run with SAT's rules, e.g. `engines: [axe()]`. */
     engines?: Engine[];
+    /** WCAG level to check: 'AA' (default) or 'AAA', which adds the AAA criteria as warnings (e.g. 1.4.6 contrast). */
+    wcagLevel?: WcagLevel;
     /** Link texts `link-text` accepts anyway (case-insensitive). */
     allowedLinkTexts?: string[];
     /**

@@ -1,5 +1,8 @@
 import type { Category, Severity } from '../../sat/issue';
 
+/** WCAG conformance level the checks aim at. */
+export type WcagLevel = 'AA' | 'AAA';
+
 export type RuleId =
     | 'h1'
     | 'h1-visible'
@@ -42,6 +45,7 @@ export interface Report {
 export interface RuleContext {
     document: Document;
     allowedLinkTexts: string[];
+    wcagLevel: WcagLevel;
     report(report: Report): void;
 }
 

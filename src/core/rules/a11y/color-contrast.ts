@@ -150,7 +150,7 @@ export function isLargeText(fontSize: string, fontWeight: string): boolean {
 const TEXT_SELECTORS = 'h1, h2, h3, h4, h5, h6, p, span, a, button, label, li, td, th, strong, em, small';
 
 /**
- * Text contrast (WCAG 1.4.3 AA as error, 1.4.6 AAA as warning).
+ * Text contrast (WCAG 1.4.3 AA as error; 1.4.6 AAA as warning with `wcagLevel: 'AAA'`).
  * Only elements that directly contain visible text are checked.
  * Thresholds: AA 4.5 (3 for large text), AAA 7 (4.5 for large text).
  */
@@ -159,7 +159,7 @@ export const colorContrast: Rule = {
     category: 'a11y',
     defaultSeverity: 'error',
     wcag: ['1.4.3'],
-    run({ document, report }) {
+    run({ document, report, wcagLevel }) {
         queryTargets<HTMLElement>(TEXT_SELECTORS, document).forEach((el) => {
             if (!hasOwnText(el) || !isElementVisible(el)) return;
 
@@ -180,7 +180,7 @@ export const colorContrast: Rule = {
                     element: el,
                     message: `Insufficient contrast on ${describeElement(el)}: ratio ${shown}. Minimum AA${sizeNote} is ${aa}.`,
                 });
-            } else if (ratio < aaa) {
+            } else if (wcagLevel === 'AAA' && ratio < aaa) {
                 report({
                     element: el,
                     message: `Suboptimal contrast on ${describeElement(el)}: ratio ${shown}. Meets AA but not AAA${sizeNote} (${aaa}).`,

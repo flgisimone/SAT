@@ -2,6 +2,8 @@
 
 **Category**: SEO · **Default**: warning
 
+**Source**: [Google Search Central: robots meta tag](https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag)
+
 ## What it checks
 
 `noindex`, `nofollow` or `none` in `<meta name="robots">` or `<meta name="googlebot">`. Always a warning.

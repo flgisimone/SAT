@@ -2,9 +2,11 @@
 
 **Category**: Accessibility · **Default**: error · **WCAG**: [1.4.3 Contrast (Minimum)](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html), [1.4.6 Contrast (Enhanced)](https://www.w3.org/WAI/WCAG22/Understanding/contrast-enhanced.html)
 
+**Source**: [ACT afw4f7 Text has minimum contrast](https://www.w3.org/WAI/standards-guidelines/act/rules/afw4f7/proposed/) · [ACT 09o5cg Text has enhanced contrast](https://www.w3.org/WAI/standards-guidelines/act/rules/09o5cg/proposed/)
+
 ## What it checks
 
-Text contrast against its background. Below AA (4.5:1, or 3:1 for large text) is an error; below AAA (7:1, or 4.5:1) is a warning (WCAG 1.4.6). Semi-transparent colors are blended. Text over background images and hidden text are skipped, since the background can't be known.
+Text contrast against its background. Below AA (4.5:1, or 3:1 for large text) is an error. With the option `wcagLevel: 'AAA'`, below AAA (7:1, or 4.5:1) is a warning (WCAG 1.4.6). Semi-transparent colors are blended. Text over background images and hidden text are skipped, since the background can't be known.
 
 ## Why
 

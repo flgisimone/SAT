@@ -1,10 +1,12 @@
 # `heading-levels`
 
-**Category**: Accessibility · **Default**: error · **WCAG**: [1.3.1 Info and Relationships](https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html)
+**Category**: Accessibility · **Default**: warning · **WCAG**: [1.3.1 Info and Relationships](https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html)
+
+**Source**: [WCAG technique G141 (advisory)](https://www.w3.org/WAI/WCAG22/Techniques/general/G141) · [Understanding 1.3.1](https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html)
 
 ## What it checks
 
-Skipped heading levels going down the outline, e.g. `<h2>` followed by `<h4>`.
+Skipped heading levels going down the outline, e.g. `<h2>` followed by `<h4>`. A warning: WCAG lists ordered levels as an advisory technique (G141), not as a requirement of 1.3.1.
 
 ## Why
 

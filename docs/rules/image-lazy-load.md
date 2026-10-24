@@ -2,6 +2,8 @@
 
 **Category**: SEO · **Default**: warning
 
+**Source**: [web.dev: lazy loading and LCP](https://web.dev/articles/lcp-lazy-loading) · [Google Search Central: lazy-loaded content](https://developers.google.com/search/docs/crawling-indexing/javascript/lazy-loading)
+
 ## What it checks
 
 Images with `loading="lazy"` that are visible when the page opens: in the first viewport, at its position in the page. Images below the fold, or outside the viewport horizontally (carousels), are not reported. Checked in the browser only (it needs layout).

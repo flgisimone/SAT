@@ -2,6 +2,8 @@
 
 **Category**: Accessibility · **Default**: error · **WCAG**: [4.1.2 Name, Role, Value](https://www.w3.org/WAI/WCAG22/Understanding/name-role-value.html), [1.1.1 Non-text Content](https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html)
 
+**Source**: [ACT 97a4e1 Button has non-empty accessible name](https://www.w3.org/WAI/standards-guidelines/act/rules/97a4e1/proposed/) · [ACT c487ae Link has non-empty accessible name](https://www.w3.org/WAI/standards-guidelines/act/rules/c487ae/proposed/) · [ACT 7d6734 SVG element with explicit role has non-empty accessible name](https://www.w3.org/WAI/standards-guidelines/act/rules/7d6734/proposed/)
+
 ## What it checks
 
 Buttons and links have an accessible name: text, `aria-label`, `aria-labelledby`, `title` or a labelled image or icon inside. `<svg role="img">` needs a `<title>`, `aria-label` or `aria-labelledby` (WCAG 1.1.1). Form fields are covered by [`form-label`](form-label.md). Elements hidden from assistive technologies (`display: none`, `visibility: hidden`, `hidden`, `aria-hidden="true"`) are skipped.

@@ -1,4 +1,4 @@
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { runSAT, seoAccessibilityTool } from '../src/core/seoAccessibilityTool';
 import { rules } from '../src/core/rules';
@@ -29,6 +29,15 @@ describe('Issue', () => {
         const docs = 'docs/rules';
         expect(rules.filter((rule) => !existsSync(`${docs}/${rule.id}.md`)).map((rule) => rule.id)).toEqual([]);
         expect(readdirSync(docs).sort()).toEqual(rules.map((rule) => `${rule.id}.md`).sort());
+    });
+
+    it('every rule page cites an official source (W3C, WHATWG, Google, Open Graph, X)', () => {
+        const official = /\(https:\/\/(www\.w3\.org|html\.spec\.whatwg\.org|developers\.google\.com|web\.dev|ogp\.me|developer\.x\.com)\//;
+        const missing = rules.filter((rule) => {
+            const source = readFileSync(`docs/rules/${rule.id}.md`, 'utf8').split('\n').find((line) => line.startsWith('**Source**: '));
+            return !source || !official.test(source);
+        });
+        expect(missing.map((rule) => rule.id)).toEqual([]);
     });
 
     it.each([
@@ -67,7 +76,7 @@ describe('rule registry', () => {
 
 describe('rules option', () => {
     beforeEach(() => {
-        document.body.innerHTML = '<img src="a.png"><img src="b.png" alt="photo.jpg"><a target="_blank" href="/x">x</a>';
+        document.body.innerHTML = '<img src="a.png"><img src="b.png" alt="photo.jpg"><a target="_blank" rel="opener" href="/x">x</a>';
     });
 
     const ofRule = async (id: string, options = {}) =>
@@ -109,11 +118,11 @@ describe('1.x enableCheck* options', () => {
         expect(target).toHaveBeenCalledTimes(1);
     });
 
-    it('without options, the same rules run as in 1.7.0 (all but link-text and link-broken)', async () => {
+    it('without options, all rules run but link-target-blank, link-text and link-broken', async () => {
         const spies = rules.map((rule) => vi.spyOn(rule, 'run').mockImplementation(() => undefined));
         await seoAccessibilityTool();
         const ran = rules.filter((_, i) => spies[i].mock.calls.length > 0).map((rule) => rule.id);
-        expect(ran).toEqual(rules.map((rule) => rule.id).filter((id) => id !== 'link-text' && id !== 'link-broken'));
+        expect(ran).toEqual(rules.map((rule) => rule.id).filter((id) => !['link-target-blank', 'link-text', 'link-broken'].includes(id)));
     });
 });
 

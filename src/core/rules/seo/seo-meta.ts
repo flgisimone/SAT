@@ -1,14 +1,13 @@
 import { queryTargets } from "../../../sat/satDom";
 import type { Rule } from "../rule";
 
-const TITLE_MAX_LENGTH = 60;
-const DESCRIPTION_MAX_LENGTH = 160;
-
 /**
  * Basic SEO metadata in <head>:
- * - <title>: present, not empty and only one (warning above 60 characters);
- * - meta description: present, not empty and only one (warning above 160 characters);
+ * - <title>: present, not empty and only one;
+ * - meta description: present, not empty and only one;
  * - warning: meta viewport missing.
+ *
+ * No length limits: Google Search Central states there is none for either, and shortens them to fit the device.
  */
 export const seoMeta: Rule = {
     id: 'seo-meta',
@@ -19,11 +18,6 @@ export const seoMeta: Rule = {
         const title = document.title.trim();
         if (!title) {
             report({ message: 'Missing or empty <title>.' });
-        } else if (title.length > TITLE_MAX_LENGTH) {
-            report({
-                message: `<title> is ${title.length} characters long; search results usually cut it after ${TITLE_MAX_LENGTH}.`,
-                severity: 'warning',
-            });
         }
 
         // HTML allows one <title> and one meta description per document.
@@ -39,11 +33,6 @@ export const seoMeta: Rule = {
         const description = document.querySelector('meta[name="description" i]')?.getAttribute('content')?.trim();
         if (!description) {
             report({ message: 'Missing or empty <meta name="description">.' });
-        } else if (description.length > DESCRIPTION_MAX_LENGTH) {
-            report({
-                message: `Meta description is ${description.length} characters long; search results usually cut it after ${DESCRIPTION_MAX_LENGTH}.`,
-                severity: 'warning',
-            });
         }
 
         if (!document.querySelector('meta[name="viewport" i]')) {

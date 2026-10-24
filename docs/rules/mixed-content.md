@@ -2,6 +2,8 @@
 
 **Category**: SEO · **Default**: error
 
+**Source**: [W3C Mixed Content](https://www.w3.org/TR/mixed-content/)
+
 ## What it checks
 
 On an `https:` page, resources loaded over `http:`. Scripts, frames, stylesheets, objects and loaded `<link>`s (icon, preload, manifest…) are errors because browsers block them; images, `srcset` candidates and media are warnings because browsers upgrade them to https or block them. Links to `http:` pages and pages served over `http:` are not reported.

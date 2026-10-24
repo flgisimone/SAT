@@ -80,9 +80,19 @@ describe('landmarks', () => {
         expect((await runOnly(['landmarks'])).errors).toBe(0);
     });
 
-    it('reports a missing main and duplicate page headers', async () => {
+    it('warns on a missing main and duplicate page headers (WAI-ARIA "should")', async () => {
         render('<header></header><header></header>');
-        expect((await runOnly(['landmarks'])).errors).toBe(2);
+        const r = await runOnly(['landmarks']);
+        expect([r.errors, r.warnings]).toEqual([0, 2]);
+    });
+
+    it('reports two visible <main> as an error (HTML "must not"), a hidden one is fine', async () => {
+        render('<main></main><main hidden></main>');
+        expect((await runOnly(['landmarks'])).errors + (await runOnly(['landmarks'])).warnings).toBe(0);
+        render('<main></main><main></main>');
+        expect((await runOnly(['landmarks'])).errors).toBe(1);
+        render('<main></main><div role="main"></div>');
+        expect((await runOnly(['landmarks'])).warnings).toBe(1);
     });
 });
 
@@ -148,9 +158,10 @@ describe('headings', () => {
         expect(r.warnings).toBe(0);
     });
 
-    it('reports a skipped level once', async () => {
+    it('warns once on a skipped level (WCAG G141 is advisory)', async () => {
         render('<h1>A</h1><h3>B</h3>');
-        expect((await runOnly(['heading-order', 'heading-levels'])).errors).toBe(1);
+        const r = await runOnly(['heading-order', 'heading-levels']);
+        expect([r.errors, r.warnings]).toEqual([0, 1]);
     });
 
     it('outline: headings in page order with their levels and skipped levels', () => {
@@ -164,21 +175,28 @@ describe('headings', () => {
         ]);
     });
 
-    it('reports missing and multiple h1', async () => {
+    it('warns on a missing h1; several h1 are valid HTML', async () => {
         render('<h2>A</h2>');
         const missing = await runOnly(['h1']);
+        expect([missing.errors, missing.warnings]).toEqual([0, 1]);
         render('<h1>A</h1><h1>B</h1>');
         const multiple = await runOnly(['h1']);
-        expect(missing.errors + multiple.errors).toBe(2);
+        expect(multiple.issues).toEqual([]);
     });
 });
 
 describe('links', () => {
-    it('reports empty hrefs (including href="") and warns on missing href', async () => {
+    it('reports empty hrefs (including href=""); <a> without href is a valid placeholder', async () => {
         render('<a href="">a</a><a href="#">b</a><a href="javascript:void(0)">c</a><a>d</a><a href="/ok">e</a>');
         const r = await runOnly(['link-href']);
         expect(r.errors).toBe(3);
-        expect(r.warnings).toBe(1);
+        expect(r.warnings).toBe(0);
+    });
+
+    it('link-target-blank: target="_blank" implies noopener, only rel="opener" is reported', async () => {
+        render('<a target="_blank" href="/a">a</a><a target="_blank" rel="noreferrer" href="/b">b</a><a target="_blank" rel="opener" href="/c">c</a>');
+        const r = await runOnly(['link-target-blank']);
+        expect(r.issues.map((i) => i.element?.textContent)).toEqual(['c']);
     });
 
     it('matches allowed link texts case-insensitively', async () => {
@@ -199,8 +217,8 @@ describe('links', () => {
         expect([...links.values()][0]).toHaveLength(2);
     });
 
-    it('link-text and link-broken are off by default', () => {
-        expect(rules.filter((rule) => rule.defaultOff).map((rule) => rule.id)).toEqual(['link-text', 'link-broken']);
+    it('link-target-blank, link-text and link-broken are off by default', () => {
+        expect(rules.filter((rule) => rule.defaultOff).map((rule) => rule.id)).toEqual(['link-target-blank', 'link-text', 'link-broken']);
     });
 });
 
@@ -219,6 +237,29 @@ describe('SEO meta', () => {
         const r = await runOnly(['html-lang', 'seo-meta']);
         expect(r.errors).toBe(0);
         expect(r.warnings).toBe(0);
+    });
+});
+
+describe('SEO meta: no length limits (Google Search Central)', () => {
+    it('does not report a long title or description', async () => {
+        document.title = 'T'.repeat(120);
+        document.head.innerHTML += `<meta name="description" content="${'D'.repeat(300)}"><meta name="viewport" content="width=device-width">`;
+        expect((await runOnly(['seo-meta'])).issues).toEqual([]);
+    });
+});
+
+describe('html-lang: valid language tags (ACT bf051a, de46e4)', () => {
+    it.each(['en', 'en-US', 'zh-Hant', 'es-419', 'de-CH-1996', 'gsw'])('accepts lang="%s"', async (lang) => {
+        document.documentElement.setAttribute('lang', lang);
+        render(`<p lang="${lang}">x</p><p lang="">y</p>`);
+        expect((await runOnly(['html-lang'])).issues).toEqual([]);
+    });
+
+    it.each(['english', 'em', '#!', 'e'])('reports lang="%s" on <html> and on an element', async (lang) => {
+        document.documentElement.setAttribute('lang', lang);
+        render(`<p lang="${lang}">x</p>`);
+        const r = await runOnly(['html-lang']);
+        expect(r.issues.map((i) => i.wcag)).toEqual([['3.1.1'], ['3.1.2']]);
     });
 });
 

@@ -2,9 +2,11 @@
 
 **Category**: SEO · **Default**: error
 
+**Source**: [Google Search Central: title links](https://developers.google.com/search/docs/appearance/title-link) · [snippets and meta description](https://developers.google.com/search/docs/appearance/snippet) · [HTML: the title element](https://html.spec.whatwg.org/multipage/semantics.html#the-title-element) · [mobile-first indexing](https://developers.google.com/search/docs/crawling-indexing/mobile/mobile-sites-mobile-first-indexing)
+
 ## What it checks
 
-`<title>` and `<meta name="description">` are present, not empty and only one each (errors). A title above 60 characters, a description above 160 and a missing `<meta name="viewport">` are warnings. `<title>` inside SVG is not counted.
+`<title>` and `<meta name="description">` are present, not empty and only one each (errors). A missing `<meta name="viewport">` is a warning. `<title>` inside SVG is not counted. There are no length limits: Google states there is none for either and shortens them to fit the device.
 
 ## Why
 
