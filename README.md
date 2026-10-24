@@ -8,7 +8,7 @@ Detects common issues in heading usage (`<h1>`-`<h6>`), ARIA roles, contrast, la
 ## 🚀 Features
 
 ✅ Framework-agnostic core logic (React, Vue, Svelte, Angular, Vanilla), a Vite plugin and a browser extension  
-✅ Validates heading structure, ARIA roles, labels, contrast, images, SEO meta tags, canonical, hreflang, Open Graph, JSON-LD and image loading  
+✅ Validates heading structure, ARIA roles and attributes, names and labels, contrast, target size, tables, forms, media, images, SEO meta tags, canonical, hreflang, Open Graph, JSON-LD and image loading, with the W3C ACT test cases as specification  
 ✅ Optional axe-core engine for about 90 more accessibility rules  
 ✅ Injects a floating toggle button to analyze any page  
 ✅ Results panel grouped by rule, with filters and a heading map; click an issue to jump to the element  
@@ -154,8 +154,10 @@ Each rule follows an official source, cited on its page in [`docs/rules/`](docs/
 | `h1-visible`        | seo      | The first `<h1>` is rendered (not hidden)                                 | warning    | `enableCheckH1Visible` |
 | `heading-order`     | a11y     | The first heading of the page is an `<h1>`                                | warning    | `enableCheckHeadingOrder` |
 | `heading-levels`    | a11y     | Skipped heading levels (e.g. H2 → H4)                                     | warning    | `enableCheckJumpLevels` |
-| `accessible-name`   | a11y     | Buttons, links and `svg[role="img"]` have an accessible name              | error      | `enableCheckAriaLabel` |
+| `accessible-name`   | a11y     | Buttons, links, menu items, `<summary>`, headings, `svg[role="img"]` and `<object>` have an accessible name | error | `enableCheckAriaLabel` |
 | `aria-roles`        | a11y     | Invalid `role` values (error), redundant roles (warning)                  | error      | `enableCheckAriaRolesWithSuggestions` |
+| `aria-attributes`   | a11y     | Unknown `aria-*` attributes, invalid values, missing required states, attributes the role doesn't support or prohibits | error | — |
+| `aria-hidden-focus` | a11y     | Elements reachable with Tab inside `aria-hidden="true"`                   | error      | — |
 | `landmarks`         | a11y     | Several visible `<main>` (error); no main, several page-level header/footer, unlabelled repeated navs (warning) | error | `enableCheckUniqueLandmarks` |
 | `color-contrast`    | a11y     | WCAG text contrast: below AA (error), below AAA with `wcagLevel: "AAA"` (warning) | error | `enableCheckTextElementContrast` |
 | `form-label`        | a11y     | Form fields have a label (placeholder is not enough)                      | error      | `enableCheckInputLabel` |
@@ -166,6 +168,14 @@ Each rule follows an official source, cited on its page in [`docs/rules/`](docs/
 | `tabindex-negative` | a11y     | Visible native controls removed from the tab order with `tabindex="-1"`   | warning    | `enableCheckTabindexNegativeOne` |
 | `link-text`         | a11y     | Vague link texts ("click here", "more")                                    | off        | `enableCheckNonDescriptiveLinks` |
 | `html-lang`         | a11y     | `<html>` has a `lang`; every `lang` is a valid language tag               | error      | `enableCheckHtmlLang` |
+| `iframe-name`       | a11y     | `<iframe>` has a `title`, `aria-label` or `aria-labelledby`               | error      | — |
+| `label-in-name`     | a11y     | The visible label of a button or link is part of its `aria-label`         | error      | — |
+| `target-size`       | a11y     | Targets under 24×24 px too close to other targets (WCAG 2.2, browser only) | error     | — |
+| `autocomplete-valid`| a11y     | `autocomplete` values follow the HTML autofill tokens                     | error      | — |
+| `table-headers`     | a11y     | `headers` pointing outside the table, header cells without cells          | error      | — |
+| `meta-viewport`     | a11y     | `user-scalable=no` or `maximum-scale` below 2 (zoom blocked)              | error      | — |
+| `meta-refresh`      | a11y     | `<meta http-equiv="refresh">` with a delay (1 s to 20 h)                  | error      | — |
+| `media-autoplay`    | a11y     | `<video>`/`<audio>` that autoplay with sound and no controls              | warning    | — |
 | `seo-meta`          | seo      | One `<title>` and one meta description (error), meta viewport (warning); no length limits | error | `enableCheckSeoMeta` |
 | `canonical`         | seo      | Several or empty canonicals (error), missing or relative canonical (warning) | warning   | — |
 | `robots-meta`       | seo      | `noindex`, `nofollow` or `none` in a robots meta tag                      | warning    | — |
@@ -199,7 +209,7 @@ satChecker({ engines: [axe()] });
 ```
 
 - axe's violations appear in the panel as `axe/<rule>` (e.g. `axe/image-alt`), with a link to Deque's page on the rule. Critical and serious ones are errors, the others warnings; results axe can't decide are not shown.
-- The SAT rules axe covers are off while it runs, so a problem is reported once: `accessible-name`, `aria-roles`, `landmarks`, `color-contrast`, `form-label`, `focus-management`, `image-alt`, `html-lang`, `heading-levels`. Setting one in `rules` turns it back on.
+- The SAT rules axe covers are off while it runs, so a problem is reported once: `accessible-name`, `aria-roles`, `aria-attributes`, `aria-hidden-focus`, `landmarks`, `color-contrast`, `form-label`, `focus-management`, `image-alt`, `html-lang`, `heading-levels`, `iframe-name`, `label-in-name`, `autocomplete-valid`, `table-headers`, `meta-viewport`, `meta-refresh`, `media-autoplay`. `target-size` stays on: axe's own rule is off by default. Setting one in `rules` turns it back on.
 - `rules` sets axe rules too: `rules: { "axe/region": "off" }`. `axe(options)` takes axe's run options, e.g. `axe({ runOnly: ["wcag2a", "wcag2aa"] })`.
 - axe adds about 550 KB (150 KB gzipped) and makes a run slower: 0.1–1.5 s instead of 5–50 ms on real pages. It checks the page's own document only.
 

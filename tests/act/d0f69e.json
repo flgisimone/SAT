@@ -1,0 +1,103 @@
+{
+ "rule": "d0f69e",
+ "name": "Table header cell has assigned cells",
+ "page": "https://www.w3.org/WAI/standards-guidelines/act/rules/d0f69e/proposed/",
+ "cases": [
+  {
+   "id": "4d021e317ad660d19925651ead361fcaf474dc76",
+   "title": "Passed Example 1",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 1</title>\n</head>\n<body>\n\t<table>\n\t\t<tr>\n\t\t\t<th>Time</th>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<td>05:41</td>\n\t\t</tr>\n\t</table>\n</body>\n</html>"
+  },
+  {
+   "id": "be8acb4fa0dd3057dd28f7cc43e64a95eff15ac6",
+   "title": "Passed Example 2",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 2</title>\n</head>\n<body>\n\t<div role=\"table\" aria-label=\"Temperatures\">\n\t\t<div role=\"rowgroup\">\n\t\t\t<div role=\"row\">\n\t\t\t\t<span role=\"columnheader\">Month</span>\n\t\t\t\t<span role=\"columnheader\">Top Temperature</span>\n\t\t\t</div>\n\t\t</div>\n\t\t<div role=\"rowgroup\">\n\t\t\t<div role=\"row\">\n\t\t\t\t<span role=\"cell\">July</span>\n\t\t\t\t<span role=\"cell\">40 C</span>\n\t\t\t</div>\n\t\t\t<div role=\"row\">\n\t\t\t\t<span role=\"cell\">August</span>\n\t\t\t\t<span role=\"cell\">45 C</span>\n\t\t\t</div>\n\t\t</div>\n\t</div>\n</body>\n</html>"
+  },
+  {
+   "id": "9fbe21d1ffdb176ef89afc95cc3f4f666353ee25",
+   "title": "Passed Example 3",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 3</title>\n</head>\n<body>\n\t<table>\n\t\t<thead>\n\t\t\t<tr>\n\t\t\t\t<th>Projects</th>\n\t\t\t\t<th>Exams</th>\n\t\t\t</tr>\n\t\t</thead>\n\t\t<tbody>\n\t\t\t<tr>\n\t\t\t\t<td colspan=\"2\">15%</td>\n\t\t\t</tr>\n\t\t</tbody>\n\t</table>\n</body>\n</html>"
+  },
+  {
+   "id": "4dba1a02d3852eecca6f2f50e1812bce802a42de",
+   "title": "Passed Example 4",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 4</title>\n</head>\n<body>\n\t<table role=\"grid\" aria-label=\"Meal times\">\n\t\t<thead>\n\t\t\t<tr>\n\t\t\t\t<td></td>\n\t\t\t\t<th scope=\"col\" role=\"columnheader\">Breakfast</th>\n\t\t\t\t<th scope=\"col\" role=\"columnheader\">Lunch</th>\n\t\t\t\t<th scope=\"col\" role=\"columnheader\">Dinner</th>\n\t\t\t</tr>\n\t\t</thead>\n\t\t<tbody>\n\t\t\t<tr>\n\t\t\t\t<th scope=\"row\" role=\"rowheader\">Day 1</th>\n\t\t\t\t<td>8:00</td>\n\t\t\t\t<td>13:00</td>\n\t\t\t\t<td>18:00</td>\n\t\t\t</tr>\n\t\t</tbody>\n\t</table>\n</body>\n</html>"
+  },
+  {
+   "id": "28e0234356523086d570a5b8f959e8cc5ea6b4a6",
+   "title": "Passed Example 5",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 5</title>\n</head>\n<body>\n\t<table>\n\t\t<tr>\n\t\t\t<th id=\"col1\">Cities</th>\n\t\t\t<th id=\"col2\">Count</th>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<td>Paris</td>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<td headers=\"col2\">1</td>\n\t\t</tr>\n\t</table>\n</body>\n</html>"
+  },
+  {
+   "id": "47a80af86b4ea6357997fa76a62cd55dcb8f2fe7",
+   "title": "Passed Example 6",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 6</title>\n</head>\n<body>\n\t<table>\n\t\t<caption>\n\t\t\tOpening hours\n\t\t</caption>\n\t\t<tr>\n\t\t\t<th>Day</th>\n\t\t\t<th>Morning</th>\n\t\t\t<th>Afternoon</th>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<th>Mon-Fri</th>\n\t\t\t<td>8-12</td>\n\t\t\t<td>14-17</td>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<th>Sat-Sun</th>\n\t\t\t<td>10-14</td>\n\t\t\t<td>Closed</td>\n\t\t</tr>\n\t</table>\n</body>\n</html>"
+  },
+  {
+   "id": "664972feaac1097f9365d73aac844c81fa927fa2",
+   "title": "Failed Example 1",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 1</title>\n</head>\n<body>\n\t<table>\n\t\t<thead>\n\t\t\t<tr>\n\t\t\t\t<th>Rate</th>\n\t\t\t\t<th>Value</th>\n\t\t\t</tr>\n\t\t</thead>\n\t\t<tbody>\n\t\t\t<tr>\n\t\t\t\t<td>15%</td>\n\t\t\t</tr>\n\t\t</tbody>\n\t</table>\n</body>\n</html>"
+  },
+  {
+   "id": "6bb6ca5dcdbd1fef063561f61de88740db24bd5d",
+   "title": "Failed Example 2",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 2</title>\n</head>\n<body>\n\t<table>\n\t\t<tr>\n\t\t\t<th id=\"col1\">Country</th>\n\t\t\t<th id=\"col2\">Starting with a Z</th>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<td>Zambia</td>\n\t\t\t<td headers=\"col1\">Zimbabwe</td>\n\t\t</tr>\n\t</table>\n</body>\n</html>"
+  },
+  {
+   "id": "1a0ee1b5549d2f1eebd337e85cae8487331ab723",
+   "title": "Failed Example 3",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 3</title>\n</head>\n<body>\n\t<div role=\"grid\">\n\t\t<div role=\"row\">\n\t\t\t<div role=\"columnheader\">Room</div>\n\t\t\t<div role=\"columnheader\">Occupant</div>\n\t\t</div>\n\t\t<div role=\"row\">\n\t\t\t<div role=\"gridcell\">1A</div>\n\t\t</div>\n\t\t<div role=\"row\">\n\t\t\t<div role=\"gridcell\">2A</div>\n\t\t</div>\n\t</div>\n</body>\n</html>"
+  },
+  {
+   "id": "7ab8f027dde4ee91a2b45b52a61cff442ec676d8",
+   "title": "Inapplicable Example 1",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 1</title>\n</head>\n<body>\n\t<table>\n\t\t<tr>\n\t\t\t<td>12:00</td>\n\t\t</tr>\n\t</table>\n</body>\n</html>"
+  },
+  {
+   "id": "b52547570de8121323bf0cc9ead85422309fa260",
+   "title": "Inapplicable Example 2",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 2</title>\n</head>\n<body>\n\t<table></table>\n</body>\n</html>"
+  },
+  {
+   "id": "c03135d1a5242415c66ff2ae561683eaf63e48d0",
+   "title": "Inapplicable Example 3",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 3</title>\n</head>\n<body>\n\t<table>\n\t\t<tr>\n\t\t\t<th role=\"cell\">Column A</th>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<td>Cell A</td>\n\t\t</tr>\n\t</table>\n</body>\n</html>"
+  },
+  {
+   "id": "0c9e4e7e3f2b739bb6dbd1f0b54bc691e6e3f1df",
+   "title": "Inapplicable Example 4",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 4</title>\n</head>\n<body>\n\t<table>\n\t\t<tr>\n\t\t\t<th style=\"display: none;\">Organization</th>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<td>W3C</td>\n\t\t</tr>\n\t</table>\n</body>\n</html>"
+  },
+  {
+   "id": "86e5df7afd4815371b086d53db45901640bb4b53",
+   "title": "Inapplicable Example 5",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 5</title>\n</head>\n<body>\n\t<table>\n\t\t<tr>\n\t\t\t<th aria-hidden=\"true\">Organization</th>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<td>W3C</td>\n\t\t</tr>\n\t</table>\n</body>\n</html>"
+  },
+  {
+   "id": "8177b424b0a57eecc5f80cc6a30d1073493e16b3",
+   "title": "Inapplicable Example 6",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 6</title>\n</head>\n<body>\n\t<div>\n\t\t<tr>\n\t\t\t<th>Column A</th>\n\t\t</tr>\n\t</div>\n</body>\n</html>"
+  },
+  {
+   "id": "0c53e1a110f5191e74bd97da2c92c79c40d76eb2",
+   "title": "Inapplicable Example 7",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 7</title>\n</head>\n<body>\n\t<table role=\"presentation\">\n\t\t<tr>\n\t\t\t<th>Time</th>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<td>12:00</td>\n\t\t</tr>\n\t</table>\n</body>\n</html>"
+  }
+ ]
+}

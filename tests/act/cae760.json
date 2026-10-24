@@ -1,0 +1,73 @@
+{
+ "rule": "cae760",
+ "name": "Iframe element has non-empty accessible name",
+ "page": "https://www.w3.org/WAI/standards-guidelines/act/rules/cae760/proposed/",
+ "cases": [
+  {
+   "id": "fbf477c0e122dc4c283cf7b9a5cb7c2802f6e4c9",
+   "title": "Passed Example 1",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 1</title>\n</head>\n<body>\n\t<iframe title=\"Grocery List\" src=\"/WAI/content-assets/wcag-act-rules/test-assets/SC4-1-2-frame-doc.html\"> </iframe>\n</body>\n</html>"
+  },
+  {
+   "id": "4075167ff3009336f6b8e87774a297de217a09b5",
+   "title": "Passed Example 2",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 2</title>\n</head>\n<body>\n\t<iframe aria-label=\"Grocery list\" src=\"/WAI/content-assets/wcag-act-rules/test-assets/SC4-1-2-frame-doc.html\"> </iframe>\n</body>\n</html>"
+  },
+  {
+   "id": "99f10671a6d11813673cd05b0a0c82169c3ec821",
+   "title": "Passed Example 3",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 3</title>\n</head>\n<body>\n\t<div id=\"frame-title-helper\">Grocery List</div>\n\t<iframe aria-labelledby=\"frame-title-helper\" src=\"/WAI/content-assets/wcag-act-rules/test-assets/SC4-1-2-frame-doc.html\"> </iframe>\n</body>\n</html>"
+  },
+  {
+   "id": "bbbf921f8ee99ea733ef46b1e28c833ae5212abf",
+   "title": "Failed Example 1",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 1</title>\n</head>\n<body>\n\t<iframe name=\"Grocery List\" src=\"/WAI/content-assets/wcag-act-rules/test-assets/SC4-1-2-frame-doc.html\"> </iframe>\n</body>\n</html>"
+  },
+  {
+   "id": "c7e0fce611f126d32f7e10200fdffd4cb5b5ceec",
+   "title": "Failed Example 2",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 2</title>\n</head>\n<body>\n\t<iframe src=\"/WAI/content-assets/wcag-act-rules/test-assets/SC4-1-2-frame-doc.html\"> </iframe>\n</body>\n</html>"
+  },
+  {
+   "id": "5090c2468b8947fdab34a7537029658f022e983b",
+   "title": "Failed Example 3",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 3</title>\n</head>\n<body>\n\t<iframe title=\"\" src=\"/WAI/content-assets/wcag-act-rules/test-assets/SC4-1-2-frame-doc.html\"> </iframe>\n</body>\n</html>"
+  },
+  {
+   "id": "0a18c94e7b8bd8d0a54c14acbc56958918fcad2b",
+   "title": "Failed Example 4",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 4</title>\n</head>\n<body>\n\t<iframe title=\" \" src=\"/WAI/content-assets/wcag-act-rules/test-assets/SC4-1-2-frame-doc.html\"> </iframe>\n</body>\n</html>"
+  },
+  {
+   "id": "ee525eaa03d462065eabd24ad6fbe0ab78fdb04e",
+   "title": "Inapplicable Example 1",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 1</title>\n</head>\n<body>\n\t<button>take me somewhere</button>\n</body>\n</html>"
+  },
+  {
+   "id": "555b35aa0e1cba408f86a4cc85cb5f0101627093",
+   "title": "Inapplicable Example 2",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 2</title>\n</head>\n<body>\n\t<iframe style=\"display:none;\" src=\"/WAI/content-assets/wcag-act-rules/test-assets/SC4-1-2-frame-doc.html\"></iframe>\n</body>\n</html>"
+  },
+  {
+   "id": "77075e0f50c9b77457d90450bc31c0fae372dbaf",
+   "title": "Inapplicable Example 3",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 3</title>\n</head>\n<body>\n\t<iframe tabindex=\"-1\" src=\"/WAI/content-assets/wcag-act-rules/test-assets/SC4-1-2-frame-doc.html\" style=\"height: 250px\"> </iframe>\n</body>\n</html>"
+  },
+  {
+   "id": "058668cee446d08989bf24d5ce3413dc2cda9975",
+   "title": "Inapplicable Example 4",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 4</title>\n</head>\n<body>\n\t<iframe src=\"/WAI/content-assets/wcag-act-rules/test-assets/SC4-1-2-frame-doc.html\" role=\"none\"> </iframe>\n</body>\n</html>"
+  }
+ ]
+}

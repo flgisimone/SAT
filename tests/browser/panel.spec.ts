@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { rules } from '../../src/core/rules';
 import type { RuleId, SATOptions } from '../../src/core/seoAccessibilityTool';
+import { STYLES } from '../../src/ui/styles';
 import { openPage } from './serve';
 
 // The in-page panel (sat-controller) in Chromium. Locators pierce SAT's open shadow root.
@@ -171,7 +172,7 @@ test('SAT reports no issues on its own panel', async ({ page, context }) => {
 <meta name="viewport" content="width=device-width"><link rel="canonical" href="https://example.com/">
 <meta property="og:title" content="SAT panel"><meta property="og:type" content="website">
 <meta property="og:image" content="https://example.com/a.png"><meta property="og:url" content="https://example.com/">
-<meta name="twitter:card" content="summary"></head><body><main><h1>SAT panel</h1>${panel}</main></body></html>`);
+<meta name="twitter:card" content="summary"><style>${STYLES}</style></head><body><main><h1>SAT panel</h1>${panel}</main></body></html>`);
     const issues = await other.evaluate(async () => {
         const { seoAccessibilityTool } = await import('/index.js');
         return (await seoAccessibilityTool({ rules: { 'link-text': 'warning' } })).issues.map((issue) => issue.message);

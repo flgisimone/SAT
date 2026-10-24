@@ -1,0 +1,55 @@
+{
+ "rule": "m6b1q3",
+ "name": "Menuitem has non-empty accessible name",
+ "page": "https://www.w3.org/WAI/standards-guidelines/act/rules/m6b1q3/",
+ "cases": [
+  {
+   "id": "895a5b0d06d892bc50351cfd2db426b31cfcc97f",
+   "title": "Passed Example 1",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 1</title>\n</head>\n<body>\n\t<div role=\"menu\">\n\t\t<button role=\"menuitem\">New file</button>\n\t</div>\n</body>\n</html>"
+  },
+  {
+   "id": "78c41b8461997477cb7b6a9d163ba8a387ad56b8",
+   "title": "Passed Example 2",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 2</title>\n</head>\n<body>\n\t<div role=\"menu\">\n\t\t<button role=\"menuitem\" aria-label=\"New file\">\n\t\t\t<img src=\"/WAI/content-assets/wcag-act-rules/test-assets/shared/file.svg\" alt=\"\" />\n\t\t</button>\n\t</div>\n</body>\n</html>"
+  },
+  {
+   "id": "83a0c030f9172c3d8d862d01138e75ec7aaf4f4e",
+   "title": "Passed Example 3",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 3</title>\n</head>\n<body>\n\t<div role=\"menu\">\n\t\t<button role=\"menuitem\" aria-labelledby=\"newfile\">\n\t\t\t<img src=\"/WAI/content-assets/wcag-act-rules/test-assets/shared/file.svg\" alt=\"\" />\n\t\t\t<span id=\"newfile\" hidden>New file</span>\n\t\t</button>\n\t</div>\n</body>\n</html>"
+  },
+  {
+   "id": "c05155744a79e6ff72f1b691b8bae15338e8146b",
+   "title": "Passed Example 4",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 4</title>\n</head>\n<body>\n\t<div role=\"menu\">\n\t\t<button role=\"menuitem\" title=\"New file\">\n\t\t\t<img src=\"/WAI/content-assets/wcag-act-rules/test-assets/shared/file.svg\" alt=\"\" />\n\t\t</button>\n\t</div>\n</body>\n</html>"
+  },
+  {
+   "id": "f3a40579bcb3cab4f12a31639bc9dd0ca5c14d87",
+   "title": "Failed Example 1",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 1</title>\n</head>\n<body>\n\t<div role=\"menu\">\n\t\t<button role=\"menuitem\">\n\t\t\t<img src=\"/WAI/content-assets/wcag-act-rules/test-assets/shared/file.svg\" alt=\"\" />\n\t\t</button>\n\t</div>\n</body>\n</html>"
+  },
+  {
+   "id": "c261108b8bb62e118a47a52d0a157b4265a6e143",
+   "title": "Failed Example 2",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n\t<style>\n\t\t.offscreen {\n\t\t\tposition: absolute;\n\t\t\tleft: -9999px;\n\t\t\ttop: -9999px;\n\t\t}\n\t</style>\n\t<div role=\"menu\" class=\"offscreen\">\n\t\t<button role=\"menuitem\">\n\t\t\t<img src=\"/WAI/content-assets/wcag-act-rules/test-assets/shared/file.svg\" alt=\"\" />\n\t\t</button>\n\t</div>\n</html>"
+  },
+  {
+   "id": "4eec4a33bca54e6313e0af600af41797bb7c4213",
+   "title": "Inapplicable Example 1",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 1</title>\n</head>\n<body>\n\t<menu>\n\t\t<li>\n\t\t\t<a href=\"#\">New file</a>\n\t\t</li>\n\t</menu>\n</body>\n</html>"
+  },
+  {
+   "id": "0edc121ac393fa9661fc1c18156e040775313779",
+   "title": "Inapplicable Example 2",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 2</title>\n</head>\n<body>\n\t<div role=\"menu\" hidden>\n\t\t<button role=\"menuitem\">\n\t\t\t<img src=\"/WAI/content-assets/wcag-act-rules/test-assets/shared/file.svg\" alt=\"\" />\n\t\t</button>\n\t</div>\n</body>\n</html>"
+  }
+ ]
+}

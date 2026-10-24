@@ -1,0 +1,103 @@
+{
+ "rule": "4e8ab6",
+ "name": "Element with role attribute has required states and properties",
+ "page": "https://www.w3.org/WAI/standards-guidelines/act/rules/4e8ab6/proposed/",
+ "cases": [
+  {
+   "id": "eadf2a087a82575bcdf9f9158e698a576e9627c8",
+   "title": "Passed Example 1",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 1</title>\n</head>\n<body>\n\t<div role=\"heading\" aria-level=\"1\">\n\t\tMy First Heading\n\t</div>\n</body>\n</html>"
+  },
+  {
+   "id": "5b39aa37000933c7b9a766970b829ce5fada62d6",
+   "title": "Passed Example 2",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 2</title>\n</head>\n<body>\n\t<div role=\"checkbox\" aria-checked=\"false\" aria-labelledby=\"label\"></div>\n\t<div id=\"label\">Check me</div>\n</body>\n</html>"
+  },
+  {
+   "id": "11c5321c05c7b83b8707eee76574a94bd44033fe",
+   "title": "Passed Example 3",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 3</title>\n</head>\n<body>\n\t<div role=\"scrollbar\" aria-controls=\"content\" aria-valuenow=\"0\"></div>\n\t<main id=\"content\"></main>\n</body>\n</html>"
+  },
+  {
+   "id": "3da0918b07e5736d55b4b405a22860d889931c15",
+   "title": "Passed Example 4",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 4</title>\n</head>\n<body>\n\t<div id=\"label\">Tags</div>\n\t<ul role=\"listbox\" aria-labelledby=\"label\">\n\t\t<li role=\"option\">Zebra</li>\n\t\t<li role=\"option\">Zoom</li>\n\t</ul>\n</body>\n</html>"
+  },
+  {
+   "id": "58a35afd2998bb6f9c670cb74fa7b550e80897b4",
+   "title": "Passed Example 5",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 5</title>\n</head>\n<body>\n\t<p>My first HTML</p>\n\t<div role=\"separator\"></div>\n\t<p>My last HTML</p>\n</body>\n</html>"
+  },
+  {
+   "id": "986038d85467255cef4ed7d72c231442427ece23",
+   "title": "Passed Example 6",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 6</title>\n</head>\n<body>\n\t<label for=\"tag_combo\" id=\"tag_label\">Tag</label>\n\t<input type=\"text\" id=\"tag_combo\" role=\"combobox\" aria-expanded=\"true\" aria-controls=\"popup_listbox\"/>\n\t<ul role=\"listbox\" id=\"popup_listbox\" aria-labelledby=\"tag_label\">\n\t\t<li role=\"option\">Zebra</li>\n\t\t<li role=\"option\" id=\"selected_option\">Zoom</li>\n\t</ul>\n</body>\n</html>"
+  },
+  {
+   "id": "80462b7b8c490305d1de7e3136c0bcfaef31789f",
+   "title": "Failed Example 1",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 1</title>\n</head>\n<body>\n\t<div role=\"heading\">\n\t\tMy First Heading\n\t</div>\n</body>\n</html>"
+  },
+  {
+   "id": "907f05aed287f7407d5f95e7d39bfc1435ec0812",
+   "title": "Failed Example 2",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 2</title>\n</head>\n<body>\n\t<div role=\"switch\">\n\t\tToggle me\n\t</div>\n</body>\n</html>"
+  },
+  {
+   "id": "9bb1bdb3e95aa9b895fc4f32b0c2cfc917a07a72",
+   "title": "Failed Example 3",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 3</title>\n</head>\n<body>\n\t<div role=\"checkbox\" aria-labelledby=\"label\"></div>\n\t<div id=\"label\">Check me</div>\n</body>\n</html>"
+  },
+  {
+   "id": "43af91df529613e51429e18d43ce3df99b189c0f",
+   "title": "Failed Example 4",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 4</title>\n</head>\n<body>\n\t<p>My first HTML</p>\n\t<div role=\"separator\" tabindex=\"0\"></div>\n\t<p>My last HTML</p>\n</body>\n</html>"
+  },
+  {
+   "id": "7a1942d2d52f50c5df458877a0ee18dc5a22b0c3",
+   "title": "Failed Example 5",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 5</title>\n</head>\n<body>\n\t<label for=\"tag_combo\">Tag</label>\n\t<input type=\"text\" id=\"tag_combo\" role=\"combobox\" aria-controls=\"popup_listbox\" />\n\t<ul role=\"listbox\" id=\"popup_listbox\">\n\t\t<li role=\"option\">Zebra</li>\n\t\t<li role=\"option\" id=\"selected_option\">Zoom</li>\n\t</ul>\n</body>\n</html>"
+  },
+  {
+   "id": "9d80b71ad39b258fb75db804867f189d76ecdab8",
+   "title": "Inapplicable Example 1",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 1</title>\n</head>\n<body>\n\t<div>Some Content</div>\n</body>\n</html>"
+  },
+  {
+   "id": "c43c9679072e95ce85f8a7cb7581e991e73124c7",
+   "title": "Inapplicable Example 2",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 2</title>\n</head>\n<body>\n\t<input type=\"checkbox\" role=\"checkbox\" aria-label=\"Checkbox name\"/>\n</body>\n</html>"
+  },
+  {
+   "id": "f473186fa351637a3c034b2df567239a39a8139c",
+   "title": "Inapplicable Example 3",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 3</title>\n</head>\n<body>\n\t<div role=\"combobox\" style=\"display:none;\"></div>\n</body>\n</html>"
+  },
+  {
+   "id": "8122ef64b86fcd30dadeea664029af028382d1b4",
+   "title": "Passed Example 6",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 6</title>\n</head>\n<body>\n\t<label for=\"tag_combo\" id=\"tag_label\">Tag</label>\n\t<input type=\"text\" id=\"tag_combo\" role=\"combobox\" aria-expanded=\"true\" aria-controls=\"popup_listbox\" />\n\t<ul role=\"listbox\" id=\"popup_listbox\" aria-labelledby=\"tag_label\">\n\t\t<li role=\"option\">Zebra</li>\n\t\t<li role=\"option\" id=\"selected_option\">Zoom</li>\n\t</ul>\n</body>\n</html>"
+  },
+  {
+   "id": "cde160492f9d0a309b4f8624e51d3380b318b046",
+   "title": "Inapplicable Example 2",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 2</title>\n</head>\n<body>\n\t<input type=\"checkbox\" role=\"checkbox\" aria-label=\"Checkbox name\" />\n</body>\n</html>"
+  }
+ ]
+}

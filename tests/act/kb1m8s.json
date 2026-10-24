@@ -1,0 +1,61 @@
+{
+ "rule": "kb1m8s",
+ "name": "ARIA global properties not used where prohibited",
+ "page": "https://www.w3.org/WAI/standards-guidelines/act/rules/kb1m8s/proposed/",
+ "cases": [
+  {
+   "id": "f5ec91369a85c8873996b82a4c5151c65a7d2204",
+   "title": "Passed Example 1",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 1</title>\n</head>\n<body>\n\t<div aria-live=\"polite\">I like Bananas</div>\n</body>\n</html>"
+  },
+  {
+   "id": "ae9e9709911eaa328189f8ab354cba0bb840a6c9",
+   "title": "Passed Example 2",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 2</title>\n</head>\n<body>\n\t<a href=\"#\" aria-label=\"Previously 100, now 1 euro\"> <s>€100</s> / <b>€1</b> </a>\n</body>\n</html>"
+  },
+  {
+   "id": "8cf721f0f9490be4e2909caaa944cf3a32a43fc0",
+   "title": "Passed Example 3",
+   "expected": "passed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Passed Example 3</title>\n</head>\n<body>\n\t<div role=\"heading\" aria-braillelabel=\"I like bananas\">\n\t\tI ❤️ Bananas\n\t</div>\n</body>\n</html>"
+  },
+  {
+   "id": "17a785ed25669522866f98997f76d69150243c8b",
+   "title": "Failed Example 1",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 1</title>\n</head>\n<body>\n\t<div aria-label=\"Previously 100, now 1 euro\"><s>€100</s> / <b>€1</b></div>\n</body>\n</html>"
+  },
+  {
+   "id": "358fa0b821c3118de63adfbe37bd0e85a3bd6f8c",
+   "title": "Failed Example 2",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 2</title>\n</head>\n<body>\n\t<h1 id=\"bananas\">I like bananas</h1>\n\t<p aria-labelledby=\"Bananas\">🧑 ❤️ 🍌🍌</p>\n</body>\n</html>"
+  },
+  {
+   "id": "1345bf067f66f2ee893f75e43d72121a0119d6b1",
+   "title": "Failed Example 3",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 3</title>\n</head>\n<body>\n\t<p aria-braillelabel=\"I love Bananas\">I ❤️ Bananas</p>\n</body>\n</html>"
+  },
+  {
+   "id": "7cddc927da518cc9b170051a9010e256068c875b",
+   "title": "Failed Example 4",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 4</title>\n</head>\n<body>\n\t<div aria-roledescription=\"Banana text\">I like bananas</div>\n</body>\n</html>"
+  },
+  {
+   "id": "c4a2fe12d5a48f7ace66475d3791e051ddefa807",
+   "title": "Failed Example 5",
+   "expected": "failed",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Failed Example 5</title>\n</head>\n<body>\n\t<h1 role=\"none\" aria-brailleroledescription=\"Banana text\">I like bananas</h1>\n</body>\n</html>"
+  },
+  {
+   "id": "c33e521a7914c6dc8bde272dcc8e090b7463473c",
+   "title": "Inapplicable Example 1",
+   "expected": "inapplicable",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>Inapplicable Example 1</title>\n</head>\n<body>\n\t<div aria-label=\"Bananas\" hidden></div>\n</body>\n</html>"
+  }
+ ]
+}

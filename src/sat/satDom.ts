@@ -39,53 +39,134 @@ export function isAriaHidden(el: Element): boolean {
 }
 
 /**
- * Not in the accessibility tree (HTML-AAM): aria-hidden, or not rendered (display: none on the
- * element or an ancestor, visibility: hidden). Transparent elements are still in the tree.
- * Without checkVisibility (jsdom) the computed styles of the ancestors are read instead.
+ * Rendered (HTML "being rendered"): not display: none on the element or an ancestor, not visibility: hidden.
+ * Transparent and off-screen elements are rendered. Without checkVisibility (jsdom) the computed
+ * styles of the ancestors are read instead.
  */
-export function isHiddenFromAssistiveTech(el: Element): boolean {
-    if (isAriaHidden(el)) return true;
-
+export function isRendered(el: Element): boolean {
     const withCheck = el as Element & { checkVisibility?: (options?: Record<string, boolean>) => boolean };
-    if (typeof withCheck.checkVisibility === 'function') return !withCheck.checkVisibility({ visibilityProperty: true });
+    if (typeof withCheck.checkVisibility === 'function') {
+        if (withCheck.checkVisibility({ visibilityProperty: true })) return true;
+        // display: contents (e.g. <picture> in some sites) has no box of its own, but its children are rendered.
+        const style = computedStyle(el);
+        return style.display === 'contents' && style.visibility !== 'hidden' && (!el.parentElement || isRendered(el.parentElement));
+    }
 
     for (let node: Element | null = el; node; node = node.parentElement) {
-        if (computedStyle(node).display === 'none') return true;
+        if (computedStyle(node).display === 'none') return false;
     }
-    return computedStyle(el).visibility === 'hidden';
+    return computedStyle(el).visibility !== 'hidden';
 }
 
 /**
- * Approximates the accessible name of an element: aria-label, aria-labelledby,
- * text content, title, or labelled images/icons inside it.
+ * Hidden with the "visually hidden" pattern, on the element or an ancestor: clipped away
+ * (clip-path: inset(50%), clip: rect(0 0 0 0)) or squeezed into a box of 1 px with overflow hidden.
+ * Screen readers read it, sighted users don't see it. Needs layout: false in jsdom.
+ */
+export function isVisuallyHidden(el: Element): boolean {
+    if (el.getClientRects().length === 0) return false;
+    for (let node: Element | null = el; node && node !== el.ownerDocument.body; node = node.parentElement) {
+        const style = computedStyle(node);
+        if (/^inset\((50|100)%/.test(style.clipPath) || /^rect\(0px,? 0px,? 0px,? 0px\)$/.test(style.clip)) return true;
+        const rect = node.getBoundingClientRect();
+        if ((rect.width <= 1 || rect.height <= 1) && style.overflow !== 'visible') return true;
+    }
+    return false;
+}
+
+/** Not in the accessibility tree (HTML-AAM): aria-hidden, or not rendered. */
+export function isHiddenFromAssistiveTech(el: Element): boolean {
+    return isAriaHidden(el) || !isRendered(el);
+}
+
+const NATIVE_FOCUSABLE = 'a[href], area[href], button, input:not([type="hidden" i]), select, textarea, iframe, audio[controls], video[controls], [contenteditable]:not([contenteditable="false" i])';
+
+/** The tabindex value parsed with HTML's rules for parsing integers, or null without a valid one. */
+export function tabIndexValue(el: Element): number | null {
+    const value = parseInt(el.getAttribute('tabindex') ?? '', 10);
+    return Number.isNaN(value) ? null : value;
+}
+
+/**
+ * In the sequential focus navigation order (reachable with Tab): rendered, not inert or disabled,
+ * natively focusable or with tabindex >= 0, and not taken out with a negative tabindex.
+ * The summary of a <details> is focusable; elements that move focus away with a script are not detected.
+ */
+export function isInTabOrder(el: Element): boolean {
+    if (!isRendered(el) || el.closest('[inert]') || el.matches(':disabled')) return false;
+    const tabIndex = tabIndexValue(el);
+    if (tabIndex !== null) return tabIndex >= 0;
+    return el.matches(NATIVE_FOCUSABLE) || isDetailsSummary(el);
+}
+
+/** The first <summary> child of a <details>: the one that toggles it. */
+export function isDetailsSummary(el: Element): boolean {
+    return el.tagName === 'SUMMARY' && el.parentElement?.tagName === 'DETAILS' && el.parentElement.querySelector(':scope > summary') === el;
+}
+
+function normalizeSpace(text: string): string {
+    return text.replace(/\s+/g, ' ').trim();
+}
+
+/** Text of the elements an aria-labelledby points to, hidden ones included (accname 1.2, step 2B). */
+function labelledByText(el: Element): string {
+    const ids = el.getAttribute('aria-labelledby')?.trim().split(/\s+/) ?? [];
+    return normalizeSpace(ids.map((id) => {
+        const target = id ? el.ownerDocument.getElementById(id) : null;
+        return target ? textAlternative(target, true) : '';
+    }).join(' '));
+}
+
+/**
+ * Name from aria-labelledby, aria-label or title only: for elements whose role takes no name from
+ * their content (iframe, object).
+ */
+export function getExplicitName(el: Element): string {
+    return labelledByText(el) || normalizeSpace(el.getAttribute('aria-label') ?? '') || normalizeSpace(el.getAttribute('title') ?? '');
+}
+
+/**
+ * Text alternative of a node, after the accessible name computation (accname 1.2): aria-labelledby,
+ * aria-label, alt of images (none for presentational ones), <title> of an SVG, the content, title.
+ * Content hidden from assistive technologies is skipped, except inside an aria-labelledby target.
+ */
+function textAlternative(el: Element, inLabelledBy: boolean): string {
+    if (!inLabelledBy) {
+        const labelled = labelledByText(el);
+        if (labelled) return labelled;
+    }
+    const label = normalizeSpace(el.getAttribute('aria-label') ?? '');
+    if (label) return label;
+
+    const tag = el.tagName.toLowerCase();
+    const role = el.getAttribute('role')?.trim().toLowerCase().split(/\s+/)[0];
+    if (tag === 'img' || tag === 'area' || (tag === 'input' && (el as HTMLInputElement).type === 'image')) {
+        if (role === 'none' || role === 'presentation') return '';
+        const alt = normalizeSpace(el.getAttribute('alt') ?? '');
+        if (alt) return alt;
+    } else if (tag === 'svg') {
+        const title = normalizeSpace(el.querySelector(':scope > title')?.textContent ?? '');
+        if (title) return title;
+    } else if (tag !== 'br') {
+        const content = normalizeSpace(Array.from(el.childNodes, (node) => {
+            if (node.nodeType === 3) return node.textContent ?? '';
+            if (node.nodeType !== 1) return '';
+            const child = node as Element;
+            if (!inLabelledBy && isHiddenFromAssistiveTech(child)) return '';
+            return ` ${textAlternative(child, inLabelledBy)} `;
+        }).join(''));
+        if (content) return content;
+    }
+    return normalizeSpace(el.getAttribute('title') ?? '');
+}
+
+/**
+ * Accessible name of an element whose role takes its name from the content (buttons, links,
+ * headings, menu items, summary): aria-labelledby, aria-label, the visible content with image
+ * alternatives, title. Whitespace is collapsed.
  */
 export function getAccessibleName(el: Element): string {
-    const ariaLabel = el.getAttribute('aria-label')?.trim();
-    if (ariaLabel) return ariaLabel;
-
-    const labelledBy = el.getAttribute('aria-labelledby');
-    if (labelledBy) {
-        const text = labelledBy
-            .split(/\s+/)
-            .map((id) => el.ownerDocument.getElementById(id)?.textContent?.trim() || '')
-            .join(' ')
-            .trim();
-        if (text) return text;
-    }
-
-    const text = el.textContent?.trim();
-    if (text) return text;
-
-    const img = el.querySelector('img[alt]:not([alt=""])');
-    if (img) return img.getAttribute('alt')!.trim();
-
-    const labelledIcon = el.querySelector('svg[aria-label], [role="img"][aria-label]');
-    if (labelledIcon) return labelledIcon.getAttribute('aria-label')!.trim();
-
-    const svgTitle = el.querySelector('svg title')?.textContent?.trim();
-    if (svgTitle) return svgTitle;
-
-    return el.getAttribute('title')?.trim() || '';
+    return textAlternative(el, false);
 }
 
 /**

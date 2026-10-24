@@ -301,6 +301,7 @@ src/
       rule.ts                 Rule, RuleContext, RuleId
       a11y/, seo/             one file per rule, named after its id
       headings.ts             helpers shared by the heading rules
+      aria.ts                 WAI-ARIA tables (attributes, roles) and the role of an element
   sat/
     satChecker.ts             in-page controller: button, run/stop, storage (entry: "./sat-controller")
     satDom.ts                 DOM helpers shared by every rule (queryTargets, describeElement)
