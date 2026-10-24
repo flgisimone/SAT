@@ -2,7 +2,11 @@
 
 **Obiettivo**: far tornare verde la CI su GitHub Actions e togliere gli avvisi di deprecazione dei runner.
 
-> **Stato: da fare.**
+> **Stato: completata** (nessuna nuova versione: cambiano solo dev dependency e CI).
+>
+> Note di implementazione:
+> - **F7-01**: `rollup-plugin-dts` `^6.5.1`; `npm ci` da zero, `npm run verify` e `npm run verify:e2e` passano. `npm pkg set` ha anche riordinato alfabeticamente le `peerDependencies`, senza cambiarle.
+> - **F7-02**: `actions/checkout`, `actions/setup-node` e `actions/upload-artifact` a v7 (Node 24) in `ci.yml` e nel README. Il runner Ubuntu 26 si verifica al primo giro della CI.
 
 ---
 
@@ -15,8 +19,8 @@
 - Già provato in locale: con 6.5.1 `npm ci` da zero e `npm run verify` passano.
 
 **Criteri di accettazione**
-- [ ] `rm -rf node_modules && npm ci` passa senza flag.
-- [ ] `npm run verify` passa e `rollup -c rollup.dts.config.cjs` genera le dichiarazioni come prima.
+- [x] `rm -rf node_modules && npm ci` passa senza flag.
+- [x] `npm run verify` passa e `rollup -c rollup.dts.config.cjs` genera le dichiarazioni come prima.
 - [ ] Il job `verify` di `.github/workflows/ci.yml` è verde.
 
 #### F7-02 · Azioni GitHub su Node 24 — S
@@ -27,4 +31,4 @@
 
 **Criteri di accettazione**
 - [ ] La CI non stampa più l'avviso su Node 20.
-- [ ] Il workflow di esempio del README usa le stesse versioni.
+- [x] Il workflow di esempio del README usa le stesse versioni.
