@@ -181,7 +181,7 @@ Each rule follows an official source, cited on its page in [`docs/rules/`](docs/
 | `robots-meta`       | seo      | `noindex`, `nofollow` or `none` in a robots meta tag                      | warning    | — |
 | `social-meta`       | seo      | Required Open Graph properties, absolute `og:image`/`og:url`, `twitter:card` | warning | — |
 | `hreflang`          | seo      | Invalid language codes, relative URLs, one language with two URLs         | error      | — |
-| `structured-data`   | seo      | JSON-LD that doesn't parse (with the position) or items without `@type`   | error      | — |
+| `structured-data`   | seo      | JSON-LD that doesn't parse, items without `@type`, properties Google requires for rich results (Product, Event, Breadcrumb…) | error | — |
 | `mixed-content`     | seo      | `http:` resources on an `https:` page: scripts, frames, styles (error), images and media (warning) | error | — |
 | `image-size`        | seo      | Visible `<img>` without `width` and `height` (layout shift)               | warning    | — |
 | `image-lazy-load`   | seo      | `loading="lazy"` on images visible when the page opens                    | warning    | — |

@@ -29,6 +29,7 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | Rilascio | Semver; i cambi di comportamento vanno in `CHANGELOG.md`; la pubblicazione su npm la fa il maintainer | CONVENTIONS §8 |
 | Gravità | Errore per un requisito normativo (WCAG A/AA, «must» di HTML e WAI-ARIA, requisito di Google), avviso per una raccomandazione, niente per ciò che le fonti dichiarano valido; ogni regola cita la sua fonte | Revisione del 24/10/2026 sulle fonti ufficiali ([00-analisi-linee-guida.md](00-analisi-linee-guida.md)) |
 | Ordine dopo F7 | Prima le regole (F8, F9, F10), poi il pannello (F11), che mostra così titoli e fonti definitivi | Scelta del 24/10/2026 |
+| Versione dopo F10 | **1.15.0**: `structured-data` controlla le proprietà che Google dichiara obbligatorie | Funzione nuova senza rotture di API (F10) |
 | Versione dopo F9 | **1.14.0**: dieci regole nuove da WCAG 2.2 e ACT, accese di default; i casi di test ACT fanno parte dei test | Funzioni nuove senza rotture di API (F9) |
 | Versione dopo F8 | **1.13.0**: gravità dalle fonti ufficiali, fonte per ogni regola, `wcagLevel`, lingue valide | Cambiano gravità e default, non le API (F8) |
 | Versione dopo F6 | **1.12.0**: plugin Vite, estensione per il browser, stili del pannello che passano la CSP | Funzioni nuove senza rotture di API (F6) |

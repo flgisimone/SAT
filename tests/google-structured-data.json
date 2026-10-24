@@ -1,0 +1,924 @@
+{
+  "source": "https://developers.google.com/search/docs/appearance/structured-data/, examples copied on 2026-10-24",
+  "examples": {
+    "article": [
+      {
+        "@context": "https://schema.org",
+        "@type": "NewsArticle",
+        "headline": "Title of a News Article",
+        "image": [
+          "https://example.com/photos/1x1/photo.jpg",
+          "https://example.com/photos/4x3/photo.jpg",
+          "https://example.com/photos/16x9/photo.jpg"
+        ],
+        "datePublished": "2024-01-05T08:00:00+08:00",
+        "dateModified": "2024-02-05T09:20:00+08:00",
+        "author": [
+          {
+            "@type": "Person",
+            "name": "Jane Doe",
+            "url": "https://example.com/profile/janedoe123"
+          },
+          {
+            "@type": "Person",
+            "name": "John Doe",
+            "url": "https://example.com/profile/johndoe123"
+          }
+        ]
+      }
+    ],
+    "breadcrumb": [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Books",
+            "item": "https://example.com/books"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Science Fiction",
+            "item": "https://example.com/books/sciencefiction"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Award Winners"
+          }
+        ]
+      },
+      [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Books",
+              "item": "https://example.com/books"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Science Fiction",
+              "item": "https://example.com/books/sciencefiction"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Award Winners"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Literature",
+              "item": "https://example.com/literature"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Award Winners"
+            }
+          ]
+        }
+      ]
+    ],
+    "event": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        "name": "The Adventures of Kira and Morrison",
+        "startDate": "2025-07-21T19:00-05:00",
+        "endDate": "2025-07-21T23:00-05:00",
+        "eventStatus": "https://schema.org/EventScheduled",
+        "location": {
+          "@type": "Place",
+          "name": "Snickerpark Stadium",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "100 West Snickerpark Dr",
+            "addressLocality": "Snickertown",
+            "postalCode": "19019",
+            "addressRegion": "PA",
+            "addressCountry": "US"
+          }
+        },
+        "image": [
+          "https://example.com/photos/1x1/photo.jpg",
+          "https://example.com/photos/4x3/photo.jpg",
+          "https://example.com/photos/16x9/photo.jpg"
+        ],
+        "description": "The Adventures of Kira and Morrison is coming to Snickertown in a can't miss performance.",
+        "offers": {
+          "@type": "Offer",
+          "url": "https://www.example.com/event_offer/12345_202403180430",
+          "price": 30,
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock",
+          "validFrom": "2024-05-21T12:00"
+        },
+        "performer": {
+          "@type": "PerformingGroup",
+          "name": "Kira and Morrison"
+        },
+        "organizer": {
+          "@type": "Organization",
+          "name": "Kira and Morrison Music",
+          "url": "https://kiraandmorrisonmusic.com"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        "name": "The Adventures of Kira and Morrison",
+        "startDate": "2025-07-21T19:00-05:00",
+        "endDate": "2025-07-21T23:00-05:00",
+        "eventStatus": "https://schema.org/EventCancelled",
+        "location": {
+          "@type": "Place",
+          "name": "Snickerpark Stadium",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "100 West Snickerpark Dr",
+            "addressLocality": "Snickertown",
+            "postalCode": "19019",
+            "addressRegion": "PA",
+            "addressCountry": "US"
+          }
+        },
+        "image": [
+          "https://example.com/photos/1x1/photo.jpg",
+          "https://example.com/photos/4x3/photo.jpg",
+          "https://example.com/photos/16x9/photo.jpg"
+        ],
+        "description": "The Adventures of Kira and Morrison is coming to Snickertown in a can't miss performance.",
+        "offers": {
+          "@type": "Offer",
+          "url": "https://www.example.com/event_offer/12345_202403180430",
+          "price": 30,
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock",
+          "validFrom": "2024-05-21T12:00"
+        },
+        "performer": {
+          "@type": "PerformingGroup",
+          "name": "Kira and Morrison"
+        },
+        "organizer": {
+          "@type": "Organization",
+          "name": "Kira and Morrison Music",
+          "url": "https://kiraandmorrisonmusic.com"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        "name": "The Adventures of Kira and Morrison",
+        "startDate": "2025-07-21T19:00-05:00",
+        "endDate": "2025-07-21T23:00-05:00",
+        "eventStatus": "https://schema.org/EventRescheduled",
+        "previousStartDate": "2025-03-21T19:00-05:00",
+        "location": {
+          "@type": "Place",
+          "name": "Snickerpark Stadium",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "100 West Snickerpark Dr",
+            "addressLocality": "Snickertown",
+            "postalCode": "19019",
+            "addressRegion": "PA",
+            "addressCountry": "US"
+          }
+        },
+        "image": [
+          "https://example.com/photos/1x1/photo.jpg",
+          "https://example.com/photos/4x3/photo.jpg",
+          "https://example.com/photos/16x9/photo.jpg"
+        ],
+        "description": "The Adventures of Kira and Morrison is coming to Snickertown in a can't miss performance.",
+        "offers": {
+          "@type": "Offer",
+          "url": "https://www.example.com/event_offer/12345_202403180430",
+          "price": 30,
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock",
+          "validFrom": "2024-05-21T12:00"
+        },
+        "performer": {
+          "@type": "PerformingGroup",
+          "name": "Kira and Morrison"
+        },
+        "organizer": {
+          "@type": "Organization",
+          "name": "Kira and Morrison Music",
+          "url": "https://kiraandmorrisonmusic.com"
+        }
+      }
+    ],
+    "local-business": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Restaurant",
+        "image": [
+          "https://example.com/photos/1x1/photo.jpg",
+          "https://example.com/photos/4x3/photo.jpg",
+          "https://example.com/photos/16x9/photo.jpg"
+        ],
+        "name": "Dave's Steak House",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "148 W 51st St",
+          "addressLocality": "New York",
+          "addressRegion": "NY",
+          "postalCode": "10019",
+          "addressCountry": "US"
+        },
+        "review": {
+          "@type": "Review",
+          "reviewRating": {
+            "@type": "Rating",
+            "ratingValue": 4,
+            "bestRating": 5
+          },
+          "author": {
+            "@type": "Person",
+            "name": "Lillian Ruiz"
+          }
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 40.761293,
+          "longitude": -73.982294
+        },
+        "url": "https://www.example.com/restaurant-locations/manhattan",
+        "telephone": "+12122459600",
+        "servesCuisine": "American",
+        "priceRange": "$$$",
+        "openingHoursSpecification": [
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday"
+            ],
+            "opens": "11:30",
+            "closes": "22:00"
+          },
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Wednesday",
+              "Thursday",
+              "Friday"
+            ],
+            "opens": "11:30",
+            "closes": "23:00"
+          },
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": "Saturday",
+            "opens": "16:00",
+            "closes": "23:00"
+          },
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": "Sunday",
+            "opens": "16:00",
+            "closes": "22:00"
+          }
+        ],
+        "menu": "https://www.example.com/menu"
+      },
+      {
+        "@context": "https://schema.org/",
+        "@type": "Restaurant",
+        "name": "Trattoria Luigi",
+        "image": [
+          "https://example.com/photos/1x1/photo.jpg",
+          "https://example.com/photos/4x3/photo.jpg",
+          "https://example.com/photos/16x9/photo.jpg"
+        ],
+        "priceRange": "$$$",
+        "servesCuisine": "Italian",
+        "telephone": "+12125557234",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "148 W 51st St",
+          "addressLocality": "New York",
+          "addressRegion": "NY",
+          "postalCode": "10019",
+          "addressCountry": "US"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Store",
+        "image": [
+          "https://example.com/photos/1x1/photo.jpg",
+          "https://example.com/photos/4x3/photo.jpg",
+          "https://example.com/photos/16x9/photo.jpg"
+        ],
+        "name": "Dave's Department Store",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "1600 Saratoga Ave",
+          "addressLocality": "San Jose",
+          "addressRegion": "CA",
+          "postalCode": "95129",
+          "addressCountry": "US"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 37.293058,
+          "longitude": -121.988331
+        },
+        "url": "https://www.example.com/store-locator/sl/San-Jose-Westgate-Store/1427",
+        "priceRange": "$$$",
+        "telephone": "+14088717984",
+        "openingHoursSpecification": [
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "opens": "08:00",
+            "closes": "23:59"
+          },
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": "Sunday",
+            "opens": "08:00",
+            "closes": "23:00"
+          }
+        ],
+        "department": [
+          {
+            "@type": "Pharmacy",
+            "image": [
+              "https://example.com/photos/1x1/photo.jpg",
+              "https://example.com/photos/4x3/photo.jpg",
+              "https://example.com/photos/16x9/photo.jpg"
+            ],
+            "name": "Dave's Pharmacy",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "1600 Saratoga Ave",
+              "addressLocality": "San Jose",
+              "addressRegion": "CA",
+              "postalCode": "95129",
+              "addressCountry": "US"
+            },
+            "priceRange": "$",
+            "telephone": "+14088719385",
+            "openingHoursSpecification": [
+              {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": [
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday"
+                ],
+                "opens": "09:00",
+                "closes": "19:00"
+              },
+              {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": "Saturday",
+                "opens": "09:00",
+                "closes": "17:00"
+              },
+              {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": "Sunday",
+                "opens": "11:00",
+                "closes": "17:00"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "organization": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "url": "https://www.example.com",
+        "sameAs": [
+          "https://example.net/profile/example1234",
+          "https://example.org/example1234"
+        ],
+        "logo": "https://www.example.com/images/logo.png",
+        "name": "Example Corporation",
+        "description": "The example corporation is well-known for producing high-quality widgets",
+        "email": "contact@example.com",
+        "telephone": "+47-99-999-9999",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Rue Improbable 99",
+          "addressLocality": "Paris",
+          "addressCountry": "FR",
+          "addressRegion": "Ile-de-France",
+          "postalCode": "75001"
+        },
+        "vatID": "FR12345678901",
+        "iso6523Code": "0199:724500PMK2A2M1SQQ228"
+      }
+    ],
+    "product-snippet": [
+      {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": "Executive Anvil",
+        "description": "Sleeker than ACME's Classic Anvil, the Executive Anvil is perfect for the business traveler looking for something to drop from a height.",
+        "review": {
+          "@type": "Review",
+          "reviewRating": {
+            "@type": "Rating",
+            "ratingValue": 4,
+            "bestRating": 5
+          },
+          "author": {
+            "@type": "Person",
+            "name": "Fred Benson"
+          }
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": 4.4,
+          "reviewCount": 89
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "Cheese Grater Pro",
+        "review": {
+          "@type": "Review",
+          "name": "Cheese Knife Pro review",
+          "author": {
+            "@type": "Person",
+            "name": "Pascal Van Cleeff"
+          },
+          "positiveNotes": {
+            "@type": "ItemList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Consistent results"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Still sharp after many uses"
+              }
+            ]
+          },
+          "negativeNotes": {
+            "@type": "ItemList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "No child protection"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Lacking advanced features"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": "Executive Anvil",
+        "image": [
+          "https://example.com/photos/1x1/photo.jpg",
+          "https://example.com/photos/4x3/photo.jpg",
+          "https://example.com/photos/16x9/photo.jpg"
+        ],
+        "description": "Sleeker than ACME's Classic Anvil, the Executive Anvil is perfect for the business traveler looking for something to drop from a height.",
+        "sku": "0446310786",
+        "mpn": "925872",
+        "brand": {
+          "@type": "Brand",
+          "name": "ACME"
+        },
+        "review": {
+          "@type": "Review",
+          "reviewRating": {
+            "@type": "Rating",
+            "ratingValue": 4,
+            "bestRating": 5
+          },
+          "author": {
+            "@type": "Person",
+            "name": "Fred Benson"
+          }
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": 4.4,
+          "reviewCount": 89
+        },
+        "offers": {
+          "@type": "AggregateOffer",
+          "offerCount": 5,
+          "lowPrice": 119.99,
+          "highPrice": 199.99,
+          "priceCurrency": "USD"
+        }
+      }
+    ],
+    "recipe": [
+      {
+        "@context": "https://schema.org/",
+        "@type": "Recipe",
+        "name": "Non-Alcoholic Piña Colada",
+        "image": [
+          "https://example.com/photos/1x1/photo.jpg",
+          "https://example.com/photos/4x3/photo.jpg",
+          "https://example.com/photos/16x9/photo.jpg"
+        ],
+        "author": {
+          "@type": "Person",
+          "name": "Mary Stone"
+        },
+        "datePublished": "2024-03-10",
+        "description": "This non-alcoholic pina colada is everyone's favorite!",
+        "recipeCuisine": "American",
+        "prepTime": "PT1M",
+        "cookTime": "PT2M",
+        "totalTime": "PT3M",
+        "keywords": "non-alcoholic",
+        "recipeYield": "4 servings",
+        "recipeCategory": "Drink",
+        "nutrition": {
+          "@type": "NutritionInformation",
+          "calories": "120 calories"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": 5,
+          "ratingCount": 18
+        },
+        "recipeIngredient": [
+          "400ml of pineapple juice",
+          "100ml cream of coconut",
+          "ice"
+        ],
+        "recipeInstructions": [
+          {
+            "@type": "HowToStep",
+            "name": "Blend",
+            "text": "Blend 400ml of pineapple juice and 100ml cream of coconut until smooth.",
+            "url": "https://example.com/non-alcoholic-pina-colada#step1",
+            "image": "https://example.com/photos/non-alcoholic-pina-colada/step1.jpg"
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Fill",
+            "text": "Fill a glass with ice.",
+            "url": "https://example.com/non-alcoholic-pina-colada#step2",
+            "image": "https://example.com/photos/non-alcoholic-pina-colada/step2.jpg"
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Pour",
+            "text": "Pour the pineapple juice and coconut mixture over ice.",
+            "url": "https://example.com/non-alcoholic-pina-colada#step3",
+            "image": "https://example.com/photos/non-alcoholic-pina-colada/step3.jpg"
+          }
+        ],
+        "video": {
+          "@type": "VideoObject",
+          "name": "How to Make a Non-Alcoholic Piña Colada",
+          "description": "This is how you make a non-alcoholic piña colada.",
+          "thumbnailUrl": [
+            "https://example.com/photos/1x1/photo.jpg",
+            "https://example.com/photos/4x3/photo.jpg",
+            "https://example.com/photos/16x9/photo.jpg"
+          ],
+          "contentUrl": "https://www.example.com/video123.mp4",
+          "embedUrl": "https://www.example.com/videoplayer?video=123",
+          "uploadDate": "2024-02-05T08:00:00+08:00",
+          "duration": "PT1M33S",
+          "interactionStatistic": {
+            "@type": "InteractionCounter",
+            "interactionType": {
+              "@type": "WatchAction"
+            },
+            "userInteractionCount": 2347
+          },
+          "expires": "2024-02-05T08:00:00+08:00"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "url": "https://example.com/apple-pie.html"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "url": "https://example.com/blueberry-pie.html"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "url": "https://example.com/cherry-pie.html"
+          }
+        ]
+      }
+    ],
+    "review-snippet": [
+      {
+        "@context": "https://schema.org/",
+        "@type": "Review",
+        "itemReviewed": {
+          "@type": "Restaurant",
+          "image": "https://www.example.com/seafood-restaurant.jpg",
+          "name": "Legal Seafood",
+          "servesCuisine": "Seafood",
+          "priceRange": "$$$",
+          "telephone": "1234567",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 William St",
+            "addressLocality": "New York",
+            "addressRegion": "NY",
+            "postalCode": "10038",
+            "addressCountry": "US"
+          }
+        },
+        "reviewRating": {
+          "@type": "Rating",
+          "ratingValue": 4
+        },
+        "author": {
+          "@type": "Person",
+          "name": "Bob Smith"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Washington Times"
+        }
+      },
+      {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "brand": {
+          "@type": "Brand",
+          "name": "Penguin Books"
+        },
+        "description": "The Catcher in the Rye is a classic coming-of-age story: an story of teenage alienation, capturing the human need for connection and the bewildering sense of loss as we leave childhood behind.",
+        "sku": "9780241984758",
+        "mpn": "925872",
+        "image": "https://www.example.com/catcher-in-the-rye-book-cover.jpg",
+        "name": "The Catcher in the Rye",
+        "review": [
+          {
+            "@type": "Review",
+            "reviewRating": {
+              "@type": "Rating",
+              "ratingValue": 5
+            },
+            "author": {
+              "@type": "Person",
+              "name": "John Doe"
+            }
+          },
+          {
+            "@type": "Review",
+            "reviewRating": {
+              "@type": "Rating",
+              "ratingValue": 1
+            },
+            "author": {
+              "@type": "Person",
+              "name": "Jane Doe"
+            }
+          }
+        ],
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": 88,
+          "bestRating": 100,
+          "ratingCount": 20
+        },
+        "offers": {
+          "@type": "Offer",
+          "url": "https://example.com/offers/catcher-in-the-rye",
+          "priceCurrency": "USD",
+          "price": 5.99,
+          "priceValidUntil": "2024-11-05",
+          "itemCondition": "https://schema.org/UsedCondition",
+          "availability": "https://schema.org/InStock",
+          "seller": {
+            "@type": "Organization",
+            "name": "eBay"
+          }
+        }
+      },
+      {
+        "@context": "https://schema.org/",
+        "@type": "AggregateRating",
+        "itemReviewed": {
+          "@type": "Restaurant",
+          "image": "https://www.example.com/seafood-restaurant.jpg",
+          "name": "Legal Seafood",
+          "servesCuisine": "Seafood",
+          "telephone": "1234567",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "123 William St",
+            "addressLocality": "New York",
+            "addressRegion": "NY",
+            "postalCode": "10038",
+            "addressCountry": "US"
+          }
+        },
+        "ratingValue": 88,
+        "bestRating": 100,
+        "ratingCount": 20
+      },
+      {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": "Executive Anvil",
+        "image": [
+          "https://example.com/photos/1x1/photo.jpg",
+          "https://example.com/photos/4x3/photo.jpg",
+          "https://example.com/photos/16x9/photo.jpg"
+        ],
+        "brand": {
+          "@type": "Brand",
+          "name": "ACME"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": 4.4,
+          "ratingCount": 89
+        },
+        "offers": {
+          "@type": "AggregateOffer",
+          "lowPrice": 119.99,
+          "highPrice": 199.99,
+          "priceCurrency": "USD"
+        }
+      }
+    ],
+    "software-app": [
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Angry Birds",
+        "operatingSystem": "ANDROID",
+        "applicationCategory": "GameApplication",
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": 4.6,
+          "ratingCount": 8864
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": 1.0,
+          "priceCurrency": "USD"
+        }
+      }
+    ],
+    "video": [
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "name": "Introducing the self-driving bicycle in the Netherlands",
+        "description": "This spring, Google is introducing the self-driving bicycle in Amsterdam, the world's premier cycling city. The Dutch cycle more than any other nation in the world, almost 900 kilometres per year per person, amounting to over 15 billion kilometres annually. The self-driving bicycle enables safe navigation through the city for Amsterdam residents, and furthers Google's ambition to improve urban mobility with technology. Google Netherlands takes enormous pride in the fact that a Dutch team worked on this innovation that will have great impact in their home country.",
+        "thumbnailUrl": [
+          "https://example.com/photos/1x1/photo.jpg",
+          "https://example.com/photos/4x3/photo.jpg",
+          "https://example.com/photos/16x9/photo.jpg"
+        ],
+        "uploadDate": "2024-03-31T08:00:00+08:00",
+        "duration": "PT1M54S",
+        "contentUrl": "https://www.example.com/video/123/file.mp4",
+        "embedUrl": "https://www.example.com/embed/123",
+        "interactionStatistic": {
+          "@type": "InteractionCounter",
+          "interactionType": {
+            "@type": "WatchAction"
+          },
+          "userInteractionCount": 5647018
+        },
+        "creator": {
+          "@type": "Organization",
+          "name": "Google Netherlands",
+          "url": "https://www.example.com"
+        },
+        "regionsAllowed": [
+          "US",
+          "NL"
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "contentURL": "https://example.com/bald-eagle-at-the-park.mp4",
+        "description": "Bald eagle at the park livestream.",
+        "duration": "PT37M14S",
+        "embedUrl": "https://example.com/bald-eagle-at-the-park",
+        "expires": "2024-10-30T14:37:14+00:00",
+        "regionsAllowed": "US",
+        "interactionStatistic": {
+          "@type": "InteractionCounter",
+          "interactionType": {
+            "@type": "WatchAction"
+          },
+          "userInteractionCount": 4756
+        },
+        "name": "Bald eagle nest livestream!",
+        "thumbnailUrl": "https://example.com/bald-eagle-at-the-park",
+        "uploadDate": "2024-10-27T14:00:00+00:00",
+        "publication": [
+          {
+            "@type": "BroadcastEvent",
+            "isLiveBroadcast": true,
+            "startDate": "2024-10-27T14:00:00+00:00",
+            "endDate": "2024-10-27T14:37:14+00:00"
+          },
+          {
+            "@type": "BroadcastEvent",
+            "isLiveBroadcast": true,
+            "startDate": "2024-10-27T18:00:00+00:00",
+            "endDate": "2024-10-27T18:37:14+00:00"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org/",
+        "@type": "VideoObject",
+        "name": "Cat video",
+        "duration": "PT10M",
+        "uploadDate": "2024-07-19T08:00:00+08:00",
+        "thumbnailUrl": "https://www.example.com/cat.jpg",
+        "description": "Watch this cat jump over a fence!",
+        "contentUrl": "https://www.example.com/cat_video_full.mp4",
+        "ineligibleRegion": "US",
+        "hasPart": [
+          {
+            "@type": "Clip",
+            "name": "Cat jumps",
+            "startOffset": 30,
+            "endOffset": 45,
+            "url": "https://www.example.com/example?t=30"
+          },
+          {
+            "@type": "Clip",
+            "name": "Cat misses the fence",
+            "startOffset": 111,
+            "endOffset": 150,
+            "url": "https://www.example.com/example?t=111"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "potentialAction": {
+          "@type": "SeekToAction",
+          "target": "https://video.example.com/watch/videoID?t={seek_to_second_number}",
+          "startOffset-input": "required name=seek_to_second_number"
+        },
+        "name": "My daily workout!",
+        "uploadDate": "2024-07-19T08:00:00+08:00",
+        "thumbnailUrl": "https://www.example.com/daily-workout.jpg",
+        "description": "My daily workout!",
+        "embedUrl": "https://example.com/daily-workout"
+      }
+    ]
+  }
+}

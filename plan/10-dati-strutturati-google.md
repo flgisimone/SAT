@@ -2,7 +2,15 @@
 
 **Obiettivo**: `structured-data` verifica le proprietà che Google dichiara obbligatorie per i risultati avanzati, oltre alla sintassi JSON-LD. Fonte: [galleria dei dati strutturati di Google Search](https://developers.google.com/search/docs/appearance/structured-data/search-gallery) (25 funzioni, aggiornata al 16/10/2026).
 
-> **Stato: da fare.**
+> **Stato: completata (24/10/2026), versione 1.15.0.**
+>
+> - Tabella in `src/core/rules/seo/google-structured-data.ts`: requisiti dei nodi di primo livello (`GOOGLE_TYPES`) e di quelli annidati nelle proprietà elencate in `nested` (`NESTED_TYPES`), con pagina e data di Google (8/9/2026, Video 24/9/2026). Ogni requisito è una lista di alternative con percorsi a punti (`offers.price`); in un array basta un elemento.
+> - Article (NewsArticle, BlogPosting) e Organization non sono in tabella: Google non dichiara proprietà obbligatorie.
+> - Product segue la pagina «Product snippet» (non «Merchant listing», che chiede di più e segnalerebbe snippet validi). Gli Offer si controllano solo dentro Product: in Event `price` è consigliato.
+> - `reviewRating` non è obbligatorio nelle Review: l'esempio «pro e contro» di Google non ce l'ha e la pagina lo rende facoltativo con autore e data; si controlla `ratingValue` quando il voto c'è.
+> - LocalBusiness: solo `Restaurant` e `Store` fra i sottotipi (quelli degli esempi di Google); BroadcastEvent, SeekToAction e HowToStep non si controllano (`ponytail:` nella tabella).
+> - I nodi con lo stesso `@id` si uniscono anche fra blocchi diversi; un nodo che prende `@type` da un altro con lo stesso `@id` non è più «senza `@type`».
+> - Gli esempi JSON-LD delle pagine di Google sono in `tests/google-structured-data.json` (copiati il 24/10/2026; esclusi i due frammenti parziali della pagina Video e l'esempio di Organization, che non è JSON valido): nessuno è segnalato, e togliendo ogni proprietà obbligatoria si ha un errore che la nomina.
 
 ---
 
