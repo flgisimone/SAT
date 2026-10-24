@@ -47,6 +47,7 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | F4 | [04-copertura-regole.md](04-copertura-regole.md) | Decisione su axe-core, nuove regole SEO e di accessibilità, documentazione per regola | F2 |
 | F5 | [05-ci-automazione.md](05-ci-automazione.md) | API senza interfaccia, helper per Playwright, CLI con report e soglie, link rotti nella CLI | F2 (meglio dopo F4) |
 | F6 | [06-ecosistema.md](06-ecosistema.md) | Plugin Vite, estensione per il browser, Svelte e Angular, documentazione | F3, F5 |
+| F7 | [07-manutenzione-ci.md](07-manutenzione-ci.md) | CI di nuovo verde (`rollup-plugin-dts` compatibile con TypeScript 6), azioni GitHub su Node 24 | — |
 
 ```
 F1 ─► F2 ─┬─► F3 ──────────┬─► F6
