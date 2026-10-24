@@ -60,7 +60,8 @@
     "build": "rollup -c && rollup -c rollup.dts.config.cjs",
     "dev": "rollup -c -w",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:browser": "npm run build && playwright test"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
@@ -78,6 +79,7 @@
     "tslib": "^2.8.1"
   },
   "devDependencies": {
+    "@playwright/test": "1.52",
     "@rollup/plugin-typescript": "^12.1.2",
     "@types/node": "^22.13.10",
     "@types/react": "^18.2.14",
