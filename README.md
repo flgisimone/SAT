@@ -14,7 +14,8 @@ Detects common issues in heading usage (`<h1>`-`<h6>`), ARIA roles, contrast, la
 ✅ Results panel grouped by rule, with filters and a heading map; click an issue to jump to the element  
 ✅ Never changes your page: highlights are drawn on SAT's own layer  
 ✅ Follows single-page apps: route changes rerun the checks  
-✅ Supports progressive checks via custom options
+✅ Supports progressive checks via custom options  
+✅ Runs in CI: Playwright helper and the `sat-check` command with JSON/HTML reports, limits and a link crawler
 
 ---
 
@@ -117,7 +118,7 @@ useSATChecker({
 | `mixed-content`     | seo      | `http:` resources on an `https:` page: scripts, frames, styles (error), images and media (warning) | error | — |
 | `image-size`        | seo      | Visible `<img>` without `width` and `height` (layout shift)               | warning    | — |
 | `image-lazy-load`   | seo      | `loading="lazy"` on images visible when the page opens                    | warning    | — |
-| `link-broken`       | seo      | HEAD request to each internal link to find 4xx/5xx (skips logout-like URLs) | off      | `enableCheckBrokenInternalLinks` |
+| `link-broken`       | seo      | HEAD request to each internal link to find 4xx/5xx (skips logout-like URLs); `sat-check --depth` finds SPA 404s too | off | `enableCheckBrokenInternalLinks` |
 
 Each rule has a page in [docs/rules](docs/rules) on what it checks, why and how to fix it; the panel links to it from every group, and each issue has its URL in `help`.
 
@@ -159,6 +160,87 @@ const { issues, errors, warnings } = await seoAccessibilityTool({ rules: { "link
 ```
 
 The page is not changed. `selector` matches only the element of the issue. `satReset` is deprecated and does nothing. `errorMessages` and `warningMessages` (lists of strings) are still returned but deprecated.
+
+`runSAT(options?, document?)` runs the same checks and returns plain data, ready for `JSON.stringify` (no DOM nodes):
+
+```ts
+import { runSAT } from "seo-accessibility-tool";
+
+const { issues, summary } = await runSAT();
+// issues: [{ ruleId, severity, category, message, wcag?, selector?, help? }], summary: { errors, warnings }
+```
+
+---
+
+## 🎭 Playwright
+
+`seo-accessibility-tool/playwright` checks a page in your end-to-end tests. The page doesn't need to import SAT: the helper adds it for the run. `@playwright/test` is an optional peer dependency.
+
+```ts
+import { test } from "@playwright/test";
+import { checkPage, expect } from "seo-accessibility-tool/playwright";
+
+test("home has no SAT errors", async ({ page }) => {
+  await page.goto("/");
+  await expect(page).toHaveNoSATErrors(); // fails with the list of errors: rule, message, selector
+});
+
+test("report", async ({ page }) => {
+  await page.goto("/");
+  const { issues, summary } = await checkPage(page, { rules: { "social-meta": "off" }, axe: true });
+});
+```
+
+- Both take the SAT options that can cross into the page (`rules`, `allowedLinkTexts`, the 1.x flags) and `axe: true` to run axe-core too (install `axe-core`).
+- `expect` is Playwright's own, extended: use it in place of the one from `@playwright/test`, or merge it with yours through `mergeExpects`.
+- Pages with a strict Content Security Policy block the added script: create the context with `bypassCSP: true`.
+
+---
+
+## 🧪 CLI and CI
+
+```bash
+npm install -D seo-accessibility-tool @playwright/test
+npx playwright install chromium
+npx sat-check http://localhost:5173/ http://localhost:5173/pricing
+```
+
+| Option | Default | Meaning |
+|--------|---------|---------|
+| `--max-errors <n>` | `0` | Errors allowed over all pages; above it the exit code is 1 |
+| `--max-warnings <n>` | no limit | Warnings allowed over all pages |
+| `--json <file>` | — | Writes `{ pages: [{ url, issues, summary }], summary }` |
+| `--html <file>` | — | Writes a standalone HTML report |
+| `--config <file>` | — | JSON with SAT options, e.g. `{ "rules": { "link-text": "warning" } }` |
+| `--axe` | off | Runs axe-core too (install `axe-core`) |
+| `--depth <n>` | `0` | Follows same-origin links this many levels deep, checks those pages and reports broken links |
+| `--max-pages <n>` | `100` | Stops after this many pages |
+| `--not-found <text>` | — | A page showing this text is a broken link: the "not found" view of a single-page app |
+
+Exit codes: 0 within the limits, 1 above them, 2 for a wrong command or a run that couldn't start.
+
+**Broken links.** With `--depth` every link is opened in Chromium, so a single-page app resolves the route with its own router. A link is broken when the server answers 4xx/5xx, the navigation fails, or the page shows the `--not-found` text; it is reported as `link-broken` on the page that links to it. Logout, delete and similar URLs are never opened. Set its severity or turn it off with `rules` in `--config`; the in-page `link-broken` rule (HEAD requests) doesn't run in the CLI.
+
+**GitHub Actions:**
+
+```yaml
+name: SAT
+on: [pull_request]
+jobs:
+  sat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build && (npx vite preview --port 4173 &) && curl -s --retry 10 --retry-connrefused -o /dev/null http://localhost:4173/
+      - run: npx sat-check http://localhost:4173/ --depth 2 --not-found "Page not found" --max-warnings 20 --html sat-report.html
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: sat-report, path: sat-report.html }
+```
 
 ---
 

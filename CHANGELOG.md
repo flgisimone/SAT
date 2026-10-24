@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.11.0 — unreleased
+
+### Added
+- `runSAT(options?, document?)`: the same checks as `seoAccessibilityTool`, returning `{ issues, summary }` without DOM nodes, ready for `JSON.stringify`.
+- `seo-accessibility-tool/playwright`: `checkPage(page, options)` and `expect(page).toHaveNoSATErrors()` for end-to-end tests. The page doesn't need to import SAT; `axe: true` runs axe-core too. `@playwright/test` is an optional peer dependency.
+- `sat-check` command: checks URLs in Chromium, prints the issues, writes JSON (`--json`) and HTML (`--html`) reports and exits with 1 above `--max-errors` (default 0) or `--max-warnings`. Options from a JSON file (`--config`), axe-core with `--axe`.
+- Broken links in the CLI: `--depth` follows same-origin links (logout-like URLs excluded, at most `--max-pages`), checks those pages and reports as `link-broken` the links whose page answers 4xx/5xx, fails to load or shows the `--not-found` text, so client-side 404s of single-page apps are found.
+
 ## 1.10.0 — unreleased
 
 ### Added

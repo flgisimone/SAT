@@ -1,6 +1,6 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { seoAccessibilityTool } from '../src/core/seoAccessibilityTool';
+import { runSAT, seoAccessibilityTool } from '../src/core/seoAccessibilityTool';
 import { rules } from '../src/core/rules';
 import { cssSelector } from '../src/sat/issue';
 import { LEGACY_OPTIONS, type LegacyOptions } from '../src/sat/satOptions';
@@ -161,5 +161,19 @@ describe('enabled option', () => {
         expect(document.querySelector('sat-panel')).not.toBeNull();
         vi.unstubAllEnvs();
         vi.unstubAllGlobals();
+    });
+});
+
+describe('runSAT', () => {
+    it('returns issues and summary that survive JSON.stringify, with selectors and messages', async () => {
+        document.body.innerHTML = '<main><img id="photo" src="a.png"></main>';
+        const report = await runSAT();
+        const parsed = JSON.parse(JSON.stringify(report));
+
+        expect(parsed).toEqual(report);
+        expect(parsed.issues.every((issue: object) => !('element' in issue))).toBe(true);
+        expect(parsed.issues.find((issue: { ruleId: string }) => issue.ruleId === 'image-alt')).toMatchObject({ selector: '[id="photo"]', message: expect.stringContaining('alt') });
+        const errors = parsed.issues.filter((issue: { severity: string }) => issue.severity === 'error').length;
+        expect(parsed.summary).toEqual({ errors, warnings: parsed.issues.length - errors });
     });
 });
