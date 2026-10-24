@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.17.0 — unreleased
+
+Fix with AI: the panel copies a ready prompt for an AI coding agent, and with the Vite plugin's `ai: true` it runs Claude Code in the project, then checks that the issue is gone. Nothing changes unless you use it; the page is still never changed. No API breaks.
+
+### Added
+- `fixPrompt(issues, { url })` (main entry): a prompt that asks an agent to fix the issues in the source code, with rule, severity, WCAG criterion or source, documentation link, page URL, and for each issue message, selector, element HTML (cut to about 2 KB) and component file when Vue or Svelte expose it in development. Page content goes in fenced blocks declared as data. Issues of the same rule share one section.
+- Panel: **Copy fix prompt** on every issue and **Copy prompt for all** on every rule; "Copied" is announced (`role="status"`); without a clipboard the prompt appears selected in a text box.
+- Vite plugin: `ai: true` adds **Fix with AI** (issue) and **Fix all with AI** (rule) to the panel and the endpoint `POST /__sat/fix` to the dev server, which runs `claude -p` with the tools `Read`, `Edit`, `Grep`, `Glob` only and streams its progress. Loopback connections, the dev server's origins and a token per dev server start only; one fix at a time; a warning when the repository has uncommitted changes. The panel shows the agent's last messages, a Cancel button, the files changed, then "Fixed" or "Still present" after checking the page again; a fix survives the page reloads it causes.
+- `SATOptions.aiFix` (set by the Vite plugin).
+
+### Changed
+- Data of the page: SAT still sends nothing anywhere. With Fix with AI turned on, Claude Code, run by the user's account, sends the prompt (which quotes the page) to the model.
+
 ## 1.16.0 — unreleased
 
 A new panel in the style of developer tools, in light and dark theme, that passes SAT's own rules and axe-core. The page is still never changed. No API breaks.

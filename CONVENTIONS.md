@@ -296,6 +296,7 @@ Keep check-specific types next to the check. Shared types (`SATOptions`, results
 src/
   core/
     seoAccessibilityTool.ts   runs the enabled rules, returns the issues (entry: ".")
+    fixPrompt.ts              the prompt that asks an AI agent to fix issues in the source (pure, exported)
     rules/
       index.ts                the registry: every rule, in result order
       rule.ts                 Rule, RuleContext, RuleId
@@ -308,8 +309,10 @@ src/
     issue.ts                  Issue, Severity, Category, cssSelector
     satOptions.ts             SATOptions, rule settings, 1.x options mapped to rules
     satReset.ts               deprecated no-op (SAT no longer changes the page)
+    aiFix.ts                  "Fix with AI" in the page: calls the Vite plugin's endpoint, checks the result
   ui/                         panel in a shadow root (satUI.ts), boxes over the page (overlay.ts), styles (DOM built by hand, no framework)
-  integrations/               react.ts, vue.ts: thin wrappers around satChecker; vite.ts: Vite plugin that adds it to `vite dev` pages (entry: "./vite")
+  integrations/               react.ts, vue.ts: thin wrappers around satChecker; vite.ts: Vite plugin that adds it to `vite dev` pages (entry: "./vite");
+                              fixServer.ts: the plugin's `POST /__sat/fix` endpoint, which runs Claude Code (Node only)
   engines/                    axe.ts: other checkers as `Engine`s (entry: "./axe"), with their package as optional peer dependency
   headless/                   runs in Node with Playwright: playwright.ts (entry: "./playwright"), cli.ts (bin `sat-check`), report.ts;
                               inject.ts is the standalone script (dist/sat-inject.js) they add to the page under test
@@ -329,6 +332,7 @@ plan/                         backlog and phases (plan/README.md)
 - `headless/` runs SAT only inside the page, through `dist/sat-inject.js`: Node code never calls the rules directly and imports `core/` and `sat/` only for types and pure helpers.
 - The public API is what the seven entry points in `package.json` `exports`, the `sat-check` command and the browser extension expose. Anything else is internal and may change.
 - The browser extension asks only for `activeTab` and `scripting`: it reads a tab only when its button is clicked there, and sends nothing anywhere.
+- "Fix with AI" runs only from the Vite plugin with `ai: true`: the endpoint accepts loopback connections from the dev server's origins with the token of its run, and Claude Code gets only `Read`, `Edit`, `Grep` and `Glob`. Anything that widens this is a security-sensitive change (§9.4).
 
 ## 6. Writing Checks
 
@@ -438,7 +442,7 @@ Runtime dependencies end up in every integrator's development bundle: add one on
 
 - Never commit secrets or private credentials.
 - Never render page content or messages with `innerHTML`; use `textContent`.
-- Do not send page content anywhere: SAT works locally in the browser.
+- Do not send page content anywhere: SAT works locally in the browser. The one exception is "Fix with AI", turned on explicitly (`ai: true`): the user's Claude Code sends the prompt to the model, SAT does not.
 - Treat URLs, user-provided values, API responses, and browser storage as potentially untrusted where appropriate.
 
 Security-sensitive changes require explicit reasoning and proportionate verification.

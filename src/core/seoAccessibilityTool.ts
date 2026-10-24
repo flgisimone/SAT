@@ -6,6 +6,7 @@ export type { SATOptions, RuleSetting, Engine } from '../sat/satOptions';
 export type { Issue, Severity, Category } from '../sat/issue';
 export type { RuleId, WcagLevel } from './rules';
 export { satReset } from '../sat/satReset';
+export { fixPrompt, type FixPromptContext } from './fixPrompt';
 
 export interface SATResult {
     issues: Issue[];

@@ -13,6 +13,7 @@ Detects common issues in heading usage (`<h1>`-`<h6>`), ARIA roles, contrast, la
 ✅ Injects a floating toggle button to analyze any page  
 ✅ Results panel in light and dark theme: counters that filter, issues by category and rule with their WCAG criterion or source, a heading map; click an issue to jump to the element  
 ✅ Never changes your page: highlights are drawn on SAT's own layer  
+✅ Fix with AI: copy a ready prompt for any issue, or (Vite plugin, opt-in) let Claude Code fix it in your source and check it is gone  
 ✅ Follows single-page apps: route changes rerun the checks  
 ✅ Supports progressive checks via custom options  
 ✅ Runs in CI: Playwright helper and the `sat-check` command with JSON/HTML reports, limits and a link crawler
@@ -66,7 +67,7 @@ export default defineConfig({
 });
 ```
 
-It takes the options that fit in JSON (`rules`, `wcagLevel`, `allowedLinkTexts`, `observeDom`, the 1.x flags) and `axe: true` to run axe-core too (install `axe-core`). It works with any app Vite serves: Svelte, SvelteKit, Solid, Preact, Vue, React. `vite` is an optional peer dependency (5 or later).
+It takes the options that fit in JSON (`rules`, `wcagLevel`, `allowedLinkTexts`, `observeDom`, the 1.x flags), `axe: true` to run axe-core too (install `axe-core`) and `ai: true` for [Fix with AI](#-fix-with-ai). It works with any app Vite serves: Svelte, SvelteKit, Solid, Preact, Vue, React. `vite` is an optional peer dependency (5 or later).
 
 ---
 
@@ -122,10 +123,45 @@ A click on the SAT button in the toolbar adds the panel to the open tab. The ext
 - The arrow in the panel header moves SAT to the other side of the window; the side is remembered in `localStorage`
 - The panel lives in a Shadow DOM: the page's CSS doesn't affect it and its CSS doesn't leak into the page
 - Single-page apps: when SAT is on, a route change (`pushState`, `replaceState`, back/forward) runs the checks again. Use `observeDom` to rerun them on any DOM change
+- **Copy fix prompt** on every issue and **Copy prompt for all** on every rule put a prompt for an AI coding agent in the clipboard (see [Fix with AI](#-fix-with-ai))
 - Keyboard: Tab through the dock and the panel, Escape closes the panel and returns focus to the counts button
 - The panel passes SAT's own rules and axe-core in both themes (contrast, target size, names), checked in the tests
 - SAT stays on across reloads until you stop it (a flag in `localStorage`)
 - Runs only when `process.env.NODE_ENV === "development"` (set by Vite, webpack, Next, etc.); the Vite plugin and the browser extension start it anyway
+
+---
+
+## 🤖 Fix with AI
+
+SAT can hand an issue to an AI coding agent, which fixes it in your source code. Two levels:
+
+1. **Copy fix prompt** (everywhere: Vite, React, Vue, vanilla, the browser extension). The button on an issue, or **Copy prompt for all** on a rule, copies a prompt you paste into your agent (Claude Code, Cursor, Copilot…). Where the clipboard is unavailable, the prompt appears selected in a text box. The same prompt comes from the API:
+
+   ```ts
+   import { fixPrompt, seoAccessibilityTool } from "seo-accessibility-tool";
+
+   const { issues } = await seoAccessibilityTool();
+   const prompt = fixPrompt(issues.filter((issue) => issue.ruleId === "image-alt"), { url: location.href });
+   ```
+
+   The prompt has the rule, severity, WCAG criterion or source, the documentation link, the page URL and, for each issue, the message, the selector, the element's HTML (cut to about 2 KB) and, with Vue and Svelte in development, the component file (Svelte with its line). It asks for the smallest fix in the source, not in the DOM, and to say so instead of changing code when the content comes from data or a CMS. Page content is in fenced blocks declared as data, not instructions.
+
+2. **Fix with AI** (Vite plugin only, opt-in): SAT runs [Claude Code](https://code.claude.com) in your project.
+
+   ```ts
+   // vite.config.ts
+   plugins: [sat({ ai: true })],
+   ```
+
+   The panel gets a **Fix with AI** button on every issue and **Fix all with AI** on every rule. SAT starts `claude -p` in the project root with the prompt, shows the agent's last messages (with a button to cancel), lists the files it changed, then checks the page again after Vite's update: **Fixed** if the issues are gone, **Still present** with the agent's summary if not. One fix runs at a time.
+
+   Requirements: Claude Code installed (`claude` in the `PATH`) and signed in. SAT uses your installation and your account: it handles no API keys and no costs.
+
+**What goes to the model.** SAT itself sends nothing anywhere. With **Fix with AI** turned on, Claude Code sends the prompt (which quotes the page as described above) and the files it reads to the model, as it does when you use it directly. Copying a prompt sends nothing: you decide where to paste it.
+
+**Security of the endpoint.** With `ai: true` the dev server answers `POST /__sat/fix` only for connections from this computer, from the dev server's own pages (`Origin`) and with a token created at every start of the dev server and given only to its pages. Claude Code runs with the tools `Read`, `Edit`, `Grep` and `Glob` only: no shell, no web, no MCP servers. `vite build` and `vite preview` contain neither the endpoint nor the token.
+
+**Undo with git.** SAT keeps no copies of your files. It warns when the repository has uncommitted changes and lists the files the agent changed: commit before a fix, and review it with `git diff`.
 
 ---
 

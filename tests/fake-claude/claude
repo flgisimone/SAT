@@ -1,0 +1,23 @@
+#!/usr/bin/env node
+// A stand-in for Claude Code in the tests: it records how it was started, prints
+// `--output-format stream-json` lines and, with SAT_FAKE_EDIT, edits a file of the project.
+// SAT_FAKE_RECORD: file for { args, stdin, cwd }; SAT_FAKE_EDIT: JSON { file, from, to }; SAT_FAKE_WAIT: never ends.
+const { readFileSync, writeFileSync } = require('node:fs');
+const { join } = require('node:path');
+
+const print = (line) => process.stdout.write(`${JSON.stringify(line)}\n`);
+let stdin = '';
+process.stdin.setEncoding('utf8').on('data', (chunk) => (stdin += chunk)).on('end', () => {
+    if (process.env.SAT_FAKE_RECORD) writeFileSync(process.env.SAT_FAKE_RECORD, JSON.stringify({ args: process.argv.slice(2), stdin, cwd: process.cwd() }));
+    print({ type: 'system', subtype: 'init' });
+
+    const edit = process.env.SAT_FAKE_EDIT && JSON.parse(process.env.SAT_FAKE_EDIT);
+    const file = join(process.cwd(), edit ? edit.file : 'index.html');
+    print({ type: 'assistant', message: { content: [{ type: 'text', text: 'Adding the alt text.' }, { type: 'tool_use', name: 'Read', input: { file_path: file } }] } });
+    print({ type: 'assistant', message: { content: [{ type: 'tool_use', name: 'Edit', input: { file_path: file } }] } });
+    if (edit) writeFileSync(file, readFileSync(file, 'utf8').replace(edit.from, edit.to));
+
+    const finish = () => print({ type: 'result', subtype: 'success', is_error: false, result: 'Added alt text to the image.' });
+    if (process.env.SAT_FAKE_WAIT) setTimeout(finish, 60_000);
+    else finish();
+});

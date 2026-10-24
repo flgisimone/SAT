@@ -1,6 +1,6 @@
 {
   "name": "seo-accessibility-tool",
-  "version": "1.16.0",
+  "version": "1.17.0",
   "author": "Giulio Simone Floresta",
   "license": "MIT",
   "type": "module",
@@ -129,6 +129,7 @@
     "react": "^18.3.1",
     "rollup": "^4.35.0",
     "rollup-plugin-dts": "^6.5.1",
+    "svelte": "^5.57.2",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.2",
     "vite": "^8.3.5",

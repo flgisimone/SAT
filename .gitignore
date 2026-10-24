@@ -22,3 +22,4 @@ coverage
 
 # tokensave
 .tokensave/
+tests/.svelte-*
