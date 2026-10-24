@@ -21,6 +21,7 @@ const NON_DESCRIPTIVE_LINK_TEXTS = [
  */
 export const linkText: Rule = {
     id: 'link-text',
+    title: 'Link text describes the target',
     category: 'a11y',
     defaultSeverity: 'warning',
     defaultOff: true,

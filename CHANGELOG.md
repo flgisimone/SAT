@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.16.0 — unreleased
+
+A new panel in the style of developer tools, in light and dark theme, that passes SAT's own rules and axe-core. The page is still never changed. No API breaks.
+
+### Added
+- Summary with error, warning, accessibility and SEO counters; each counter is a toggle button (`aria-pressed`) that filters the list and the boxes.
+- Issues by category, then by rule (rules with errors first): readable title, count, WCAG criteria or source, link "Why and how to fix", and the messages visible without opening anything (five per rule, then "Show N more").
+- A tag with severity and rule title when pointing at a box on the page, or clicking it; it stays inside the viewport.
+- The panel can move to the right side of the window; the side is remembered in `localStorage` (`sat-side`).
+- Time the checks took, in the panel header.
+- `Issue.title` (readable rule name) and `Issue.source` (source of rules without a WCAG criterion, e.g. "Google"); `title` and `source` in the rule registry. axe issues get axe's rule help as `title`.
+
+### Changed
+- SVG icons instead of emoji; colors from CSS tokens, dark theme from `prefers-color-scheme`; transitions and the flash of the revealed element off with `prefers-reduced-motion`.
+- The panel's checkboxes are replaced by the counters; the rule groups are no longer `<details>` to open.
+
 ## 1.15.0 — unreleased
 
 `structured-data` checks the properties Google requires for rich results, as listed on the pages of Google's structured data gallery. A missing one is an error with its path (`Product > offers > price`) and the link to Google's page. Recommended properties are not checked. To turn the rule off, set it to `"off"` in `rules`.

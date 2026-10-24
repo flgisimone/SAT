@@ -16,6 +16,8 @@ export function isAbsoluteUrl(value: string): boolean {
  */
 export const canonical: Rule = {
     id: 'canonical',
+    title: 'Canonical URL is valid',
+    source: 'Google',
     category: 'seo',
     defaultSeverity: 'warning',
     run({ document, report }) {

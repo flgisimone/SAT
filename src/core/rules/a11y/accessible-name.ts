@@ -38,6 +38,7 @@ function rendersNonText(object: HTMLObjectElement): boolean {
  */
 export const accessibleName: Rule = {
     id: 'accessible-name',
+    title: 'Elements have an accessible name',
     category: 'a11y',
     defaultSeverity: 'error',
     wcag: ['4.1.2'],

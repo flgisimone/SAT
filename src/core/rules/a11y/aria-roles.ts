@@ -119,6 +119,7 @@ export function implicitRole(el: Element): string | null {
  */
 export const ariaRoles: Rule = {
     id: 'aria-roles',
+    title: 'ARIA roles are valid',
     category: 'a11y',
     defaultSeverity: 'error',
     wcag: ['4.1.2'],

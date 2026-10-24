@@ -32,7 +32,7 @@ test('the script works on a page with a strict Content Security Policy', async (
     await page.addScriptTag({ url: '/sat.js' });
 
     const run = page.locator('#sat-run-button');
-    await expect(run).toHaveCSS('border-radius', '50%');
+    await expect(run).toHaveCSS('border-radius', '10px');
     await run.click();
     await expect(page.locator('.results')).toHaveText(/^\d+ errors? · /);
 

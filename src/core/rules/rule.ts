@@ -61,6 +61,10 @@ export interface RuleContext {
 
 export interface Rule {
     id: RuleId;
+    /** Short readable name, shown in the panel. */
+    title: string;
+    /** Short name of the source, for rules without a WCAG criterion (e.g. "Google"). */
+    source?: string;
     category: Category;
     defaultSeverity: Severity;
     /** True for rules that must be turned on explicitly. */

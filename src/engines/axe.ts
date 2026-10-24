@@ -31,6 +31,7 @@ function toIssues(results: axeCore.AxeResults): Array<Omit<Issue, 'selector'>> {
             severity: impact === 'critical' || impact === 'serious' ? 'error' : 'warning',
             category: 'a11y',
             message: `${rule.help}: ${target}.${detail ? ` ${detail}` : ''}`,
+            title: rule.help,
             wcag: wcagCriteria(rule.tags),
             element,
             help: rule.helpUrl,

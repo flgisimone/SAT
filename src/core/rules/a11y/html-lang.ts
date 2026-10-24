@@ -38,6 +38,7 @@ function hasOwnText(el: Element): boolean {
  */
 export const htmlLang: Rule = {
     id: 'html-lang',
+    title: 'Page language is valid',
     category: 'a11y',
     defaultSeverity: 'error',
     wcag: ['3.1.1'],

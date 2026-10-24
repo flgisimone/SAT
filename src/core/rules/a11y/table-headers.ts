@@ -97,6 +97,7 @@ function hasAssignedCells(header: Slot, scope: Exclude<HeaderScope, null>, slots
  */
 export const tableHeaders: Rule = {
     id: 'table-headers',
+    title: 'Table headers match their cells',
     category: 'a11y',
     defaultSeverity: 'error',
     wcag: ['1.3.1'],

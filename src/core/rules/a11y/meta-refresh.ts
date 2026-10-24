@@ -17,6 +17,7 @@ function refreshDelay(content: string): number | null {
  */
 export const metaRefresh: Rule = {
     id: 'meta-refresh',
+    title: 'Page does not refresh by itself',
     category: 'a11y',
     defaultSeverity: 'error',
     wcag: ['2.2.1'],

@@ -21,8 +21,8 @@ test('the panel lists axe issues with their help page, and the replaced SAT rule
     await expect(page.locator('.results')).not.toHaveText('Running…');
     await page.locator('.results').click();
 
-    const group = page.locator('details', { has: page.locator('summary', { hasText: /^axe\/image-alt \(1\)$/ }) });
+    const group = page.locator('.rule', { has: page.locator('.rule-title', { hasText: /^Images must have alternative text$/ }) });
     await expect(group).toHaveCount(1);
     await expect(group.locator('a.docs')).toHaveAttribute('href', /dequeuniversity\.com\/rules\/axe\/[\d.]+\/image-alt/);
-    await expect(page.locator('summary', { hasText: /^image-alt / })).toHaveCount(0);
+    await expect(page.locator('.rule-title', { hasText: 'Images have alternative text' })).toHaveCount(0);
 });

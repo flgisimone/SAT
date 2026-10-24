@@ -7,6 +7,8 @@ import type { Rule } from "../rule";
  */
 export const h1: Rule = {
     id: 'h1',
+    title: 'Page has a main heading',
+    source: 'Google',
     category: 'seo',
     defaultSeverity: 'warning',
     run({ document, report }) {

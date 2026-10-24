@@ -8,6 +8,7 @@ import type { Rule } from "../rule";
  */
 export const headingLevels: Rule = {
     id: 'heading-levels',
+    title: 'Heading levels are not skipped',
     category: 'a11y',
     defaultSeverity: 'warning',
     wcag: ['1.3.1'],

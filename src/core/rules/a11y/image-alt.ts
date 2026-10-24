@@ -10,6 +10,7 @@ const FILENAME_LIKE = /\.(png|jpe?g|gif|svg|webp|avif|bmp)$/i;
  */
 export const imageAlt: Rule = {
     id: 'image-alt',
+    title: 'Images have alternative text',
     category: 'a11y',
     defaultSeverity: 'error',
     wcag: ['1.1.1'],

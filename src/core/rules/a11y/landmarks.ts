@@ -23,6 +23,7 @@ function hasLabel(el: Element): boolean {
  */
 export const landmarks: Rule = {
     id: 'landmarks',
+    title: 'Landmarks are well formed',
     category: 'a11y',
     defaultSeverity: 'error',
     wcag: ['1.3.1'],

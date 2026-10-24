@@ -13,6 +13,8 @@ const OG_URLS = ['og:image', 'og:url'];
  */
 export const socialMeta: Rule = {
     id: 'social-meta',
+    title: 'Social sharing tags are set',
+    source: 'Open Graph',
     category: 'seo',
     defaultSeverity: 'warning',
     run({ document, report }) {

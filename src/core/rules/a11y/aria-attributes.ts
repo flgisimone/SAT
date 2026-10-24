@@ -58,6 +58,7 @@ function requiredAttributes(el: Element, role: string): string[] {
  */
 export const ariaAttributes: Rule = {
     id: 'aria-attributes',
+    title: 'ARIA attributes are valid',
     category: 'a11y',
     defaultSeverity: 'error',
     wcag: ['4.1.2'],

@@ -9,6 +9,7 @@ import type { Rule } from "../rule";
  */
 export const ariaHiddenFocus: Rule = {
     id: 'aria-hidden-focus',
+    title: 'Hidden content is not focusable',
     category: 'a11y',
     defaultSeverity: 'error',
     wcag: ['4.1.2'],

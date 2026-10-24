@@ -80,6 +80,7 @@ export function satChecker(customOptions: Partial<SATOptions> = {}): void {
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
         let issues: Issue[];
+        const startTime = performance.now();
         try {
             issues = (await seoAccessibilityTool(customOptions)).issues;
         } catch {
@@ -88,7 +89,7 @@ export function satChecker(customOptions: Partial<SATOptions> = {}): void {
 
         // Stopped, or a newer run started while this one waited (e.g. on link-broken requests).
         if (!running || id !== runId) return;
-        ui.showResults(issues, headingOutline(document));
+        ui.showResults(issues, headingOutline(document), performance.now() - startTime);
     };
 
     const runSoon = (delay: number) => {

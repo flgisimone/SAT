@@ -7,8 +7,12 @@ export interface Issue {
     severity: Severity;
     category: Category;
     message: string;
+    /** Readable name of the rule, e.g. "Images have alternative text". */
+    title?: string;
     /** WCAG success criteria the rule enforces, e.g. ["1.1.1"]. */
     wcag?: string[];
+    /** Source of rules without a WCAG criterion, e.g. "Google". */
+    source?: string;
     element?: Element;
     /** CSS selector that matches `element` and nothing else. */
     selector?: string;

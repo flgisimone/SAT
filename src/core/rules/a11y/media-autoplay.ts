@@ -20,6 +20,7 @@ function playsBriefly(media: HTMLMediaElement): boolean {
  */
 export const mediaAutoplay: Rule = {
     id: 'media-autoplay',
+    title: 'Media does not autoplay sound',
     category: 'a11y',
     defaultSeverity: 'warning',
     wcag: ['1.4.2'],
