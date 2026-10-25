@@ -50,7 +50,7 @@
 - `examples/vite-vanilla` usabile come punto di partenza: istruzioni con `npx degit flgisimone/SAT/examples/vite-vanilla`, già con plugin, script per `sat-check` e workflow di CI.
 
 **Criteri di accettazione**
-- [ ] Il comando `degit` funziona su `develop` dopo il push e l'esempio parte senza modifiche.
+- [ ] Il comando `degit` funziona su `develop` dopo il push e l'esempio parte senza modifiche. *Provato il 25/10/2026: `degit` copia la cartella con `.github/workflows/sat.yml`; con il tarball di `npm pack` l'esempio fa `build`, `preview` e `check` senza modifiche (5 errori, 3 avvisi). `npm install` da npm fallisce (`ETARGET`, `^1.18.0` non pubblicata): si segna dopo la pubblicazione.*
 
 ## 3. Note
 
