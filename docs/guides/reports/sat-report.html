@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SAT report</title>
+<style>
+:root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+body { margin: 0 auto; max-width: 72rem; padding: 1rem; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border-bottom: 1px solid #8884; padding: .4rem; text-align: left; vertical-align: top; }
+tr.error td:first-child { color: #d32f2f; font-weight: 600; }
+tr.warning td:first-child { color: #b26a00; font-weight: 600; }
+code { word-break: break-all; }
+</style></head><body>
+<h1>SAT report</h1>
+<p>1 page, 5 errors, 3 warnings</p>
+<section><h2>http://localhost:4173/</h2><p>5 errors, 3 warnings</p>
+<table><thead><tr><th>Severity</th><th>Rule</th><th>Message</th><th>Selector</th></tr></thead><tbody>
+<tr class="warning"><td>warning</td><td><a href="https://github.com/flgisimone/SAT/blob/develop/docs/rules/heading-levels.md">heading-levels</a></td><td>Heading level skipped: &#60;h4 id=&#34;returns&#34;&#62; &#34;Returns&#34; comes after an H2. Expected H3 or higher.</td><td><code>[id=&#34;returns&#34;]</code></td></tr>
+<tr class="error"><td>error</td><td><a href="https://github.com/flgisimone/SAT/blob/develop/docs/rules/color-contrast.md">color-contrast</a></td><td>Insufficient contrast on &#60;p id=&#34;fine-print&#34; class=&#34;faint&#34;&#62; &#34;Offers end on Sunday.&#34;: ratio 1.98. Minimum AA is 4.5.</td><td><code>[id=&#34;fine-print&#34;]</code></td></tr>
+<tr class="error"><td>error</td><td><a href="https://github.com/flgisimone/SAT/blob/develop/docs/rules/form-label.md">form-label</a></td><td>Missing label for form field &#60;input id=&#34;email&#34;&#62; (name=&#34;unnamed&#34;). A placeholder is not a replacement for a label.</td><td><code>[id=&#34;email&#34;]</code></td></tr>
+<tr class="error"><td>error</td><td><a href="https://github.com/flgisimone/SAT/blob/develop/docs/rules/image-alt.md">image-alt</a></td><td>&#60;img src=&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80'%3E%3Crect width='120' height='80' fill='%2399c'/%3E%3C/svg%3E&#34;&#62; has no alt attribute. Describe the image, or use alt=&#34;&#34; if it is decorative.</td><td><code>[id=&#34;photo&#34;]</code></td></tr>
+<tr class="warning"><td>warning</td><td><a href="https://github.com/flgisimone/SAT/blob/develop/docs/rules/link-text.md">link-text</a></td><td>Non-descriptive link text: &#34;click here&#34; in &#60;a href=&#34;/returns&#34;&#62;.</td><td><code>[id=&#34;click-here&#34;]</code></td></tr>
+<tr class="error"><td>error</td><td><a href="https://github.com/flgisimone/SAT/blob/develop/docs/rules/html-lang.md">html-lang</a></td><td>&#60;html&#62; has no lang attribute. Add one, e.g. &#60;html lang=&#34;en&#34;&#62;.</td><td><code></code></td></tr>
+<tr class="error"><td>error</td><td><a href="https://github.com/flgisimone/SAT/blob/develop/docs/rules/seo-meta.md">seo-meta</a></td><td>Missing or empty &#60;meta name=&#34;description&#34;&#62;.</td><td><code></code></td></tr>
+<tr class="warning"><td>warning</td><td><a href="https://github.com/flgisimone/SAT/blob/develop/docs/rules/canonical.md">canonical</a></td><td>Missing &#60;link rel=&#34;canonical&#34;&#62;. Add one with the absolute URL of the page.</td><td><code></code></td></tr>
+</tbody></table></section>
+</body></html>

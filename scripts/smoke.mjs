@@ -3,7 +3,8 @@
 // - the tarball has LICENSE, README.md, CHANGELOG.md and dist/ only, and every file package.json points to;
 // - no optional peer dependency gets installed where the example doesn't ask for it;
 // - examples with a "dev" script: `vite build` works, and in `vite dev` the panel shows the counts of expected.json;
-// - examples with a "check" script: `npm run check` exits with 1 and its JSON report has exactly the issues of expected.json.
+// - examples with a "check" script: `npm run check` exits with 1 and its JSON report has exactly the issues of expected.json;
+//   with a "preview" script too, `npm run preview` serves the build while the check runs, as in the example's CI workflow.
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { createServer } from 'node:net';
@@ -93,9 +94,28 @@ async function checkPanel(dir, browser) {
     }
 }
 
-function checkCli(dir) {
+/** `npm run preview`, the server the "check" script expects; its URL is the one in the script. */
+async function startPreview(dir, check) {
+    const url = check.match(/https?:\/\/\S+/)[0];
+    // detached: the process group is killed, vite included, not only npm.
+    const server = spawn('npm', ['run', 'preview', '--silent'], { cwd: dir, detached: true });
+    let output = '';
+    server.stdout.on('data', (data) => { output += data; });
+    server.stderr.on('data', (data) => { output += data; });
+    const stop = () => process.kill(-server.pid);
+    await waitForServer(url, server, () => output).catch((error) => { stop(); throw error; });
+    return stop;
+}
+
+async function checkCli(dir, scripts) {
     run('npx', ['playwright', 'install', 'chromium'], dir);
-    const result = spawnSync('npm', ['run', 'check', '--silent'], { cwd: dir, encoding: 'utf8' });
+    const stop = scripts.preview ? await startPreview(dir, scripts.check) : () => undefined;
+    let result;
+    try {
+        result = spawnSync('npm', ['run', 'check', '--silent'], { cwd: dir, encoding: 'utf8' });
+    } finally {
+        stop();
+    }
     const output = `${result.stdout}${result.stderr}`;
     if (result.status !== 1) throw new Error(`npm run check: exit code ${result.status}, expected 1\n${output}`);
     if (!existsSync(join(dir, 'sat-report.json'))) throw new Error(`npm run check wrote no report\n${output}`);
@@ -126,7 +146,7 @@ try {
             checkPeers(dir, own);
             if (own.scripts.build) run('npm', ['run', 'build', '--silent'], dir);
             if (own.scripts.dev) await checkPanel(dir, browser);
-            if (own.scripts.check) checkCli(dir);
+            if (own.scripts.check) await checkCli(dir, own.scripts);
             console.log(`ok   ${name}`);
         } catch (error) {
             failures.push(`${name}: ${error.message}`);

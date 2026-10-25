@@ -15,6 +15,7 @@ const APP = `<!doctype html><html lang="en"><head><title>SPA</title>
 const routes = {
     '/': '<h1>Home</h1><nav><a href="/about">About</a> <a href="/missing">Missing</a> <a href="/old.html">Old</a> <a href="/logout">Log out</a></nav>',
     '/about': '<h1>About</h1><p>About us. <a href="/">Home</a></p>',
+    '/photo': '<h1>Photo</h1><img src="data:,">',
 };
 document.getElementById('app').innerHTML = '<main>' + (routes[location.pathname] ?? '<h1>Page not found</h1>') + '</main>';
 </script></body></html>`;
@@ -26,7 +27,8 @@ const requested: string[] = [];
 test.beforeAll(async () => {
     server = createServer((request, response) => {
         requested.push(request.url ?? '');
-        response.writeHead(request.url === '/old.html' ? 404 : 200, { 'content-type': 'text/html' });
+        const csp = request.url === '/csp' ? { 'content-security-policy': "default-src 'self'" } : {};
+        response.writeHead(request.url === '/old.html' ? 404 : 200, { 'content-type': 'text/html', ...csp });
         response.end(APP);
     });
     await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
@@ -45,6 +47,13 @@ test('a clean page passes with exit code 0', async () => {
     const { code, stdout } = await satCheck(`${origin}/about`);
 
     expect(stdout).toContain(`${origin}/about  0 errors`);
+    expect(code).toBe(0);
+});
+
+test('a page with a strict Content Security Policy is checked too', async () => {
+    const { code, stdout } = await satCheck(`${origin}/csp`);
+
+    expect(stdout).toContain(`${origin}/csp  0 errors`);
     expect(code).toBe(0);
 });
 
@@ -76,6 +85,14 @@ test('limits and rule settings decide the exit code', async () => {
     expect(code).toBe(1);
 
     expect((await satCheck(`${origin}/`, '--depth', '1', '--max-errors', '1')).code).toBe(0);
+});
+
+test('"axe": true in the config file runs axe-core', async () => {
+    const config = test.info().outputPath('sat.json');
+    writeFileSync(config, JSON.stringify({ axe: true }));
+
+    const { stdout } = await satCheck(`${origin}/photo`, '--config', config);
+    expect(stdout).toMatch(/error\s+axe\/image-alt/);
 });
 
 test('--wcag-level accepts AA or AAA only', async () => {
