@@ -28,18 +28,18 @@
 - Per ogni tipo coperto, le proprietà obbligatorie e le alternative ammesse (es. Product: `name` più uno fra `review`, `aggregateRating`, `offers`), lette dalle pagine di Google.
 
 **Criteri di accettazione**
-- [ ] Ogni voce cita la pagina di Google e la data; un test verifica che la tabella sia ben formata.
+- [x] Ogni voce cita la pagina di Google e la data; un test verifica che la tabella sia ben formata.
 
 #### F10-02 · Controllo in `structured-data` — M
 **Dipendenze**: F10-01
 - Errore per ogni proprietà obbligatoria mancante, con il percorso (`Product > offers > price`) e il link alla pagina di Google.
 
 **Criteri di accettazione**
-- [ ] Gli esempi validi delle pagine di Google non sono segnalati; togliendo una proprietà obbligatoria si ha un errore che la nomina.
+- [x] Gli esempi validi delle pagine di Google non sono segnalati; togliendo una proprietà obbligatoria si ha un errore che la nomina.
 
 #### F10-03 · Documentazione e rilascio — S
 **Dipendenze**: F10-02
 - `docs/rules/structured-data.md`, README, `CHANGELOG.md`, versione 1.15.0.
 
 **Criteri di accettazione**
-- [ ] `npm run verify` e `npm run verify:e2e` passano.
+- [x] `npm run verify` e `npm run verify:e2e` passano.

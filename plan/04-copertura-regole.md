@@ -77,7 +77,7 @@ Osservazioni per la decisione:
 - Id duplicati, riferimenti ARIA verso id inesistenti, `aria-hidden` su focalizzabili, titolo degli `iframe`, intestazioni delle tabelle, struttura delle liste, skip link, media in autoplay.
 
 **Criteri di accettazione**
-- [ ] Ogni regola ha test sul caso da segnalare e sui pattern validi.
+- Annullato: le regole le copre axe-core con l'adattatore di F4-01 (`engines: [axe()]`).
 
 #### F4-05 · Prestazioni di caricamento — S
 **Dipendenze**: F2-02
