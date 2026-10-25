@@ -133,12 +133,16 @@ try {
             console.log(`FAIL ${name}`);
         }
     }
+} catch (error) {
+    failures.push(error.message);
 } finally {
     await browser.close();
 }
 
 if (failures.length) {
     console.error(`\n${failures.join('\n\n')}\n\nThe copies are in ${work}`);
+    // In GitHub Actions each failure also becomes an annotation on the run.
+    if (process.env.GITHUB_ACTIONS) failures.forEach((failure) => console.log(`::error title=smoke::${failure.replace(/%/g, '%25').replace(/\r?\n/g, '%0A')}`));
     process.exitCode = 1;
 } else {
     rmSync(work, { recursive: true, force: true });
