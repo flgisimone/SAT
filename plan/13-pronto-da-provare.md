@@ -2,7 +2,7 @@
 
 **Obiettivo**: chi non conosce SAT lo installa da npm su un progetto pulito, segue solo il README e lo vede funzionare. Il pacchetto pubblicato è quello documentato: oggi su npm c'è la 1.6.0 (aprile 2025), mentre il README descrive la 1.17.0.
 
-> **Stato: da iniziare.** Fonte: roadmap di crescita del 25/10/2026, fase 0 e parte della fase 6.
+> **Stato: completata (25/10/2026), versione 1.18.0, da pubblicare a cura del maintainer** (checklist in fondo). Fonte: roadmap di crescita del 25/10/2026, fase 0 e parte della fase 6.
 
 ---
 
@@ -26,7 +26,7 @@
   - `engines.node` con la versione minima che la CLI regge.
 
 **Criteri di accettazione**
-- [ ] `npm pack --dry-run` include `LICENSE`, `README.md`, `CHANGELOG.md` e `dist/`, e nient'altro.
+- [x] `npm pack --dry-run` include `LICENSE`, `README.md`, `CHANGELOG.md` e `dist/`, e nient'altro.
 
 #### F13-02 · Installazione pulita in CI — M
 **Dipendenze**: F13-01
@@ -36,7 +36,7 @@
 - Job `smoke` nel workflow, dopo `verify:e2e`; comando `npm run smoke` per la postazione.
 
 **Criteri di accettazione**
-- [ ] Il job fallisce se si rompe un `exports`, se manca un file dal tarball o se una peer dependency diventa obbligatoria (provato a mano rompendone una).
+- [x] Il job fallisce se si rompe un `exports`, se manca un file dal tarball o se una peer dependency diventa obbligatoria (provato a mano rompendone una).
 
 #### F13-03 · Esempi minimi — M
 **Dipendenze**: F13-02
@@ -49,7 +49,7 @@
 - Esclusi dal pacchetto npm, da `tsc` e da ESLint del progetto.
 
 **Criteri di accettazione**
-- [ ] `npm run smoke` passa su tutti gli esempi.
+- [x] `npm run smoke` passa su tutti gli esempi.
 
 #### F13-04 · Pagina con errori voluti e risultati attesi — S
 **Dipendenze**: —
@@ -58,7 +58,7 @@
 - È la base di esempi (F13-03), demo (F14-02) e video (F16).
 
 **Criteri di accettazione**
-- [ ] Test in Chromium: `runSAT` sulla pagina dà esattamente i problemi di `expected.json` (stessa regola e selettore, nessuno in più).
+- [x] Test in Chromium: `runSAT` sulla pagina dà esattamente i problemi di `expected.json` (stessa regola e selettore, nessuno in più).
 
 #### F13-05 · Limiti dichiarati — S
 **Dipendenze**: —
@@ -70,7 +70,7 @@
 - Le funzioni opzionali (axe-core, Fix with AI) segnate come tali, con i requisiti.
 
 **Criteri di accettazione**
-- [ ] Ogni limite elencato è vero sul codice attuale (verificato, non presunto).
+- [x] Ogni limite elencato è vero sul codice attuale (verificato, non presunto).
 
 #### F13-06 · Contribuire e segnalare — S
 **Dipendenze**: —
@@ -89,4 +89,26 @@
 - Checklist per il maintainer in fondo a questo file: `npm run verify`, `verify:e2e`, `smoke`, `npm publish --dry-run`, `npm publish`, tag `v1.18.0`, release su GitHub con il riassunto.
 
 **Criteri di accettazione**
-- [ ] `npm run verify`, `npm run verify:e2e` e `npm run smoke` passano; la pubblicazione resta al maintainer.
+- [x] `npm run verify`, `npm run verify:e2e` e `npm run smoke` passano; la pubblicazione resta al maintainer.
+
+## 3. Note
+
+- **Pagina con errori voluti** in `examples/page/index.html`: 5 errori (`image-alt`, `form-label`, `color-contrast`, `html-lang`, `seo-meta`) e 3 avvisi (`heading-levels`, `link-text`, `canonical`), ognuno accanto al pattern valido simile (`alt=""` decorativo, `<h3>` dopo un `<h4>`, campo con `<label>`, testo `#595959`, link con testo descrittivo). `link-text` è spenta di default: gli esempi la accendono come avviso (`options` in `expected.json`), e così mostrano anche la configurazione. I meta Open Graph e `twitter:card` ci sono apposta, per non avere avvisi `social-meta` fuori dal piano.
+- **Una copia della pagina per esempio**: Vite vuole `index.html` nella root del progetto e un esempio deve funzionare da solo, copiato altrove. React e Vue aggiungono soltanto il punto di montaggio e lo script. Lo smoke test controlla su ogni copia i problemi di `expected.json`, quindi una copia che si allontana fa fallire la CI.
+- **Lo smoke test** (`scripts/smoke.mjs`) controlla il pannello dai contatori (`5 errors · 3 warnings`) in `vite dev`, perché il pannello non espone gli id delle regole; regole e selettori esatti li controllano il test in Chromium sulla pagina e il report JSON della CLI. Una peer dependency diventata obbligatoria si vede perché npm la installa in un esempio che non la chiede. Prova a mano: `exports['./vue']` su un file inesistente, `files` senza le dichiarazioni, `vue` senza `optional`: in tutti e tre i casi il comando esce con 1 e dice cosa manca.
+- **`engines.node >=20`**: è il minimo di Playwright 1.64, che CLI e helper usano; il plugin Vite segue la versione di Vite del progetto. Il job `smoke` gira su Node 20 per provarlo.
+- **Limiti verificati sul codice**: le regole non entrano negli `<iframe>` né negli shadow root (nessun accesso a `contentDocument` o `shadowRoot` in `core/` e `sat/`); `color-contrast` salta gli elementi con un'immagine o un gradiente di sfondo (`getEffectiveBackground`); il controller parte solo con `NODE_ENV === "development"` o `enabled: true`; `link-broken` in pagina è spento di default e usa richieste HEAD.
+- **Discussions e segnalazioni private** sono spente sul repository (API di GitHub, 25/10/2026): `config.yml` e `SECURITY.md` ci rimandano, quindi il maintainer le attiva in Settings → General → Features → Discussions e Settings → Code security → Private vulnerability reporting (rientra nelle impostazioni del repository di F14).
+- **La data della 1.18.0** nel CHANGELOG è quella della fine della fase; se la pubblicazione avviene un altro giorno, si aggiorna insieme alle voci dalla 1.7.0 alla 1.17.0.
+
+## 4. Checklist di rilascio (maintainer)
+
+1. `git checkout develop && git pull`
+2. `npm ci`
+3. `npm run verify`
+4. `npm run verify:e2e`
+5. `npm run smoke`
+6. `npm publish --dry-run`: controlla versione 1.18.0 e file (`LICENSE`, `README.md`, `CHANGELOG.md`, `package.json`, `dist/`)
+7. `npm publish`
+8. `git tag v1.18.0 && git push origin v1.18.0`
+9. Release su GitHub dal tag `v1.18.0`, con la sezione «Upgrading from 1.6.0» del CHANGELOG come testo

@@ -45,6 +45,6 @@ Il costo di una sessione cresce con le chiamate e con la dimensione del contesto
 
 ## Verifica, fasi e rilascio
 
-- `npm run verify` (typecheck, lint, test unitari, build) deve passare prima di ogni commit; `npm run verify:e2e` (build e test in Chromium) prima del merge di una fase. Stampano solo errori e riepiloghi.
+- `npm run verify` (typecheck, lint, test unitari, build) deve passare prima di ogni commit; `npm run verify:e2e` (build e test in Chromium) prima del merge di una fase, e `npm run smoke` (pacchetto da `npm pack` installato negli esempi) quando cambiano `package.json`, gli entry point o `examples/`. Stampano solo errori e riepiloghi.
 - Ogni fase si lavora sul branch `fase/f<n>-<slug>`; a fine fase merge `--no-ff` su `develop` («Merge fase/… in develop») e push di `develop` e del branch di fase. Lo stato della fase si aggiorna nel suo file di `plan/`.
 - La pubblicazione su npm la fa il maintainer, non un agente.

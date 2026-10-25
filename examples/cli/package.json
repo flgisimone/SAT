@@ -1,0 +1,12 @@
+{
+  "name": "sat-example-cli",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "sat-check file://$PWD/index.html --config sat.config.json --json sat-report.json --html sat-report.html"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.0",
+    "seo-accessibility-tool": "^1.18.0"
+  }
+}

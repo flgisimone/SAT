@@ -1,10 +1,10 @@
 {
   "name": "seo-accessibility-tool",
-  "version": "1.17.0",
+  "version": "1.18.0",
   "author": "Giulio Simone Floresta",
   "license": "MIT",
   "type": "module",
-  "description": "Universal Accessibility & SEO Checker (React, Vue, Vite, Vanilla, browser extension)",
+  "description": "Visual accessibility and SEO debugger for web apps: a panel in your dev server that shows WCAG, ARIA and SEO issues on the page, plus a Playwright helper and a CLI for CI",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
@@ -48,35 +48,40 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "CHANGELOG.md"
   ],
   "keywords": [
     "accessibility",
-    "seo",
     "a11y",
+    "wcag",
+    "aria",
+    "seo",
+    "seo-audit",
+    "accessibility-testing",
+    "devtools",
+    "debugger",
     "react",
     "vue",
-    "lighthouse",
-    "html5",
-    "semantic",
-    "aria",
-    "checker",
-    "devtools",
-    "axe-core",
-    "playwright",
-    "ci",
+    "svelte",
     "vite",
     "vite-plugin",
+    "playwright",
+    "axe-core",
+    "ci",
     "browser-extension"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/flgisimone/sat"
+    "url": "git+https://github.com/flgisimone/SAT.git"
   },
   "bugs": {
     "url": "https://github.com/flgisimone/SAT/issues"
   },
-  "homepage": "https://github.com/flgisimone/sat",
+  "homepage": "https://github.com/flgisimone/SAT#readme",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "rollup -c && rollup -c rollup.dts.config.cjs",
     "dev": "rollup -c -w",
@@ -87,7 +92,8 @@
     "test:e2e": "npm run build -- --silent && playwright test",
     "verify": "tsc --noEmit && eslint . && vitest run --reporter=agent --silent=passed-only && rollup -c --silent && rollup -c rollup.dts.config.cjs --silent",
     "verify:e2e": "rollup -c --silent && playwright test --reporter=dot",
-    "usage": "node scripts/token-usage.mjs"
+    "usage": "node scripts/token-usage.mjs",
+    "smoke": "rollup -c --silent && rollup -c rollup.dts.config.cjs --silent && node scripts/smoke.mjs"
   },
   "peerDependencies": {
     "@playwright/test": ">=1.40.0",

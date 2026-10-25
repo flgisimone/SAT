@@ -1,0 +1,13 @@
+{
+  "options": { "rules": { "link-text": "warning" } },
+  "issues": [
+    { "ruleId": "image-alt", "severity": "error", "selector": "[id=\"photo\"]" },
+    { "ruleId": "heading-levels", "severity": "warning", "selector": "[id=\"returns\"]" },
+    { "ruleId": "form-label", "severity": "error", "selector": "[id=\"email\"]" },
+    { "ruleId": "color-contrast", "severity": "error", "selector": "[id=\"fine-print\"]" },
+    { "ruleId": "link-text", "severity": "warning", "selector": "[id=\"click-here\"]" },
+    { "ruleId": "html-lang", "severity": "error", "selector": null },
+    { "ruleId": "seo-meta", "severity": "error", "selector": null },
+    { "ruleId": "canonical", "severity": "warning", "selector": null }
+  ]
+}

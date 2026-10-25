@@ -1,0 +1,25 @@
+name: New rule
+description: Propose a check SAT doesn't have
+labels: [new rule]
+body:
+  - type: textarea
+    id: check
+    attributes:
+      label: What the rule checks
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source
+      description: The WCAG criterion, ACT rule, WAI-ARIA or HTML section, or Google's page that requires or recommends it. A requirement becomes an error, a recommendation a warning.
+    validations:
+      required: true
+  - type: textarea
+    id: examples
+    attributes:
+      label: Failing and valid markup
+      description: HTML the rule should report, and similar HTML it must not report.
+      render: html
+    validations:
+      required: true
