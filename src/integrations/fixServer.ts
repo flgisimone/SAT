@@ -52,30 +52,34 @@ function short(text: string): string {
     return line.length > MAX_TEXT ? `${line.slice(0, MAX_TEXT)}…` : line;
 }
 
-function send(res: ServerResponse, status: number, message: string): void {
+export function send(res: ServerResponse, status: number, message: string): void {
     res.writeHead(status, { 'content-type': 'text/plain; charset=utf-8' }).end(message);
 }
 
-function readBody(req: IncomingMessage): Promise<string> {
+export function readBody(req: IncomingMessage, limit = MAX_BODY): Promise<string> {
     return new Promise((resolve, reject) => {
         let body = '';
         req.setEncoding('utf8');
         req.on('data', (chunk: string) => {
             body += chunk;
-            if (body.length > MAX_BODY) reject(new Error('Prompt too long.'));
+            if (body.length > limit) reject(new Error('Request too long.'));
         });
         req.on('end', () => resolve(body));
         req.on('error', reject);
     });
 }
 
+export function isLoopback(req: IncomingMessage): boolean {
+    return LOOPBACK.has(req.socket.remoteAddress ?? '');
+}
+
 /**
  * Why the request is refused, if it is: only pages of the dev server, opened on this computer,
- * with the token the plugin put in their SAT module, may start Claude Code.
+ * with the token the plugin put in their SAT module, may start Claude Code or send results.
  */
 export function refusal(req: IncomingMessage, token: string, origins: string[]): string | undefined {
-    if (!LOOPBACK.has(req.socket.remoteAddress ?? '')) return 'Fix with AI accepts requests from this computer only.';
-    if (!req.headers.origin || !origins.includes(req.headers.origin)) return "Fix with AI accepts requests from the dev server's pages only.";
+    if (!isLoopback(req)) return 'SAT accepts requests from this computer only.';
+    if (!req.headers.origin || !origins.includes(req.headers.origin)) return "SAT accepts requests from the dev server's pages only.";
     if (req.headers['x-sat-token'] !== token) return 'Invalid SAT token: reload the page.';
     return undefined;
 }

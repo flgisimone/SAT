@@ -1,6 +1,7 @@
 import type { RuleId, WcagLevel } from '../core/rules/rule';
 import type { AIFixEndpoint } from './aiFix';
 import type { Issue, Severity } from './issue';
+import type { MCPEndpoint } from './mcpResults';
 
 /** A severity forces every issue of the rule to it; 'off' turns the rule off. */
 export type RuleSetting = Severity | 'off';
@@ -103,4 +104,6 @@ export interface SATOptions extends LegacyOptions {
     observeDom?: number;
     /** Controller only: the endpoint of "Fix with AI". Set by the Vite plugin with `ai: true`. */
     aiFix?: AIFixEndpoint;
+    /** Controller only: where the results go for the agents that use SAT's MCP server. Set by the Vite plugin with `mcp: true`. */
+    mcp?: MCPEndpoint;
 }

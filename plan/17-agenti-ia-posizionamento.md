@@ -2,7 +2,7 @@
 
 **Obiettivo**: SAT si presenta come una cosa sola, il pannello di accessibilità e SEO nel dev server Vite che passa i problemi all'IA, e funziona con qualsiasi agente che parla MCP (Claude Code, Cursor, Copilot in VS Code, Codex, Gemini CLI, Windsurf, Zed) con una riga di configurazione. axe-core diventa il motore consigliato e si accende da solo quando è installato. Esito: la 1.19.0, la prima pubblicata dopo la 1.6.0.
 
-> **Stato: da fare.** Fonte: valutazione del 25/10/2026 (76 download al mese, 0 stelle; per CI, crawler ed estensione esistono `@axe-core/playwright`, `pa11y-ci`, `unlighthouse`, axe DevTools e Lighthouse; il pannello nel dev server con SEO e correzione con l'IA non ha un equivalente diffuso fuori da Astro).
+> **Stato: in corso.** Fonte: valutazione del 25/10/2026 (76 download al mese, 0 stelle; per CI, crawler ed estensione esistono `@axe-core/playwright`, `pa11y-ci`, `unlighthouse`, axe DevTools e Lighthouse; il pannello nel dev server con SEO e correzione con l'IA non ha un equivalente diffuso fuori da Astro).
 
 ---
 
@@ -101,4 +101,33 @@
 
 ## 3. Note
 
-_Da scrivere durante la fase._
+### F17-01 · MCP nei client (verificato il 25/10/2026)
+
+**Specifica.** La versione corrente è la [2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28/changelog.md): niente più handshake `initialize`, versione e capacità del client in `_meta` di ogni richiesta, `server/discover` obbligatorio, `ping` rimosso, `resultType` in ogni risultato, header `MCP-Protocol-Version`, `Mcp-Method` e `Mcp-Name` obbligatori e da confrontare col corpo (`400`, `-32020`), versione sconosciuta → `400` con `UnsupportedProtocolVersionError` (`-32022`), metodo sconosciuto → `404` con `-32601`, `GET`/`DELETE` → `405`, notifiche → `202`. `Origin` presente e non valido → `403` ([Streamable HTTP](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http.md)). I client in circolazione parlano ancora le versioni con `initialize` (l'SDK TypeScript 1.32.2 usa la 2025-11-25): il server di SAT è quindi **dual-era** ([Versioning](https://modelcontextprotocol.io/specification/2026-07-28/basic/versioning.md)): `initialize` sceglie la versione vecchia, una richiesta con `_meta` quella nuova. Senza sessioni e senza SSE, risposte `application/json`.
+
+| Client | HTTP streamable | Configurazione | Fonte |
+|---|---|---|---|
+| Claude Code | sì | `claude mcp add --transport http sat <url>`; `.mcp.json` → `mcpServers.sat = { type: "http", url }` (senza `type` è stdio) | [code.claude.com/docs/en/mcp](https://code.claude.com/docs/en/mcp) |
+| Cursor | sì | `.cursor/mcp.json` o `~/.cursor/mcp.json` → `mcpServers.sat = { url }` | [cursor.com/docs/context/mcp](https://cursor.com/docs/context/mcp) |
+| VS Code (Copilot) | sì | `.vscode/mcp.json` → `servers.sat = { type: "http", url }`; formato portabile `.mcp.json` con `mcpServers` | [code.visualstudio.com/docs/agents/reference/mcp-configuration](https://code.visualstudio.com/docs/agents/reference/mcp-configuration) |
+| Codex CLI | sì | `~/.codex/config.toml` (o `.codex/config.toml` nei progetti fidati) → `[mcp_servers.sat] url = …`; `codex mcp add sat --url <url>` | [learn.chatgpt.com/docs/extend/mcp](https://learn.chatgpt.com/docs/extend/mcp?surface=cli) |
+| Gemini CLI | sì | `.gemini/settings.json` → `mcpServers.sat = { httpUrl }` (`url` è SSE); `gemini mcp add --transport http sat <url>` | [geminicli.com/docs/tools/mcp-server](https://geminicli.com/docs/tools/mcp-server/) |
+| Windsurf | sì | `~/.codeium/windsurf/mcp_config.json` → `mcpServers.sat = { serverUrl }`; la documentazione è passata a docs.devin.ai (Devin Desktop: `~/.config/devin/mcp_config.json`) | [docs.devin.ai/desktop/cascade/mcp](https://docs.devin.ai/desktop/cascade/mcp) |
+| Zed | sì | `settings.json` → `context_servers.sat = { url }`; senza `Authorization` propone OAuth solo se il server lo chiede | [zed.dev/docs/ai/mcp](https://zed.dev/docs/ai/mcp) |
+
+`Origin`: nessuna documentazione lo dichiara; sono processi Node, Rust o Electron fuori da una pagina e le richieste di Claude Code e dell'SDK TypeScript arrivano senza. Il server accetta le richieste senza `Origin` e rifiuta quelle con un `Origin` diverso dal dev server.
+
+**Ponte stdio: no.** Tutti e sette supportano HTTP; la guida di troubleshooting dice cosa fare con un client solo stdio e chiede di aprire una issue.
+
+### F17-03 · Prove a mano
+
+- **Claude Code 2.1.310** (`claude -p --mcp-config` con `type: "http"`, pagina d'esempio aperta in Chromium): `sat_issues` e `sat_recheck` restituiscono 5 errori (color-contrast, form-label, image-alt, html-lang, seo-meta) e 3 avvisi (heading-levels, link-text, canonical). Prima prova fallita per colpa del test (`spawnSync` bloccava il processo del dev server), non del server.
+- **SDK TypeScript ufficiale 1.32.2** (`StreamableHTTPClientTransport`, lo stesso di Gemini CLI; protocollo 2025-11-25): `initialize` con istruzioni e `serverInfo`, `tools/list`, `sat_issues` (5 errori, 3 avvisi), `sat_recheck` con `url: "/"`.
+- Cursor e VS Code non sono installati sulla postazione: la prova con uno dei due resta da fare al maintainer prima del lancio.
+
+### Scelte durante la fase
+
+- `sat_recheck` aspetta 1 s prima di chiedere la nuova analisi: senza, la pagina rispondeva prima che Vite la ricaricasse dopo la modifica dell'agente (test in Chromium). `ponytail:` attesa fissa come `HMR_DELAY` di F12.
+- `sat:run` accende SAT nella pagina se era spento: altrimenti un agente non avrebbe risultati finché l'utente non preme play.
+- Con axe acceso la pagina d'esempio dà 4 errori e 3 avvisi (axe accetta il placeholder come nome del campo email): `expected.json` ha `panelWithAxe`, che lo smoke test usa per vite-vanilla; `sat-check` resta senza axe e confronta gli 8 problemi di SAT.
+- I messaggi di rifiuto di `refusal` dicono «SAT accepts…» invece di «Fix with AI accepts…», perché valgono anche per `/__sat/results`.

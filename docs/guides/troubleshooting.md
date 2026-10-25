@@ -35,15 +35,15 @@ Each entry: what you see, why, what to do. The messages in quotes are the ones S
 
 **Fix.** Tell SAT when to start with `enabled`: `satChecker({ enabled: true })` without a bundler, `satChecker({ enabled: isDevMode() })` in Angular, `enabled: import.meta.env.DEV` with Vite.
 
-### With `axe: true` or `engines: [axe()]`
+### With axe-core (`axe` in the Vite plugin, `engines: [axe()]`)
 
 **What you see.** No panel; in the browser console and in the terminal of `vite dev`:
 
 > Could not resolve "axe-core" imported by "seo-accessibility-tool". Is it installed?
 
-**Why.** axe-core is an optional dependency: it isn't installed with SAT.
+**Why.** axe-core is an optional dependency: it isn't installed with SAT. The Vite plugin turns it on only when it finds it, so this happens with `axe: true` or `engines: [axe()]`, or when `axe-core` resolves from the project root but not from SAT's folder (a monorepo with a different `node_modules`).
 
-**Fix.** `npm install -D axe-core`, then restart the dev server.
+**Fix.** `npm install -D axe-core` in the project that runs `vite dev`, then restart the dev server; or remove `axe: true`.
 
 ## The panel ignores my options
 
@@ -130,13 +130,13 @@ error   link-broken           Page can't be checked: http://localhost:4173/ (req
 
 **Fix.** Reload the page.
 
-### "Fix with AI accepts requests from this computer only."
+### "SAT accepts requests from this computer only."
 
-**Why.** The page is open on another device, through `vite --host`. Only this computer may run Claude Code in the project.
+**Why.** The page is open on another device, through `vite --host`. Only this computer may run Claude Code in the project or send results to the MCP server.
 
-**Fix.** Use Fix with AI from a browser on the computer that runs `vite dev`.
+**Fix.** Use Fix with AI and the MCP server from a browser on the computer that runs `vite dev`.
 
-### "Fix with AI accepts requests from the dev server's pages only."
+### "SAT accepts requests from the dev server's pages only."
 
 **Why.** The page comes from another origin than the dev server, e.g. through a proxy or a different host name.
 
@@ -149,6 +149,44 @@ error   link-broken           Page can't be checked: http://localhost:4173/ (req
 **Why.** A warning, not an error: the fix runs anyway. SAT keeps no copies of your files, so git is how you undo a fix.
 
 **Fix.** Commit or stash before a fix, review it with `git diff`.
+
+## The agent doesn't see SAT (MCP server)
+
+### The agent can't connect, or the tools are missing
+
+**Why.** The MCP server exists only with `sat({ mcp: true })` and while `vite dev` runs; or the agent points at another port.
+
+**Fix.** Add `mcp: true`, start `vite dev` and check the line it prints: `SAT: MCP server at http://localhost:5173/__sat/mcp`. The agent's configuration must have that URL ([AI agents](ai-agents.md)); after a change, restart the agent or reconnect the server (`/mcp` in Claude Code).
+
+### The port changed
+
+**Why.** When 5173 is taken, Vite picks the next free port, and the URL in the agent's configuration no longer matches. Vite then prints "set server.strictPort".
+
+**Fix.** Set `server: { strictPort: true }` (and `port` if you use another one) in `vite.config`: Vite stops with an error instead of changing port, and the URL stays the same.
+
+### "No page has sent SAT results yet" or "No page of the app is open in the browser"
+
+**Why.** The agent sees only the pages open in the browser during this run of `vite dev`. Results stay in memory: a restart of the dev server forgets them.
+
+**Fix.** Open the page in the browser and keep it open; then ask the agent again, or let it call `sat_recheck`, which turns SAT on in the page if it was off.
+
+### "No open page answered within 10 seconds"
+
+**Why.** The page didn't send new results: it was reloading, it was opened before the dev server started, or it is in a background tab the browser has frozen.
+
+**Fix.** Reload the page, bring its tab to the front, and call `sat_recheck` again.
+
+### "SAT's MCP server accepts requests from this computer only, at localhost."
+
+**Why.** The request came from another device, or with a host name other than `localhost`, `127.0.0.1` or `[::1]` (a protection against DNS rebinding), or from a web page of another origin.
+
+**Fix.** Run the agent on the computer that runs `vite dev`, with `http://localhost:<port>/__sat/mcp` as URL. A dev server in a container or a remote machine needs a port forward to `localhost`.
+
+### My agent supports only stdio servers
+
+**Why.** SAT's server speaks MCP over HTTP (Streamable HTTP). Claude Code, Cursor, VS Code, Codex CLI, Gemini CLI, Windsurf and Zed support it.
+
+**Fix.** Use a stdio-to-HTTP bridge if your agent has one, or **Copy fix prompt** in the panel. Open an [issue](https://github.com/flgisimone/SAT/issues) with the agent's name: a bridge in `sat-check` is possible if there is demand.
 
 ## A rule reports something that is right
 
