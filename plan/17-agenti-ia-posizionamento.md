@@ -123,7 +123,8 @@
 
 - **Claude Code 2.1.310** (`claude -p --mcp-config` con `type: "http"`, pagina d'esempio aperta in Chromium): `sat_issues` e `sat_recheck` restituiscono 5 errori (color-contrast, form-label, image-alt, html-lang, seo-meta) e 3 avvisi (heading-levels, link-text, canonical). Prima prova fallita per colpa del test (`spawnSync` bloccava il processo del dev server), non del server.
 - **SDK TypeScript ufficiale 1.32.2** (`StreamableHTTPClientTransport`, lo stesso di Gemini CLI; protocollo 2025-11-25): `initialize` con istruzioni e `serverInfo`, `tools/list`, `sat_issues` (5 errori, 3 avvisi), `sat_recheck` con `url: "/"`.
-- Cursor e VS Code non sono installati sulla postazione: la prova con uno dei due resta da fare al maintainer prima del lancio.
+- **VS Code, dal sorgente** (25/10/2026, `microsoft/vscode`, [`extHostMcp.ts`](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/api/common/extHostMcp.ts) e [`extHostMcpNode.ts`](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/api/node/extHostMcpNode.ts)): il client HTTP gira nell'extension host e usa la `fetch` globale di Node; manda `Content-Type`, `Accept: text/event-stream, application/json` e gli header configurati, **nessun `Origin`** (provato con la `fetch` di Node 22: `Host: localhost:<porta>`, niente `Origin`). Parla la versione con `initialize` e senza `_meta`; ripiega su SSE solo se la prima POST riceve un 4xx (SAT risponde 200); la GET per le notifiche riceve 405 e VS Code le disattiva soltanto. Quindi il server di SAT lo accetta.
+- Cursor (fork chiuso di VS Code) e la prova a mano con VS Code restano da fare al maintainer prima del lancio: l'analisi del sorgente toglie il rischio dell'`Origin`, non sostituisce la prova.
 
 ### Scelte durante la fase
 
