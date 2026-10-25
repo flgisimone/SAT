@@ -1,0 +1,50 @@
+<!doctype html>
+<!-- A page with known issues, one per section, each next to a similar pattern that is valid.
+     On purpose: no lang on <html>, no meta description, no canonical. The issues SAT reports are listed in examples/page/expected.json. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example Shop</title>
+  <meta property="og:title" content="Example Shop">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://shop.example/cover.png">
+  <meta property="og:url" content="https://shop.example/">
+  <meta name="twitter:card" content="summary_large_image">
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; background: #fff; }
+    .muted { color: #595959; }
+    .faint { color: #b8b8b8; }
+  </style>
+</head>
+<body>
+  <header><p>Example Shop</p></header>
+  <main>
+    <h1>Example Shop</h1>
+    <p>Every section below has one issue on purpose, next to a similar pattern that is valid.</p>
+
+    <h2>Images</h2>
+    <img id="photo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80'%3E%3Crect width='120' height='80' fill='%2399c'/%3E%3C/svg%3E" width="120" height="80">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80'%3E%3Crect width='120' height='80' fill='%23c99'/%3E%3C/svg%3E" alt="Red mug" width="120" height="80">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='4'%3E%3Crect width='120' height='4' fill='%23ccc'/%3E%3C/svg%3E" alt="" width="120" height="4">
+
+    <h2>Shipping</h2>
+    <h4 id="returns">Returns</h4>
+    <p>Returns are free within 30 days.</p>
+    <h3>Exchanges</h3>
+    <p>Exchanges are free too.</p>
+
+    <h2>Newsletter</h2>
+    <form>
+      <p><label for="name">Name</label> <input id="name" type="text" autocomplete="name"></p>
+      <p><input id="email" type="email" placeholder="Email" autocomplete="email"></p>
+      <p><button type="submit">Subscribe</button></p>
+    </form>
+
+    <h2>Terms</h2>
+    <p class="muted">Prices include VAT.</p>
+    <p class="faint" id="fine-print">Offers end on Sunday.</p>
+    <p>Read the <a href="/terms">terms of sale</a>. For returns, <a id="click-here" href="/returns">click here</a>.</p>
+  </main>
+</body>
+</html>

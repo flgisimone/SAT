@@ -1,0 +1,39 @@
+name: Bug
+description: SAT crashes, shows something wrong or doesn't start
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: SAT version
+      placeholder: "1.18.0"
+    validations:
+      required: true
+  - type: input
+    id: setup
+    attributes:
+      label: How you run SAT
+      description: Framework and entry point, e.g. React 19 with useSATChecker, Vite plugin, sat-check, browser extension. Browser and Node version if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: page
+    attributes:
+      label: Page or minimal HTML
+      description: A public URL, or the smallest HTML that shows the problem.
+      render: html
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: Messages, console errors, screenshots.
+    validations:
+      required: true

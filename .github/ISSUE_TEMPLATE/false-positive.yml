@@ -1,0 +1,40 @@
+name: False positive
+description: SAT reports markup that is valid
+labels: [false positive]
+body:
+  - type: input
+    id: rule
+    attributes:
+      label: Rule
+      description: The rule id, as in the panel link or in `ruleId`.
+      placeholder: "heading-levels"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: SAT version
+      placeholder: "1.18.0"
+    validations:
+      required: true
+  - type: textarea
+    id: html
+    attributes:
+      label: Minimal HTML
+      description: The smallest markup SAT reports.
+      render: html
+    validations:
+      required: true
+  - type: textarea
+    id: message
+    attributes:
+      label: SAT's message
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source that calls it valid
+      description: A link to WCAG, an ACT rule, WAI-ARIA, the HTML standard or Google's documentation, with the relevant passage.
+    validations:
+      required: true

@@ -26,6 +26,8 @@ Detects common issues in heading usage (`<h1>`-`<h6>`), ARIA roles, contrast, la
 npm install seo-accessibility-tool
 ```
 
+To try it first, the [examples](examples/) are small projects (Vite plugin, React, Vue, CLI) on the same page with known issues.
+
 ---
 
 ## ⚛️ React Integration
@@ -357,14 +359,39 @@ jobs:
 
 ---
 
+## 🚧 What SAT does not do
+
+- **It doesn't certify WCAG conformance.** Automated checks find a part of the WCAG failures. The rest needs a person: keyboard use, screen readers (NVDA, JAWS, VoiceOver), zoom and reflow, whether alt texts, labels and captions make sense. No errors in SAT means no errors SAT can detect.
+- **It doesn't guarantee a position on Google.** The SEO rules check technical requirements from Google Search Central (title, description, canonical, hreflang, structured data); they don't judge content, links from other sites or ranking.
+- **In the page it runs in development only.** The panel starts when `NODE_ENV` is `"development"` (or with `enabled: true`), and the Vite plugin adds it to `vite dev` only: SAT is not meant for production pages.
+- **Broken links are complete only in the CLI.** The in-page `link-broken` rule is off by default and sends HEAD requests, which can't see the 404 view of a single-page app; `sat-check --depth` opens every link in Chromium.
+- **What it doesn't see:**
+  - the documents inside `<iframe>` elements, of any origin (SAT checks the frame's name, not its content), and the shadow roots of web components;
+  - what is drawn in a `<canvas>`;
+  - the contrast of text over a background image or a gradient: it isn't reported, because the background color can't be known;
+  - states that appear only after an interaction, such as open menus, dialogs, hover and focus styles: SAT checks the page as it is when it runs. Open the state and run the checks again, or use `observeDom`.
+
+**Optional features**, each off until you add it:
+
+| Feature | Needs |
+|---|---|
+| [axe-core engine](#-axe-core-engine-optional) | `npm install -D axe-core` (4.10 or later); adds about 550 KB and makes a run slower |
+| [Fix with AI](#-fix-with-ai) | The Vite plugin with `ai: true`, [Claude Code](https://code.claude.com) installed and signed in; Claude Code sends the prompt, which quotes the page, to the model |
+| [Playwright helper](#-playwright) and [CLI](#-cli-and-ci) | `@playwright/test` and Chromium (`npx playwright install chromium`), Node 20 or later |
+| [Browser extension](#-browser-extension) | Built from this repository and loaded unpacked in Chrome or Edge; it isn't on the Chrome Web Store |
+
+---
+
 ## 🛠️ Development
 
 ```bash
 npm install
 npm run verify       # type check, lint, unit tests, build
 npm run verify:e2e   # build + browser tests (Chromium)
+npm run smoke        # npm pack, then the package installed in a copy of each example
 ```
 
+- How to contribute: [CONTRIBUTING.md](CONTRIBUTING.md); security issues: [SECURITY.md](SECURITY.md)
 - Conventions: [CONVENTIONS.md](CONVENTIONS.md); agent rules: [AGENTS.md](AGENTS.md)
 - Roadmap and backlog by phase: [plan/README.md](plan/README.md)
 - Changes: [CHANGELOG.md](CHANGELOG.md)
@@ -373,7 +400,7 @@ npm run verify:e2e   # build + browser tests (Chromium)
 
 ## 📄 License
 
-MIT License © 2025 [Giulio Simone Floresta](https://github.com/flgisimone)
+[MIT License](LICENSE) © 2025–2026 [Giulio Simone Floresta](https://github.com/flgisimone)
 
 ---
 
