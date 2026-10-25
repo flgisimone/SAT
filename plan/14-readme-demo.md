@@ -2,7 +2,7 @@
 
 **Obiettivo**: chi arriva sul repository o su npm capisce in dieci secondi a cosa serve SAT e lo vede funzionare senza installare niente.
 
-> **Stato: codice completato il 25/10/2026; restano al maintainer l'attivazione di GitHub Pages e le impostazioni del repository (§4).** Fonte: roadmap di crescita del 25/10/2026, fasi 1 e 2.
+> **Stato: codice completato il 25/10/2026; demo online; restano al maintainer le impostazioni del repository (§4).** Fonte: roadmap di crescita del 25/10/2026, fasi 1 e 2.
 
 ---
 
@@ -34,7 +34,7 @@
 
 **Criteri di accettazione**
 - [x] Test in Chromium sulla demo costruita: il pannello si apre, i problemi sono quelli di `expected.json`, la barra non ne aggiunge.
-- [ ] La demo è online e il link funziona da mobile (provato dopo il push). *Provata da mobile in locale, sul sito come lo costruisce il workflow; online dopo l'attivazione di Pages (§4).*
+- [x] La demo è online e il link funziona da mobile (provato dopo il push). *Online il 25/10/2026: in Chromium da desktop (pannello aperto) e in viewport iPhone 13 (pannello chiuso), «5 errors · 3 warnings», nessun errore JavaScript; resta la prova su un telefono vero.*
 
 #### F14-03 · README riscritto — M
 **Dipendenze**: F14-01, F14-02
@@ -75,7 +75,7 @@
 
 Impostazioni del repository su GitHub, lette dall'API pubblica il 25/10/2026: descrizione «Universal Accessibility & SEO Checker», sito su npm, Pages e Discussions spente.
 
-- [ ] Settings → Pages → Build and deployment → Source: **GitHub Actions**; poi Actions → Demo → Run workflow (o un push su `develop`) e prova di https://flgisimone.github.io/SAT/ da desktop e da telefono.
+- [x] Settings → Pages → Build and deployment → Source: **GitHub Actions**; poi Actions → Demo → Run workflow (o un push su `develop`) e prova di https://flgisimone.github.io/SAT/ da desktop e da telefono.
 - [ ] Descrizione: «Catch accessibility and SEO issues before your users do. A visual a11y and SEO debugger for your dev server, Playwright and CI.»
 - [ ] Sito: https://flgisimone.github.io/SAT/
 - [ ] Topic: `accessibility`, `a11y`, `wcag`, `aria`, `seo`, `devtools`, `vite-plugin`, `playwright`, `react`, `vue`, `svelte`, `ci`.
