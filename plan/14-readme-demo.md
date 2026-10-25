@@ -34,7 +34,7 @@
 
 **Criteri di accettazione**
 - [x] Test in Chromium sulla demo costruita: il pannello si apre, i problemi sono quelli di `expected.json`, la barra non ne aggiunge.
-- [x] La demo è online e il link funziona da mobile (provato dopo il push). *Online il 25/10/2026: in Chromium da desktop (pannello aperto) e in viewport iPhone 13 (pannello chiuso), «5 errors · 3 warnings», nessun errore JavaScript; resta la prova su un telefono vero.*
+- [x] La demo è online e il link funziona da mobile (provato dopo il push). *Online il 25/10/2026: in Chromium da desktop (pannello aperto) e in viewport iPhone 13 (pannello chiuso), «5 errors · 3 warnings», nessun errore JavaScript; provata anche su un telefono dal maintainer il 25/10/2026.*
 
 #### F14-03 · README riscritto — M
 **Dipendenze**: F14-01, F14-02

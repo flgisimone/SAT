@@ -21,7 +21,7 @@
 **Criteri di accettazione**
 - [x] `rm -rf node_modules && npm ci` passa senza flag.
 - [x] `npm run verify` passa e `rollup -c rollup.dts.config.cjs` genera le dichiarazioni come prima.
-- [ ] Il job `verify` di `.github/workflows/ci.yml` è verde.
+- [x] Il job `verify` di `.github/workflows/ci.yml` è verde. *Verde il 25/10/2026 (esecuzione 40204553840, `aaede61`).*
 
 #### F7-02 · Azioni GitHub su Node 24 — S
 **Dipendenze**: —
@@ -30,5 +30,5 @@
 - `ubuntu-latest` passa a Ubuntu 26 dal 19/10/2026: controllare che `npx playwright install --with-deps chromium` funzioni ancora sul runner nuovo.
 
 **Criteri di accettazione**
-- [ ] La CI non stampa più l'avviso su Node 20.
+- [x] La CI non stampa più l'avviso su Node 20. *Nessun avviso il 25/10/2026 con `checkout@v7` e `setup-node@v7`; resta solo la nota informativa sul passaggio di `ubuntu-latest` a Ubuntu 26.*
 - [x] Il workflow di esempio del README usa le stesse versioni.

@@ -80,7 +80,7 @@
 - `SECURITY.md`: come segnalare un problema, soprattutto sull'endpoint di Fix with AI.
 
 **Criteri di accettazione**
-- [ ] I template compaiono su GitHub alla creazione di una issue (provato dopo il push).
+- [x] I template compaiono su GitHub alla creazione di una issue (provato dopo il push). *Verificato dal maintainer il 25/10/2026.*
 
 #### F13-07 · Rilascio 1.18.0 — S
 **Dipendenze**: F13-01 … F13-06
