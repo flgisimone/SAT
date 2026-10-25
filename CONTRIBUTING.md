@@ -38,3 +38,24 @@ The details (severity, messages, the host page, the public API) are in [CONVENTI
 3. Run `npm run verify` and `npm run verify:e2e`, then open a pull request against `develop`.
 
 Releases to npm are made by the maintainer.
+
+## Triage
+
+Every issue gets one label; the issue templates set the first three.
+
+| Label | For |
+|---|---|
+| `bug` | SAT crashes, shows something wrong or doesn't start |
+| `false-positive` | SAT reports markup that its source calls valid |
+| `new-rule` | A check SAT doesn't have |
+| `documentation` | A guide, the README or a rule page is wrong, missing or unclear |
+| `good first issue` | Small and well described, with the files to change: added by the maintainer |
+
+Issues are handled in this order:
+
+1. **Installation blocked**: SAT doesn't install, the panel doesn't appear, `sat-check` doesn't start.
+2. **Unclear results**: a message, a box or a report that doesn't say what is wrong or where.
+3. **False positives**: a valid pattern reported, so the fix follows the source.
+4. **Documentation**.
+5. **New rules asked for by more than one person**: a rule asked once waits for a second request, or for a pull request.
+6. **Performance**.

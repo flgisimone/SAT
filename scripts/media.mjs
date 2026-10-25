@@ -2,11 +2,13 @@
 // Screenshots of the panel in both themes, the social image (1280×640) and a GIF of SAT at work,
 // in docs/images/; sat-check's JSON and HTML reports in docs/guides/reports/.
 // Needs the build (dist/) and, for the GIF, ffmpeg in the PATH.
+// `npm run media -- --video <file.webm>` also keeps the recording, for the launch videos (plan/lancio/video.md).
 import { spawn, spawnSync } from 'node:child_process';
 import { createServer } from 'node:http';
-import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { parseArgs } from 'node:util';
 import { chromium } from '@playwright/test';
 
 const ROOT = new URL('../', import.meta.url);
@@ -15,6 +17,7 @@ const IMAGES = new URL('docs/images/', ROOT).pathname;
 const ORIGIN = 'http://shop.example';
 const OPTIONS = JSON.parse(readFileSync(new URL('examples/page/expected.json', ROOT), 'utf8')).options;
 const MAX_GIF = 5 * 1024 * 1024;
+const { video: KEEP_VIDEO } = parseArgs({ options: { video: { type: 'string' } } }).values;
 
 // The page as an app in development would have it: SAT imported, not started yet.
 // Its content moves to the right, so the panel (on the left) doesn't cover it.
@@ -107,6 +110,10 @@ await click(page, page.getByRole('button', { name: /^Structure/ }), 2200);
 const video = await page.video().path();
 await context.close();
 await browser.close();
+if (KEEP_VIDEO) {
+    copyFileSync(video, KEEP_VIDEO);
+    console.log(`Recording saved as ${KEEP_VIDEO}`);
+}
 
 const gif = join(IMAGES, 'sat.gif');
 if (spawnSync('ffmpeg', ['-version']).error) {

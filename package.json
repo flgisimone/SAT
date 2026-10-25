@@ -94,7 +94,8 @@
     "verify:e2e": "rollup -c --silent && playwright test --reporter=dot",
     "usage": "node scripts/token-usage.mjs",
     "smoke": "rollup -c --silent && rollup -c rollup.dts.config.cjs --silent && node scripts/smoke.mjs",
-    "media": "rollup -c --silent && node scripts/media.mjs"
+    "media": "rollup -c --silent && node scripts/media.mjs",
+    "stats": "node scripts/stats.mjs"
   },
   "peerDependencies": {
     "@playwright/test": ">=1.40.0",
