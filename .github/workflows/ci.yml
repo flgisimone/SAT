@@ -29,6 +29,8 @@ jobs:
         with:
           node-version: 20
           cache: npm
+      # npm 10, bundled with Node 20, fails on `npm install vite@8` (optional peer dependencies of Vite).
+      - run: npm install -g npm@11
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run smoke
