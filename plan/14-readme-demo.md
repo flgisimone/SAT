@@ -2,7 +2,7 @@
 
 **Obiettivo**: chi arriva sul repository o su npm capisce in dieci secondi a cosa serve SAT e lo vede funzionare senza installare niente.
 
-> **Stato: codice completato il 25/10/2026; completata il 25/10/2026: demo online, impostazioni del repository fatte dal maintainer e verificate dall'API pubblica (§4).** Fonte: roadmap di crescita del 25/10/2026, fasi 1 e 2.
+> **Stato: completata il 25/10/2026: demo online, impostazioni del repository fatte dal maintainer e verificate dall'API pubblica (§4).** Fonte: roadmap di crescita del 25/10/2026, fasi 1 e 2.
 
 ---
 
