@@ -20,6 +20,14 @@ The first version on npm after 1.6.0: npm goes from 1.6.0 to 1.18.0. Versions 1.
 - README rewritten: quick start with the Vite plugin, a GIF of the panel, a table of the integrations. A [live demo](https://flgisimone.github.io/SAT/) on GitHub Pages, which is now the package's `homepage`.
 - `CONTRIBUTING.md`, `SECURITY.md`, issue templates (bug, false positive, new rule) and a pull request template.
 - `npm run smoke` and a CI job: the package made by `npm pack` is installed in a copy of each example and tried there, on Node 22.
+- Guides in [`docs/guides/`](docs/guides/): [CI](docs/guides/ci.md), [configuration](docs/guides/configuration.md), [single-page apps](docs/guides/spa.md), [troubleshooting](docs/guides/troubleshooting.md), with example JSON and HTML reports.
+- `examples/vite-vanilla` is a template (`npx degit flgisimone/SAT/examples/vite-vanilla my-site`): one `sat.config.json` for the panel and `sat-check`, `npm run check` on the build, a GitHub Actions workflow.
+
+### Fixed
+- `sat-check` checks pages with a strict Content Security Policy: it used to stop with "page.addScriptTag: Executing inline script violates the following Content Security Policy directive".
+- `sat-check --config`: `"axe": true` in the file runs axe-core; it was ignored unless `--axe` was given too.
+- `checkPage(page, { axe: true })` and `sat-check --axe` without axe-core say "axe-core is not installed: npm install -D axe-core" instead of "Cannot find module 'axe-core/axe.min.js'".
+- README: the Vite plugin doesn't add SAT in SvelteKit, which renders its pages without Vite's `index.html`; the README now starts SAT from the root layout there.
 
 ### Changed
 - `package.json`: `engines.node` is `>=22`, the oldest Node still supported (Node 20 reached its end of life in April 2026), a description of what SAT does, revised keywords, repository and homepage URLs; `CHANGELOG.md` is part of the package.

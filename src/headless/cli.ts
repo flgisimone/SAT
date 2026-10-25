@@ -70,7 +70,8 @@ function readArgs(argv: string[]) {
         html: values.html,
         options: {
             ...(values.config ? JSON.parse(readFileSync(values.config, 'utf8')) : {}),
-            axe: values.axe,
+            // A flag adds to the config file, it doesn't unset what the file says.
+            ...(values.axe && { axe: true }),
             ...(wcagLevel && { wcagLevel }),
         } as CheckPageOptions,
         depth: count(values.depth, 'depth', 0),
@@ -183,7 +184,8 @@ async function main(argv: string[]): Promise<number> {
     const browser = await playwright.chromium.launch();
     let pages: PageReport[];
     try {
-        pages = await crawl(await browser.newPage(), args, helper.checkPage);
+        // SAT is added to the page as an inline script: a strict Content Security Policy would block it.
+        pages = await crawl(await browser.newPage({ bypassCSP: true }), args, helper.checkPage);
     } finally {
         await browser.close();
     }

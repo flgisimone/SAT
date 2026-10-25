@@ -1,0 +1,23 @@
+# SAT in CI: builds the site, serves it with `vite preview` and checks it with sat-check.
+# The job fails above the limits (by default: any error) and keeps the reports as an artifact.
+name: SAT
+on: [push, pull_request]
+jobs:
+  sat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+      - run: npm install
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm run preview &
+      - run: curl -s --retry 10 --retry-connrefused -o /dev/null http://localhost:4173/
+      - run: npm run check
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: sat-report
+          path: sat-report.*

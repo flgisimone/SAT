@@ -1,7 +1,9 @@
-// npm run media: the README images, made again from the page with known issues (examples/page).
+// npm run media: the README images and the example reports, made again from the page with known issues (examples/page).
 // Screenshots of the panel in both themes, the social image (1280×640) and a GIF of SAT at work,
-// in docs/images/. Needs the build (dist/) and, for the GIF, ffmpeg in the PATH.
-import { spawnSync } from 'node:child_process';
+// in docs/images/; sat-check's JSON and HTML reports in docs/guides/reports/.
+// Needs the build (dist/) and, for the GIF, ffmpeg in the PATH.
+import { spawn, spawnSync } from 'node:child_process';
+import { createServer } from 'node:http';
 import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -64,6 +66,19 @@ async function showPanel(page, pause) {
     await click(page, issue(page, 'Images have alternative text'), pause);
 }
 
+// The reports of the CI guide: sat-check on the page served at the URL of examples/vite-vanilla's `npm run preview`.
+{
+    const page = readFileSync(new URL('examples/page/index.html', ROOT));
+    const server = createServer((request, response) => response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }).end(page));
+    await new Promise((resolve) => server.listen(4173, 'localhost', resolve));
+    const reports = new URL('docs/guides/reports/', ROOT).pathname;
+    const cli = spawn('node', [new URL('cli.js', DIST).pathname, 'http://localhost:4173/', '--config', new URL('examples/cli/sat.config.json', ROOT).pathname,
+        '--json', join(reports, 'sat-report.json'), '--html', join(reports, 'sat-report.html')], { stdio: 'ignore' });
+    const code = await new Promise((resolve) => cli.on('close', resolve));
+    server.close();
+    if (code !== 1) throw new Error(`sat-check exited with ${code}, expected 1 (the page has errors on purpose)`);
+}
+
 const browser = await chromium.launch();
 
 for (const colorScheme of ['light', 'dark']) {
@@ -104,7 +119,7 @@ if (spawnSync('ffmpeg', ['-version']).error) {
     rmSync(videos, { recursive: true });
     if (run.status !== 0) process.exit(1);
     const bytes = statSync(gif).size;
-    console.log(`docs/images/: panel-light.png, panel-dark.png, social.png, sat.gif (${(bytes / 1024 / 1024).toFixed(1)} MB)`);
+    console.log(`docs/images/: panel-light.png, panel-dark.png, social.png, sat.gif (${(bytes / 1024 / 1024).toFixed(1)} MB); docs/guides/reports/: sat-report.json, sat-report.html`);
     if (bytes > MAX_GIF) {
         console.error('sat.gif is over 5 MB: shorten the recording or lower fps/scale in scripts/media.mjs.');
         process.exit(1);

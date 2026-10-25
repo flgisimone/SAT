@@ -20,7 +20,7 @@ npm install -D seo-accessibility-tool
 
 ## Quick start
 
-With Vite (Svelte, SvelteKit, Solid, Preact, Vue, React, vanilla):
+With Vite (Svelte, Solid, Preact, Vue, React, vanilla; for SvelteKit see [below](#svelte-and-angular)):
 
 1. Install the package (above).
 2. Add the plugin:
@@ -39,7 +39,14 @@ With Vite (Svelte, SvelteKit, Solid, Preact, Vue, React, vanilla):
 
 You see the SAT dock in a corner of the page. Press play: boxes appear on the elements with issues (red for errors, amber for warnings), and the counts button opens the panel with the issues by rule, each with its WCAG criterion or source. Click an issue to jump to its element. SAT is only in `vite dev`: `vite build` doesn't include it.
 
-The [examples](examples/) are small projects (Vite plugin, React, Vue, CLI) on the same page with known issues.
+The [examples](examples/) are small projects (Vite plugin, React, Vue, CLI) on the same page with known issues. To start from one, with `sat-check` and a CI workflow already set up: `npx degit flgisimone/SAT/examples/vite-vanilla my-site`.
+
+## Guides
+
+- [SAT in CI](docs/guides/ci.md): GitHub Actions and GitLab CI, limits, reports, the link crawler, a project with many issues.
+- [Configuration](docs/guides/configuration.md): where the options go, severity per rule, WCAG level, axe-core, one config for the panel and the CLI.
+- [Single-page apps](docs/guides/spa.md): route changes, content loaded later, broken links, what SAT doesn't see.
+- [Troubleshooting](docs/guides/troubleshooting.md): the panel doesn't appear, `sat-check` doesn't run, Fix with AI, false positives.
 
 ## Use it with
 
@@ -48,7 +55,7 @@ The [examples](examples/) are small projects (Vite plugin, React, Vue, CLI) on t
 | Vite | [Plugin](#vite-plugin), no import in the app |
 | React | [`useSATChecker`](#react) |
 | Vue 3 | [`useSatChecker`](#vue-3) |
-| Svelte, Angular | [`satChecker`](#svelte-and-angular) in the entry point |
+| SvelteKit, Angular | [`satChecker`](#svelte-and-angular) in the root layout or the entry point |
 | Vanilla JS, other bundlers | [`satChecker`](#vanilla-js) |
 | Any site, without installing | [Browser extension](#browser-extension) |
 | Playwright tests | [`toHaveNoSATErrors`](#playwright) |
@@ -93,13 +100,21 @@ useSatChecker(); // in setup: SAT starts when the component is mounted, in devel
 
 ## Svelte and Angular
 
-No wrapper is needed: `satChecker` starts the panel from the app's entry point. With Vite, the plugin above is enough.
+No wrapper is needed: `satChecker` starts the panel from the app's entry point. With Svelte on Vite, the plugin above is enough.
 
-```ts
-// Svelte (or SvelteKit, in a +layout.svelte onMount)
-import { satChecker } from "seo-accessibility-tool/sat-controller";
+SvelteKit renders its pages without Vite's `index.html`, so the plugin can't add SAT there: start it from the root layout.
 
-satChecker(); // starts when NODE_ENV is "development"
+```svelte
+<!-- src/routes/+layout.svelte -->
+<script>
+  import { onMount } from "svelte";
+  import { satChecker } from "seo-accessibility-tool/sat-controller";
+
+  let { children } = $props();
+  onMount(() => satChecker()); // starts when NODE_ENV is "development"
+</script>
+
+{@render children()}
 ```
 
 ```ts
@@ -335,6 +350,8 @@ jobs:
         if: always()
         with: { name: sat-report, path: sat-report.html }
 ```
+
+More in the [CI guide](docs/guides/ci.md): GitLab CI, starting on a project with many issues, the reports.
 
 ---
 
