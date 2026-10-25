@@ -2,7 +2,7 @@
 
 **Obiettivo**: chi arriva sul repository o su npm capisce in dieci secondi a cosa serve SAT e lo vede funzionare senza installare niente.
 
-> **Stato: codice completato il 25/10/2026; demo online; restano al maintainer le impostazioni del repository (§4).** Fonte: roadmap di crescita del 25/10/2026, fasi 1 e 2.
+> **Stato: codice completato il 25/10/2026; demo online e impostazioni del repository fatte (verificate dall'API pubblica il 25/10/2026), salvo un topic da correggere (§4).** Fonte: roadmap di crescita del 25/10/2026, fasi 1 e 2.
 
 ---
 
@@ -76,8 +76,8 @@
 Impostazioni del repository su GitHub, lette dall'API pubblica il 25/10/2026: descrizione «Universal Accessibility & SEO Checker», sito su npm, Pages e Discussions spente.
 
 - [x] Settings → Pages → Build and deployment → Source: **GitHub Actions**; poi Actions → Demo → Run workflow (o un push su `develop`) e prova di https://flgisimone.github.io/SAT/ da desktop e da telefono.
-- [ ] Descrizione: «Catch accessibility and SEO issues before your users do. A visual a11y and SEO debugger for your dev server, Playwright and CI.»
-- [ ] Sito: https://flgisimone.github.io/SAT/
-- [ ] Topic: `accessibility`, `a11y`, `wcag`, `aria`, `seo`, `devtools`, `vite-plugin`, `playwright`, `react`, `vue`, `svelte`, `ci`.
-- [ ] Settings → General → Social preview: `docs/images/social.png` (1280×640, da `npm run media`).
-- [ ] Settings → General → Features → Discussions attive, con una categoria «Feedback»; Settings → Code security → Private vulnerability reporting (da F13).
+- [x] Descrizione: «Catch accessibility and SEO issues before your users do. A visual a11y and SEO debugger for your dev server, Playwright and CI.»
+- [x] Sito: https://flgisimone.github.io/SAT/
+- [ ] Topic: `accessibility`, `a11y`, `wcag`, `aria`, `seo`, `devtools`, `vite-plugin`, `playwright`, `react`, `vue`, `svelte`, `ci`. *Il 25/10/2026 risulta `svelt` al posto di `svelte`: da correggere.*
+- [x] Settings → General → Social preview: `docs/images/social.png` (1280×640, da `npm run media`).
+- [x] Settings → General → Features → Discussions attive, con una categoria «Feedback»; Settings → Code security → Private vulnerability reporting (da F13).
