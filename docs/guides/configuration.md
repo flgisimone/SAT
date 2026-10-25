@@ -6,7 +6,7 @@ The same options work in every integration: which rules run and how severe their
 
 | Integration | Options | What it takes |
 |---|---|---|
-| Vite plugin | `sat(options)` in `vite.config` | The options that fit in JSON, `axe: true`, `ai: true` |
+| Vite plugin | `sat(options)` in `vite.config` | The options that fit in JSON, `axe`, `ai: true`, `mcp: true` |
 | React | `useSATChecker(options)` | All the options |
 | Vue 3 | `useSatChecker(options)` | All the options |
 | Svelte, Angular, vanilla JS | `satChecker(options)` | All the options |
@@ -68,7 +68,8 @@ npm install -D axe-core
 
 | Integration | How |
 |---|---|
-| Vite plugin, Playwright, CLI config | `axe: true` |
+| Vite plugin | on by itself when `axe-core` is installed in the project; `axe: false` turns it off |
+| Playwright, CLI config | `axe: true` |
 | CLI | `--axe` |
 | React, Vue, `satChecker` | `engines: [axe()]`, with `import { axe } from "seo-accessibility-tool/axe"` |
 
@@ -82,7 +83,8 @@ satChecker({ engines: [axe({ runOnly: ["wcag2a", "wcag2aa"] })] });
 - axe's issues are named `axe/<rule>`, e.g. `axe/image-alt`; critical and serious ones are errors, the others warnings.
 - The SAT rules axe covers are off while it runs, so a problem is reported once. Setting one in `rules` turns it back on.
 - `rules` sets axe rules too: `{ "axe/region": "off" }`.
-- `axe(options)` takes axe's run options; it is the only way to pass them, so `axe: true` runs axe with its defaults.
+- `axe(options)` takes axe's run options; it is the only way to pass them, so `axe: true` and the Vite plugin run axe with its defaults.
+- The Vite plugin checks whether `axe-core` resolves from the project root when the dev server starts, and prints "SAT: axe-core found, running it as an engine". The other integrations don't, because without a bundler that checks it an import of a missing package breaks the page.
 - axe adds about 550 KB (150 KB gzipped) and makes a run slower: 0.1–1.5 s instead of 5–50 ms on real pages.
 
 ## One config for the panel and the CLI
@@ -119,7 +121,9 @@ import satConfig from "./sat.config.json" with { type: "json" };
 sat(satConfig as SATViteOptions);
 ```
 
-The file can hold `rules`, `wcagLevel`, `allowedLinkTexts` and `axe`. `--axe` and `--wcag-level` on the command line take precedence over it.
+The file can hold `rules`, `wcagLevel`, `allowedLinkTexts` and `axe`. `--axe` and `--wcag-level` on the command line take precedence over it. With `axe-core` installed the plugin runs it and `sat-check` doesn't, unless the file has `"axe": true` or the command `--axe`: the panel then shows axe's issues in place of the SAT rules they cover.
+
+Options for the plugin only, such as `mcp`, go next to the file's: `sat({ ...satConfig, mcp: true })`.
 
 ## Options of the panel only
 
@@ -140,5 +144,6 @@ The Vite plugin sets `enabled` itself (SAT is in `vite dev` only) and takes `obs
 | `engines` | `Engine[]`, e.g. `[axe()]` | `[]` |
 | `enabled` | `boolean` | `NODE_ENV === "development"` |
 | `observeDom` | `number` (ms) | off |
-| `axe` | `boolean`: Vite plugin, Playwright, CLI config | `false` |
-| `ai` | `boolean`: Vite plugin, [Fix with AI](../../README.md#fix-with-ai) | `false` |
+| `axe` | `boolean`: Vite plugin, Playwright, CLI config | Vite plugin: `true` when `axe-core` is installed; otherwise `false` |
+| `ai` | `boolean`: Vite plugin, [Fix with AI](../../README.md#fix-with-ai-claude-code-one-click) | `false` |
+| `mcp` | `boolean`: Vite plugin, [MCP server](ai-agents.md) for AI agents | `false` |

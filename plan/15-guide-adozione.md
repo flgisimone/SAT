@@ -2,7 +2,7 @@
 
 **Obiettivo**: chi ha provato SAT lo mette nel proprio lavoro quotidiano: lo configura, capisce i risultati, lo porta in CI e sa cosa fare quando qualcosa non va.
 
-> **Stato: completata (25/10/2026).** Guide in `docs/guides/`, template `examples/vite-vanilla`; tre difetti della CLI corretti strada facendo (§3). Il template si installa da npm solo dopo la pubblicazione della 1.18.0. Fonte: roadmap di crescita del 25/10/2026, fase 6.
+> **Stato: completata (25/10/2026).** Guide in `docs/guides/`, template `examples/vite-vanilla`; tre difetti della CLI corretti strada facendo (§3). Il template si installa da npm solo dopo la pubblicazione della 1.19.0 (F17; la 1.18.0 non si pubblica). Fonte: roadmap di crescita del 25/10/2026, fase 6.
 
 ---
 
@@ -50,7 +50,7 @@
 - `examples/vite-vanilla` usabile come punto di partenza: istruzioni con `npx degit flgisimone/SAT/examples/vite-vanilla`, già con plugin, script per `sat-check` e workflow di CI.
 
 **Criteri di accettazione**
-- [ ] Il comando `degit` funziona su `develop` dopo il push e l'esempio parte senza modifiche. *Provato il 25/10/2026: `degit` copia la cartella con `.github/workflows/sat.yml`; con il tarball di `npm pack` l'esempio fa `build`, `preview` e `check` senza modifiche (5 errori, 3 avvisi). `npm install` da npm fallisce (`ETARGET`, `^1.18.0` non pubblicata): si segna dopo la pubblicazione.*
+- [ ] Il comando `degit` funziona su `develop` dopo il push e l'esempio parte senza modifiche. *Provato il 25/10/2026: `degit` copia la cartella con `.github/workflows/sat.yml`; con il tarball di `npm pack` l'esempio fa `build`, `preview` e `check` senza modifiche (5 errori, 3 avvisi). `npm install` da npm fallisce (`ETARGET`, `^1.18.0` non pubblicata): si segna dopo la pubblicazione della 1.19.0, a cui l'esempio ora rimanda (F17).*
 
 ## 3. Note
 

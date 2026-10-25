@@ -1,8 +1,8 @@
 # Changelog
 
-## 1.18.0 — 2026-10-25
+## 1.19.0 — 2026-10-25
 
-The first version on npm after 1.6.0: npm goes from 1.6.0 to 1.18.0. Versions 1.7.0 to 1.17.0, below, were never published on their own; all their changes are in 1.18.0. This version adds no changes to the rules, the panel or the API: the package is now checked as npm installs it.
+The first version on npm after 1.6.0: npm goes from 1.6.0 to 1.19.0. Versions 1.7.0 to 1.18.0, below, were never published on their own; all their changes are in 1.19.0. This version gives the issues of the page in `vite dev` to any AI agent through MCP, and runs axe-core in the Vite plugin when it is installed.
 
 ### Upgrading from 1.6.0
 
@@ -10,8 +10,23 @@ The first version on npm after 1.6.0: npm goes from 1.6.0 to 1.18.0. Versions 1.
 - **Results and options.** `seoAccessibilityTool()` returns `issues` with `ruleId`, `severity`, `category`, `message`, `selector`, `help`, `title` and the WCAG criteria or source (1.8.0, 1.16.0). The `rules` option replaces the `enableCheck*` flags, and `issues` replaces `errorMessages`/`warningMessages`: the old names still work in 1.x but are deprecated. New options: `wcagLevel`, `observeDom`, `enabled`, `engines`.
 - **The page is never changed.** Highlights are drawn on SAT's own layer instead of styles and `title` on the elements, and `satReset` does nothing (1.9.0). The broken-links check is off by default (1.7.0).
 - **New panel** in a Shadow DOM, light and dark: counters that filter, issues by rule with their source, the heading map, single-page app routes, Copy fix prompt (1.9.0, 1.16.0, 1.17.0).
-- **New entry points**: `seo-accessibility-tool/vite` (plugin, with opt-in Fix with AI), `/axe` (axe-core engine), `/playwright` (`checkPage`, `toHaveNoSATErrors`), the `sat-check` command for CI, and a browser extension built from the repository (1.10.0–1.12.0, 1.17.0).
+- **New entry points**: `seo-accessibility-tool/vite` (plugin, with opt-in Fix with AI and MCP server, axe-core on when installed), `/axe` (axe-core engine), `/playwright` (`checkPage`, `toHaveNoSATErrors`), the `sat-check` command for CI, and a browser extension built from the repository (1.10.0–1.12.0, 1.17.0).
+- **AI agents.** With `sat({ mcp: true })` any agent that speaks MCP reads the issues of the open pages and checks them again (1.19.0); Copy fix prompt works everywhere, Fix with AI runs Claude Code from the panel (1.17.0).
 - **Dependencies.** React, Vue, Vite, axe-core and `@playwright/test` are optional peer dependencies: install only the ones you use (1.7.0).
+
+### Added
+- MCP server in the Vite plugin: with `sat({ mcp: true })` the dev server answers `POST /__sat/mcp` (Streamable HTTP, JSON responses; MCP 2026-07-28 and the earlier versions with `initialize`). Tools: `sat_issues` returns the issues of the pages open in the browser, as the fix prompt and as a list (rule, severity, selector, component file, documentation link); `sat_recheck` makes the open pages run the checks again and returns what is left. Only connections from this computer, with a `localhost` host name and no foreign `Origin`. Off by default. Configurations for Claude Code, Cursor, VS Code, Codex CLI, Gemini CLI, Windsurf and Zed in the README and in the new [AI agents guide](docs/guides/ai-agents.md).
+- With `mcp: true` the pages send their results to `POST /__sat/results` after every run (same protection as Fix with AI); `vite dev` prints the MCP endpoint and the command for Claude Code.
+
+### Changed
+- Vite plugin: `axe` defaults to `true` when `axe-core` resolves from the project root, and Vite prints "SAT: axe-core found, running it as an engine"; `axe: false` turns it off. Without `axe-core` nothing changes. The other integrations still need `engines: [axe()]`.
+- The endpoints of Fix with AI refuse with "SAT accepts requests from this computer only." and "…from the dev server's pages only." instead of "Fix with AI accepts…".
+- README rewritten around the panel in `vite dev` and the AI agents; Playwright, the CLI and the extension are under **Also**. `examples/vite-vanilla` installs `axe-core` and turns on `mcp`.
+
+## 1.18.0 — 2026-10-25, published on npm in 1.19.0
+
+The package checked as npm installs it. This version adds no changes to the rules, the panel or the API.
+
 
 ### Added
 - `LICENSE` file (MIT), now part of the package.
@@ -32,7 +47,7 @@ The first version on npm after 1.6.0: npm goes from 1.6.0 to 1.18.0. Versions 1.
 ### Changed
 - `package.json`: `engines.node` is `>=22`, the oldest Node still supported (Node 20 reached its end of life in April 2026), a description of what SAT does, revised keywords, repository and homepage URLs; `CHANGELOG.md` is part of the package.
 
-## 1.17.0 — 2026-10-25, published on npm in 1.18.0
+## 1.17.0 — 2026-10-25, published on npm in 1.19.0
 
 Fix with AI: the panel copies a ready prompt for an AI coding agent, and with the Vite plugin's `ai: true` it runs Claude Code in the project, then checks that the issue is gone. Nothing changes unless you use it; the page is still never changed. No API breaks.
 
@@ -45,7 +60,7 @@ Fix with AI: the panel copies a ready prompt for an AI coding agent, and with th
 ### Changed
 - Data of the page: SAT still sends nothing anywhere. With Fix with AI turned on, Claude Code, run by the user's account, sends the prompt (which quotes the page) to the model.
 
-## 1.16.0 — 2026-10-25, published on npm in 1.18.0
+## 1.16.0 — 2026-10-25, published on npm in 1.19.0
 
 A new panel in the style of developer tools, in light and dark theme, that passes SAT's own rules and axe-core. The page is still never changed. No API breaks.
 
@@ -61,7 +76,7 @@ A new panel in the style of developer tools, in light and dark theme, that passe
 - SVG icons instead of emoji; colors from CSS tokens, dark theme from `prefers-color-scheme`; transitions and the flash of the revealed element off with `prefers-reduced-motion`.
 - The panel's checkboxes are replaced by the counters; the rule groups are no longer `<details>` to open.
 
-## 1.15.0 — 2026-10-25, published on npm in 1.18.0
+## 1.15.0 — 2026-10-25, published on npm in 1.19.0
 
 `structured-data` checks the properties Google requires for rich results, as listed on the pages of Google's structured data gallery. A missing one is an error with its path (`Product > offers > price`) and the link to Google's page. Recommended properties are not checked. To turn the rule off, set it to `"off"` in `rules`.
 
@@ -71,7 +86,7 @@ A new panel in the style of developer tools, in light and dark theme, that passe
 ### Changed
 - `structured-data`: nodes with the same `@id` are one node, also across blocks, so a node whose `@type` is on another node with its `@id` is no longer counted as an item without `@type`.
 
-## 1.14.0 — 2026-10-25, published on npm in 1.18.0
+## 1.14.0 — 2026-10-25, published on npm in 1.19.0
 
 Ten new accessibility rules from WCAG 2.2 and the W3C ACT rules, on by default. The ACT rules' own test cases are part of SAT's tests (`tests/act/`): failed cases are reported, passed and inapplicable ones are not. With the axe-core engine the new rules are off, except `target-size` (axe's rule is off by default). To turn a rule off, set it to `"off"` in `rules`.
 
@@ -95,7 +110,7 @@ Ten new accessibility rules from WCAG 2.2 and the W3C ACT rules, on by default. 
 ### Fixed
 - The panel's "How to fix" links are 24 px tall, so they pass `target-size`.
 
-## 1.13.0 — 2026-10-25, published on npm in 1.18.0
+## 1.13.0 — 2026-10-25, published on npm in 1.19.0
 
 Every rule now follows an official source (WCAG 2.2 and the W3C ACT rules, WAI-ARIA 1.2, the HTML standard, Google Search Central), cited on its page in `docs/rules/`. Requirements are errors, recommendations warnings, and what the sources call valid is no longer reported. To get a previous behavior back, set the rule's severity in `rules`.
 
@@ -113,7 +128,7 @@ Every rule now follows an official source (WCAG 2.2 and the W3C ACT rules, WAI-A
 - `link-href`: `<a>` without `href` is no longer reported (a placeholder link, valid HTML).
 - `link-target-blank`: off by default, and when on it reports only `rel="opener"`, since HTML already treats `target="_blank"` as `noopener`.
 
-## 1.12.0 — 2026-10-25, published on npm in 1.18.0
+## 1.12.0 — 2026-10-25, published on npm in 1.19.0
 
 ### Added
 - `seo-accessibility-tool/vite`: Vite plugin `sat(options)` that adds SAT to the pages of `vite dev` only, with the options from the config and `axe: true` for axe-core. The production build doesn't contain SAT. `vite` is an optional peer dependency.
@@ -123,7 +138,7 @@ Every rule now follows an official source (WCAG 2.2 and the W3C ACT rules, WAI-A
 ### Fixed
 - The panel keeps its styles on pages whose Content Security Policy blocks inline styles: they are now a constructed style sheet instead of a `<style>` element.
 
-## 1.11.0 — 2026-10-25, published on npm in 1.18.0
+## 1.11.0 — 2026-10-25, published on npm in 1.19.0
 
 ### Added
 - `runSAT(options?, document?)`: the same checks as `seoAccessibilityTool`, returning `{ issues, summary }` without DOM nodes, ready for `JSON.stringify`.
@@ -131,7 +146,7 @@ Every rule now follows an official source (WCAG 2.2 and the W3C ACT rules, WAI-A
 - `sat-check` command: checks URLs in Chromium, prints the issues, writes JSON (`--json`) and HTML (`--html`) reports and exits with 1 above `--max-errors` (default 0) or `--max-warnings`. Options from a JSON file (`--config`), axe-core with `--axe`.
 - Broken links in the CLI: `--depth` follows same-origin links (logout-like URLs excluded, at most `--max-pages`), checks those pages and reports as `link-broken` the links whose page answers 4xx/5xx, fails to load or shows the `--not-found` text, so client-side 404s of single-page apps are found.
 
-## 1.10.0 — 2026-10-25, published on npm in 1.18.0
+## 1.10.0 — 2026-10-25, published on npm in 1.19.0
 
 ### Added
 - SEO rules for indexing and sharing: `canonical`, `robots-meta`, `social-meta` (Open Graph and Twitter card) and `hreflang`.
@@ -148,7 +163,7 @@ Every rule now follows an official source (WCAG 2.2 and the W3C ACT rules, WAI-A
 ### Fixed
 - `link-href`, `accessible-name` and `form-label` no longer report elements hidden from assistive technologies (`display: none`, `visibility: hidden`, `hidden`, `aria-hidden`), such as closed menus and sticky headers.
 
-## 1.9.0 — 2026-10-25, published on npm in 1.18.0
+## 1.9.0 — 2026-10-25, published on npm in 1.19.0
 
 ### Added
 - New results panel in a Shadow DOM: issues grouped by rule with counts (groups start closed), filters by severity and category, and a **Structure** tab with the H1–H6 tree and skipped levels marked.
@@ -170,7 +185,7 @@ Every rule now follows an official source (WCAG 2.2 and the W3C ACT rules, WAI-A
 ### Performance
 - A run on a page of about 5,000 elements with 850 issues went from about 140 ms to about 55 ms (Chromium): no style writes between reads, and a linear CSS selector for each issue.
 
-## 1.8.0 — 2026-10-25, published on npm in 1.18.0
+## 1.8.0 — 2026-10-25, published on npm in 1.19.0
 
 ### Added
 - Structured results: `seoAccessibilityTool()` returns `issues`, each with `ruleId`, `severity`, `category`, `message`, WCAG criteria and, when there is one, the `element` and a unique CSS `selector`.
@@ -186,7 +201,7 @@ Every rule now follows an official source (WCAG 2.2 and the W3C ACT rules, WAI-A
 ### Deprecated
 - The `enableCheck*` options (use `rules`) and the `errorMessages`/`warningMessages` result fields (use `issues`). They keep working in 1.x.
 
-## 1.7.0 — 2026-10-25, published on npm in 1.18.0
+## 1.7.0 — 2026-10-25, published on npm in 1.19.0
 
 ### Behavior changes
 These change the number of errors and warnings you see on the same page.

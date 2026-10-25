@@ -4,6 +4,7 @@ import type { Issue } from "./issue";
 import type { SATOptions } from "./satOptions";
 import { createSATUI } from "../ui/satUI";
 import { createFixController } from "./aiFix";
+import { sendResults } from "./mcpResults";
 
 let satHasRun = false;
 
@@ -92,6 +93,7 @@ export function satChecker(customOptions: Partial<SATOptions> = {}): void {
         if (!running || id !== runId) return;
         ui.showResults(issues, headingOutline(document), performance.now() - startTime);
         fixer?.checked(issues);
+        if (customOptions.mcp) sendResults(customOptions.mcp, issues);
     };
 
     const runSoon = (delay: number) => {
@@ -125,6 +127,9 @@ export function satChecker(customOptions: Partial<SATOptions> = {}): void {
         cancel: () => fixer!.cancel(),
     });
     const fixer = customOptions.aiFix && createFixController(customOptions.aiFix, ui.showFix, run);
+
+    // An agent asked for a new check (sat_recheck): SAT turns on if it was off.
+    customOptions.mcp?.listen?.(() => (running ? run() : start()));
 
     onRouteChange(() => {
         if (!running) return;

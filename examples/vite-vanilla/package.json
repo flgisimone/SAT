@@ -10,7 +10,8 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.64.0",
-    "seo-accessibility-tool": "^1.18.0",
+    "axe-core": "^4.10.3",
+    "seo-accessibility-tool": "^1.19.0",
     "vite": "^8.3.5"
   }
 }

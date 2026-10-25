@@ -2,7 +2,7 @@
 
 **Obiettivo**: materiali pronti per far conoscere SAT a sviluppatori che possono usarlo, e un modo semplice per capire cosa funziona. Gli agenti preparano i materiali; li pubblica il maintainer.
 
-> **Stato: completata (25/10/2026), con un passo del maintainer aperto**: rifare i passi del tutorial con la 1.18.0 da npm prima di pubblicarlo (F16-02). Materiali in `plan/lancio/`; li pubblica il maintainer. Fonte: roadmap di crescita del 25/10/2026, fasi 3, 4 e 7.
+> **Stato: completata (25/10/2026), con un passo del maintainer aperto**: rifare i passi del tutorial con la 1.19.0 da npm prima di pubblicarlo (F16-02; la 1.18.0 non si pubblica e F17 ha riscritto tutorial, post e video attorno al pannello con l'IA). Materiali in `plan/lancio/`; li pubblica il maintainer. Fonte: roadmap di crescita del 25/10/2026, fasi 3, 4 e 7.
 
 ---
 

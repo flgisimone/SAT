@@ -2,7 +2,7 @@
 // each folder of examples/ and checks that the example works as its README says.
 // - the tarball has LICENSE, README.md, CHANGELOG.md and dist/ only, and every file package.json points to;
 // - no optional peer dependency gets installed where the example doesn't ask for it;
-// - examples with a "dev" script: `vite build` works, and in `vite dev` the panel shows the counts of expected.json;
+// - examples with a "dev" script: `vite build` works, and in `vite dev` the panel shows the counts of expected.json (panelWithAxe with axe-core);
 // - examples with a "check" script: `npm run check` exits with 1 and its JSON report has exactly the issues of expected.json;
 //   with a "preview" script too, `npm run preview` serves the build while the check runs, as in the example's CI workflow.
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
@@ -67,7 +67,7 @@ async function waitForServer(url, server, log) {
 
 const plural = (count, word) => `${count} ${word}${count === 1 ? '' : 's'}`;
 
-async function checkPanel(dir, browser) {
+async function checkPanel(dir, browser, withAxe) {
     const port = await freePort();
     const url = `http://127.0.0.1:${port}/`;
     const server = spawn(join(dir, 'node_modules/.bin/vite'), ['--port', String(port), '--strictPort', '--host', '127.0.0.1'], { cwd: dir });
@@ -82,7 +82,8 @@ async function checkPanel(dir, browser) {
         await page.goto(url);
         await page.locator('#sat-run-button').click({ timeout: 20_000 });
         const errorCount = expected.issues.filter((issue) => issue.severity === 'error').length;
-        const counts = `${plural(errorCount, 'error')} · ${plural(expected.issues.length - errorCount, 'warning')}`;
+        // With axe-core installed the Vite plugin runs it: its rules replace the SAT rules they cover.
+        const counts = withAxe ? expected.panelWithAxe : `${plural(errorCount, 'error')} · ${plural(expected.issues.length - errorCount, 'warning')}`;
         const results = page.locator('.results');
         await results.filter({ hasText: new RegExp(`^${counts}$`) }).waitFor({ timeout: 20_000 }).catch(async () => {
             const shown = await results.first().textContent({ timeout: 1000 }).catch(() => 'no panel');
@@ -145,7 +146,7 @@ try {
             run('npm', ['install', '--no-audit', '--no-fund', '--loglevel=error', tarball], dir);
             checkPeers(dir, own);
             if (own.scripts.build) run('npm', ['run', 'build', '--silent'], dir);
-            if (own.scripts.dev) await checkPanel(dir, browser);
+            if (own.scripts.dev) await checkPanel(dir, browser, 'axe-core' in (own.devDependencies ?? {}));
             if (own.scripts.check) await checkCli(dir, own.scripts);
             console.log(`ok   ${name}`);
         } catch (error) {

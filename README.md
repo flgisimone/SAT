@@ -1,8 +1,8 @@
 # SAT: SEO Accessibility Tool
 
-**Catch accessibility and SEO issues before your users do.**
+**Accessibility and SEO issues on the page in `vite dev`, and your AI agent fixes them.**
 
-SAT is a visual accessibility and SEO debugger for development: a panel in your dev server shows WCAG, ARIA and SEO issues on the page, next to the elements, and the same checks run in Playwright tests and in CI.
+SAT adds a panel to the pages of your Vite dev server: WCAG, WAI-ARIA and SEO issues next to the elements, each with its source. Your coding agent (Claude Code, Cursor, Copilot, Codex, Gemini CLI, Windsurf, Zed) gets the same issues through SAT's MCP server, fixes them in your source code and checks the page again.
 
 [![npm](https://img.shields.io/npm/v/seo-accessibility-tool)](https://www.npmjs.com/package/seo-accessibility-tool)
 [![License: MIT](https://img.shields.io/github/license/flgisimone/SAT)](LICENSE)
@@ -12,43 +12,84 @@ SAT is a visual accessibility and SEO debugger for development: a panel in your 
 
 <img src="docs/images/sat.gif" width="800" alt="SAT on a page with known issues: the play button runs the checks, boxes appear on the elements, the panel lists the issues by rule, and clicking one flashes its element">
 
-## Install
-
-```bash
-npm install -D seo-accessibility-tool
-```
-
 ## Quick start
 
-With Vite (Svelte, Solid, Preact, Vue, React, vanilla; for SvelteKit see [below](#svelte-and-angular)):
+With Vite (Svelte, Solid, Preact, Vue, React, vanilla; for SvelteKit and other setups see [Other frameworks](#other-frameworks)):
 
-1. Install the package (above).
-2. Add the plugin:
+```bash
+npm install -D seo-accessibility-tool axe-core
+```
+
+```ts
+// vite.config.ts
+import { defineConfig } from "vite";
+import { sat } from "seo-accessibility-tool/vite";
+
+export default defineConfig({
+  plugins: [sat({ mcp: true })],
+  server: { strictPort: true }, // the MCP server's URL stays the same
+});
+```
+
+Run `npm run dev` and open the page. You see the SAT dock in a corner: press play, and boxes appear on the elements with issues (red for errors, amber for warnings); the counts button opens the panel with the issues by rule. SAT is only in `vite dev`: `vite build` doesn't include it, and your app's code doesn't import it.
+
+Then connect your agent, once (Claude Code here, the others [below](#use-it-with-your-ai-agent)):
+
+```bash
+claude mcp add --transport http sat http://localhost:5173/__sat/mcp
+```
+
+and ask it: *"Fix the SAT issues on the page."* It reads them with `sat_issues`, edits the code and calls `sat_recheck` to see what is left.
+
+`axe-core` is optional: when it is installed, the plugin runs its rules too ([below](#axe-core-engine)). The [examples](examples/) are small projects on a page with known issues; to start from one: `npx degit flgisimone/SAT/examples/vite-vanilla my-site`.
+
+## Use it with your AI agent
+
+With `sat({ mcp: true })` the dev server is an [MCP](https://modelcontextprotocol.io) server at `http://localhost:5173/__sat/mcp` (Vite prints the URL when it starts). Add it to your agent; the agent keeps your account, model and permissions.
+
+| Agent | Configuration |
+|---|---|
+| Claude Code | `claude mcp add --transport http sat http://localhost:5173/__sat/mcp`, or in `.mcp.json`: `{ "mcpServers": { "sat": { "type": "http", "url": "http://localhost:5173/__sat/mcp" } } }` |
+| Cursor | `.cursor/mcp.json`: `{ "mcpServers": { "sat": { "url": "http://localhost:5173/__sat/mcp" } } }` |
+| VS Code (Copilot) | `.vscode/mcp.json`: `{ "servers": { "sat": { "type": "http", "url": "http://localhost:5173/__sat/mcp" } } }` |
+| Codex CLI | `codex mcp add sat --url http://localhost:5173/__sat/mcp`, or in `~/.codex/config.toml`: `[mcp_servers.sat]` with `url = "http://localhost:5173/__sat/mcp"` |
+| Gemini CLI | `gemini mcp add --transport http sat http://localhost:5173/__sat/mcp`, or in `.gemini/settings.json`: `{ "mcpServers": { "sat": { "httpUrl": "http://localhost:5173/__sat/mcp" } } }` |
+| Windsurf | `~/.codeium/windsurf/mcp_config.json`: `{ "mcpServers": { "sat": { "serverUrl": "http://localhost:5173/__sat/mcp" } } }` |
+| Zed | `settings.json`: `{ "context_servers": { "sat": { "url": "http://localhost:5173/__sat/mcp" } } }` |
+
+Configurations from each agent's documentation, October 2026; tried with Claude Code. Use your dev server's port if it isn't 5173. The [AI agents guide](docs/guides/ai-agents.md) has the details.
+
+**Tools.**
+
+- `sat_issues` (`url` optional): the pages open in the browser with their issues, as a prompt to fix them in the source (rule, severity, WCAG criterion or source, selector, the element's HTML, the component file with Vue and Svelte, documentation link) and as a structured list.
+- `sat_recheck` (`url` optional): runs the checks again on the open pages and returns what is left, in 1 to 11 seconds. It turns SAT on in the page if it was off.
+
+The agent sees the pages open in the browser during this `vite dev` run: keep the page open while it works.
+
+**What goes to the model.** SAT sends nothing anywhere. With `mcp: true` your agent gets the issues and the quoted HTML of the elements and sends them to its model, as anything else it reads. The MCP server is off by default.
+
+**Safety.** The endpoint answers only connections from this computer, with a `localhost` host name (against DNS rebinding) and no foreign `Origin`. It only returns the results the pages sent and asks them to check again; it changes no files: the agent edits them with its own tools and permissions.
+
+## Fix with AI (Claude Code, one click)
+
+1. **Copy fix prompt**, everywhere: the button on an issue, or **Copy prompt for all** on a rule, copies a prompt for your coding agent, for the agents and setups without the MCP server. It has the rule, its source, the page URL and, for each issue, the message, the selector, the element's HTML and, with Vue and Svelte in development, the component file. It asks for the smallest fix in the source, and quotes the page as data, not instructions. The same prompt comes from the API:
 
    ```ts
-   // vite.config.ts
-   import { defineConfig } from "vite";
-   import { sat } from "seo-accessibility-tool/vite";
+   import { fixPrompt, seoAccessibilityTool } from "seo-accessibility-tool";
 
-   export default defineConfig({
-     plugins: [sat()],
-   });
+   const { issues } = await seoAccessibilityTool();
+   const prompt = fixPrompt(issues.filter((issue) => issue.ruleId === "image-alt"), { url: location.href });
    ```
 
-3. Run `npm run dev` and open the page.
+2. **Fix with AI** (optional, Vite plugin only): with `sat({ ai: true })` every issue gets a **Fix with AI** button that runs [Claude Code](https://code.claude.com) (`claude -p`) in your project, shows its progress and the files it changed, then checks the page again: **Fixed** or **Still present**. Requires Claude Code installed and signed in; SAT handles no API keys.
 
-You see the SAT dock in a corner of the page. Press play: boxes appear on the elements with issues (red for errors, amber for warnings), and the counts button opens the panel with the issues by rule, each with its WCAG criterion or source. Click an issue to jump to its element. SAT is only in `vite dev`: `vite build` doesn't include it.
+**What goes to the model.** SAT sends nothing anywhere. With Fix with AI on, Claude Code sends the prompt (which quotes the page) and the files it reads to the model, as when you use it directly.
 
-The [examples](examples/) are small projects (Vite plugin, React, Vue, CLI) on the same page with known issues. To start from one, with `sat-check` and a CI workflow already set up: `npx degit flgisimone/SAT/examples/vite-vanilla my-site`.
+**Safety.** The dev server answers `POST /__sat/fix` only for this computer, its own pages and a token created at every start. Claude Code gets `Read`, `Edit`, `Grep` and `Glob` only: no shell, no web, no MCP servers. SAT keeps no copies of your files: it warns about uncommitted changes, so commit first and review with `git diff`.
 
-## Guides
+---
 
-- [SAT in CI](docs/guides/ci.md): GitHub Actions and GitLab CI, limits, reports, the link crawler, a project with many issues.
-- [Configuration](docs/guides/configuration.md): where the options go, severity per rule, WCAG level, axe-core, one config for the panel and the CLI.
-- [Single-page apps](docs/guides/spa.md): route changes, content loaded later, broken links, what SAT doesn't see.
-- [Troubleshooting](docs/guides/troubleshooting.md): the panel doesn't appear, `sat-check` doesn't run, Fix with AI, false positives.
-
-## Use it with
+## Other frameworks
 
 | With | How |
 |---|---|
@@ -57,11 +98,8 @@ The [examples](examples/) are small projects (Vite plugin, React, Vue, CLI) on t
 | Vue 3 | [`useSatChecker`](#vue-3) |
 | SvelteKit, Angular | [`satChecker`](#svelte-and-angular) in the root layout or the entry point |
 | Vanilla JS, other bundlers | [`satChecker`](#vanilla-js) |
-| Any site, without installing | [Browser extension](#browser-extension) |
-| Playwright tests | [`toHaveNoSATErrors`](#playwright) |
-| CI | [`sat-check`](#cli-and-ci): JSON and HTML reports, limits, link crawler |
 
----
+The MCP server, Fix with AI and the automatic axe-core are features of the Vite plugin; with the others, **Copy fix prompt** gives your agent the same prompt.
 
 ## Vite plugin
 
@@ -71,11 +109,17 @@ import { defineConfig } from "vite";
 import { sat } from "seo-accessibility-tool/vite";
 
 export default defineConfig({
-  plugins: [sat({ rules: { "link-text": "warning" } })],
+  plugins: [sat({ mcp: true, rules: { "link-text": "warning" } })],
 });
 ```
 
-It takes the options that fit in JSON (`rules`, `wcagLevel`, `allowedLinkTexts`, `observeDom`, the 1.x flags), `axe: true` to run [axe-core](#axe-core-engine-optional) too and `ai: true` for [Fix with AI](#fix-with-ai). `vite` is an optional peer dependency (5 or later).
+It takes the options that fit in JSON (`rules`, `wcagLevel`, `allowedLinkTexts`, `observeDom`, the 1.x flags), and:
+
+- `mcp: true` for the [MCP server](#use-it-with-your-ai-agent);
+- `ai: true` for [Fix with AI](#fix-with-ai-claude-code-one-click);
+- `axe`: [axe-core](#axe-core-engine) runs when the package is installed in the project; `axe: false` turns it off.
+
+`vite` is an optional peer dependency (5 or later).
 
 ## React
 
@@ -136,17 +180,6 @@ satChecker(); // starts when process.env.NODE_ENV is "development" (Vite, webpac
 satChecker({ enabled: true }); // or always, without a bundler
 ```
 
-## Browser extension
-
-Checks any page, a public site included, without installing SAT in a project. Build it and load it unpacked in Chrome or Edge:
-
-```bash
-npm install && npm run build
-# chrome://extensions → Developer mode → Load unpacked → dist/extension
-```
-
-A click on the SAT button in the toolbar adds the panel to the open tab. The extension asks only for `activeTab` and `scripting`: it reads a tab only after its button is clicked there, and nothing leaves the browser. It works on pages with a strict Content Security Policy too.
-
 ---
 
 ## The panel
@@ -163,23 +196,6 @@ A click on the SAT button in the toolbar adds the panel to the open tab. The ext
 - **Boxes** over the page: red for errors, amber dashed for warnings; point at one for its issues. They are drawn on SAT's own layer: your page's elements, styles and attributes are never changed, and the panel's Shadow DOM keeps its CSS and yours apart.
 - **Single-page apps**: a route change (`pushState`, `replaceState`, back/forward) runs the checks again; `observeDom` reruns them on any DOM change.
 - Light and dark theme from the system, keyboard navigation (Escape closes the panel), no animations with `prefers-reduced-motion`. The panel passes SAT's own rules and axe-core in both themes.
-
-## Fix with AI
-
-1. **Copy fix prompt**, everywhere: the button on an issue, or **Copy prompt for all** on a rule, copies a prompt for your coding agent (Claude Code, Cursor, Copilot…). It has the rule, its source, the page URL and, for each issue, the message, the selector, the element's HTML and, with Vue and Svelte in development, the component file. It asks for the smallest fix in the source, and quotes the page as data, not instructions. The same prompt comes from the API:
-
-   ```ts
-   import { fixPrompt, seoAccessibilityTool } from "seo-accessibility-tool";
-
-   const { issues } = await seoAccessibilityTool();
-   const prompt = fixPrompt(issues.filter((issue) => issue.ruleId === "image-alt"), { url: location.href });
-   ```
-
-2. **Fix with AI** (optional, Vite plugin only): with `sat({ ai: true })` every issue gets a **Fix with AI** button that runs [Claude Code](https://code.claude.com) (`claude -p`) in your project, shows its progress and the files it changed, then checks the page again: **Fixed** or **Still present**. Requires Claude Code installed and signed in; SAT handles no API keys.
-
-**What goes to the model.** SAT sends nothing anywhere. With Fix with AI on, Claude Code sends the prompt (which quotes the page) and the files it reads to the model, as when you use it directly.
-
-**Safety.** The dev server answers `POST /__sat/fix` only for this computer, its own pages and a token created at every start. Claude Code gets `Read`, `Edit`, `Grep` and `Glob` only: no shell, no web, no MCP servers. SAT keeps no copies of your files: it warns about uncommitted changes, so commit first and review with `git diff`.
 
 ## Configuration
 
@@ -252,13 +268,11 @@ Each rule follows an official source, cited on its page in [`docs/rules/`](docs/
 
 The panel links each rule to its page; each issue carries its URL in `help`, the rule's name in `title` and, for rules without a WCAG criterion, its source in `source`.
 
-## axe-core engine (optional)
+## axe-core engine
 
-[axe-core](https://github.com/dequelabs/axe-core) adds about 90 accessibility rules:
+[axe-core](https://github.com/dequelabs/axe-core) adds about 90 accessibility rules. With the Vite plugin it runs as soon as it is installed (`npm install -D axe-core`), and Vite prints "SAT: axe-core found" when it starts; `sat({ axe: false })` turns it off.
 
-```bash
-npm install -D axe-core
-```
+With React, Vue and `satChecker` you add it yourself, because without the plugin an import of a missing package breaks the page (the CLI and Playwright take `--axe` and `axe: true`):
 
 ```ts
 import { satChecker } from "seo-accessibility-tool/sat-controller";
@@ -271,7 +285,21 @@ satChecker({ engines: [axe()] }); // with React or Vue: useSATChecker({ engines:
 - The SAT rules axe covers are off while it runs, so a problem is reported once (`target-size` stays on); setting one in `rules` turns it back on. `rules` sets axe rules too: `{ "axe/region": "off" }`. `axe(options)` takes axe's run options, e.g. `axe({ runOnly: ["wcag2a", "wcag2aa"] })`.
 - axe adds about 550 KB (150 KB gzipped) and makes a run slower: 0.1–1.5 s instead of 5–50 ms on real pages.
 
-## Results without the panel
+## Guides
+
+- [AI agents](docs/guides/ai-agents.md): the MCP server, each agent's configuration, what the agent gets, Fix with AI.
+- [Configuration](docs/guides/configuration.md): where the options go, severity per rule, WCAG level, axe-core, one config for the panel and the CLI.
+- [Single-page apps](docs/guides/spa.md): route changes, content loaded later, broken links, what SAT doesn't see.
+- [SAT in CI](docs/guides/ci.md): GitHub Actions and GitLab CI, limits, reports, the link crawler, a project with many issues.
+- [Troubleshooting](docs/guides/troubleshooting.md): the panel doesn't appear, the agent doesn't see SAT, `sat-check` doesn't run, false positives.
+
+---
+
+## Also
+
+The same checks outside the dev server. For these jobs there are mature tools too ([`@axe-core/playwright`](https://www.npmjs.com/package/@axe-core/playwright), [pa11y-ci](https://github.com/pa11y/pa11y-ci), Lighthouse); SAT adds its SEO rules and the configuration of your panel.
+
+### Results without the panel
 
 ```ts
 import { runSAT } from "seo-accessibility-tool";
@@ -282,7 +310,7 @@ const { issues, summary } = await runSAT({ rules: { "link-text": "warning" } });
 
 `runSAT(options?, document?)` returns plain data, ready for `JSON.stringify`. `seoAccessibilityTool(options)` returns the same issues with their DOM `element`. The page is never changed; `satReset` is deprecated and does nothing.
 
-## Playwright
+### Playwright
 
 `seo-accessibility-tool/playwright` checks a page in your end-to-end tests; the page doesn't need to import SAT. `@playwright/test` is an optional peer dependency.
 
@@ -305,7 +333,7 @@ test("report", async ({ page }) => {
 - `expect` is Playwright's own, extended: use it in place of the one from `@playwright/test`, or merge it with yours through `mergeExpects`.
 - Pages with a strict Content Security Policy block the added script: create the context with `bypassCSP: true`.
 
-## CLI and CI
+### CLI and CI
 
 ```bash
 npm install -D seo-accessibility-tool @playwright/test
@@ -353,6 +381,17 @@ jobs:
 
 More in the [CI guide](docs/guides/ci.md): GitLab CI, starting on a project with many issues, the reports.
 
+### Browser extension
+
+Checks any page, a public site included, without installing SAT in a project. Build it and load it unpacked in Chrome or Edge:
+
+```bash
+npm install && npm run build
+# chrome://extensions → Developer mode → Load unpacked → dist/extension
+```
+
+A click on the SAT button in the toolbar adds the panel to the open tab. The extension asks only for `activeTab` and `scripting`: it reads a tab only after its button is clicked there, and nothing leaves the browser. It works on pages with a strict Content Security Policy too.
+
 ---
 
 ## What SAT does not do
@@ -371,8 +410,9 @@ More in the [CI guide](docs/guides/ci.md): GitLab CI, starting on a project with
 
 | Feature | Needs |
 |---|---|
-| [axe-core engine](#axe-core-engine-optional) | `npm install -D axe-core` (4.10 or later); adds about 550 KB and makes a run slower |
-| [Fix with AI](#fix-with-ai) | The Vite plugin with `ai: true`, [Claude Code](https://code.claude.com) installed and signed in; Claude Code sends the prompt, which quotes the page, to the model |
+| [axe-core engine](#axe-core-engine) | `npm install -D axe-core` (4.10 or later); then on by itself in the Vite plugin; adds about 550 KB and makes a run slower |
+| [MCP server](#use-it-with-your-ai-agent) | The Vite plugin with `mcp: true` and an agent that speaks MCP over HTTP; the agent sends the issues, which quote the page, to its model |
+| [Fix with AI](#fix-with-ai-claude-code-one-click) | The Vite plugin with `ai: true`, [Claude Code](https://code.claude.com) installed and signed in; Claude Code sends the prompt, which quotes the page, to the model |
 | [Playwright helper](#playwright) and [CLI](#cli-and-ci) | `@playwright/test` and Chromium (`npx playwright install chromium`), Node 22 or later |
 | [Browser extension](#browser-extension) | Built from this repository and loaded unpacked in Chrome or Edge; it isn't on the Chrome Web Store |
 

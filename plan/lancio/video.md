@@ -1,10 +1,10 @@
 # Script dei video
 
-Sei video brevi, uno per idea. Li registra e li pubblica il maintainer; il testo a schermo, i sottotitoli e le didascalie sono in inglese, come il README.
+Sette video brevi, uno per idea; il messaggio è il pannello in `vite dev` che passa i problemi all'agente IA (F17), CI e report vengono dopo. Li registra e li pubblica il maintainer; il testo a schermo, i sottotitoli e le didascalie sono in inglese, come il README.
 
 ## Regole comuni
 
-- **Solo la 1.18.0**: ogni scena usa funzioni del pacchetto pubblicato. Prima di registrare, `npm view seo-accessibility-tool version` deve dare 1.18.0 o successiva.
+- **Solo la 1.19.0**: ogni scena usa funzioni del pacchetto pubblicato. Prima di registrare, `npm view seo-accessibility-tool version` deve dare 1.19.0 o successiva.
 - **Formato**: registrazione 16:9 a 1200×720 o più (X, LinkedIn). Per YouTube Shorts, che vuole il verticale, la stessa clip al centro di un fotogramma 1080×1920 con il testo sopra e sotto:
   `ffmpeg -i clip.webm -vf "scale=1080:-2,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:white" -c:v libx264 -pix_fmt yuv420p short.mp4` (da provare: `ffmpeg` non era installato quando è stato scritto).
 - **Sottotitoli sempre accesi**: chi scorre i social guarda senza audio. Il testo a schermo coincide con i sottotitoli; frasi brevi, almeno due secondi l'una. Niente musica che copra una voce.
@@ -33,7 +33,28 @@ Sei video brevi, uno per idea. Li registra e li pubblica il maintainer; il testo
 - **LinkedIn**: Accessibility and SEO issues rarely get written on purpose. They come with the starter, the copied component, the quick fix, and nobody sees them until an audit.<br><br>I built SAT, an open source panel for the dev server that shows WCAG, ARIA and SEO issues on the page, next to the elements. On Vite's own starter page it finds three errors before you write a line.<br><br>Automated checks find part of the issues, not all: keyboard and screen reader testing still need a person. Live demo: https://flgisimone.github.io/SAT/ #accessibility #webdev
 - **YouTube Shorts**: titolo «Vite's starter page has 3 accessibility errors»; descrizione: «SAT, an open source accessibility and SEO panel for vite dev. Demo: https://flgisimone.github.io/SAT/ · Code: https://github.com/flgisimone/SAT»
 
-## 2. La scoperta — 15 s
+## 2. Il tuo agente corregge — 40 s
+
+**Idea**: l'agente non vede la pagina; SAT gliela fa vedere via MCP, e lui corregge il sorgente e ricontrolla.
+
+| Tempo | Inquadratura | Testo a schermo / sottotitoli |
+|---|---|---|
+| 0–5 s | Browser su `vite dev`, pannello aperto: «4 errors · 3 warnings» | Your AI agent writes the code. It doesn't see the page. |
+| 5–11 s | Terminale: `claude mcp add --transport http sat http://localhost:5173/__sat/mcp` | SAT shows it the issues, through MCP. One line. |
+| 11–19 s | Claude Code: «Fix the SAT issues on this page.»; la chiamata a `sat_issues` | It gets each issue: rule, WCAG criterion, selector, the element's HTML. |
+| 19–29 s | Le modifiche in `index.html` (alt, label, lang, meta description) | It fixes the source, not the page. |
+| 29–35 s | La chiamata a `sat_recheck`; nel browser il conteggio scende | Then it checks the page again. |
+| 35–40 s | La tabella degli agenti nel README | Cursor, Copilot, Codex, Gemini CLI, Windsurf, Zed: same server. |
+
+**Come si registra**: `npx degit flgisimone/SAT/examples/vite-vanilla my-site` (ha già `mcp: true` e axe-core), `npm install`, `npm run dev`, pagina aperta e SAT acceso; Claude Code nella cartella del progetto, terminale e browser affiancati. Claude Code chiede di approvare il server e le modifiche: si approvano fuori inquadratura o si tagliano. Il risultato dell'agente cambia da una prova all'altra: a schermo il conteggio che resta, mai «0 errors» come promessa; se arriva a zero, «zero errors SAT can detect».
+
+**Invito**: la guida agli agenti.
+
+- **X**: Your coding agent can't see the rendered page: the 1.98:1 contrast, the field with only a placeholder, the missing lang. SAT shows it the issues from vite dev through MCP; it fixes the source and checks again. Claude Code, Cursor, Copilot, Codex, Gemini CLI… https://github.com/flgisimone/SAT/blob/develop/docs/guides/ai-agents.md
+- **LinkedIn**: Coding agents write most of my markup now. They work from the source, so they miss what only shows up on the rendered page: contrast, labels, headings, meta tags.<br><br>SAT, an open source panel for vite dev, now has an MCP server: `sat({ mcp: true })`, one line in your agent's config, and it gets the issues of the page you have open, with the element's HTML and the WCAG criterion. It fixes the code and asks SAT to check again. Your agent, your model, your permissions; SAT sends nothing anywhere.<br><br>Automated checks find part of the issues: review the diff, and test with a keyboard and a screen reader. https://github.com/flgisimone/SAT #accessibility #ai
+- **YouTube Shorts**: titolo «Let your AI agent see accessibility issues»; descrizione: «SAT's MCP server for vite dev. Guide: https://github.com/flgisimone/SAT/blob/develop/docs/guides/ai-agents.md»
+
+## 3. La scoperta — 15 s
 
 **Idea**: un clic, e gli errori sono sulla pagina, non in un report.
 
@@ -52,7 +73,7 @@ Sei video brevi, uno per idea. Li registra e li pubblica il maintainer; il testo
 - **LinkedIn**: Most accessibility tools give you a report. I wanted the issues where I work: on the page, next to the element, while the dev server is running.<br><br>SAT draws boxes over the elements with issues and lists them by rule with their WCAG criterion or source. It never changes the page's DOM or styles. Open source, MIT: https://github.com/flgisimone/SAT #a11y #frontend
 - **YouTube Shorts**: titolo «Accessibility issues on the page, not in a report»; descrizione: «SAT, the open source accessibility and SEO panel for development. https://github.com/flgisimone/SAT»
 
-## 3. Dal problema all'elemento — 25 s
+## 4. Dal problema all'elemento — 25 s
 
 **Idea**: dal messaggio all'elemento in un clic, anche nelle pagine lunghe.
 
@@ -71,19 +92,19 @@ Sei video brevi, uno per idea. Li registra e li pubblica il maintainer; il testo
 - **LinkedIn**: The slow part of fixing an accessibility issue is often finding the element. A selector in a report doesn't tell you which component rendered it.<br><br>In SAT's panel every issue is a link to its element: one click scrolls to it, focuses it and flashes its box. The Structure tab shows the heading tree with skipped levels marked. Demo: https://flgisimone.github.io/SAT/ #accessibility #webdevelopment
 - **YouTube Shorts**: titolo «From an accessibility issue to its element, in one click»; descrizione: «Demo: https://flgisimone.github.io/SAT/»
 
-## 4. Il workflow con il plugin Vite — 35 s
+## 5. Il workflow con il plugin Vite — 35 s
 
 **Idea**: una riga nel config, poi si corregge e si vede il conteggio scendere, senza cambiare finestra.
 
 | Tempo | Inquadratura | Testo a schermo / sottotitoli |
 |---|---|---|
-| 0–6 s | Editor: `npm install -D seo-accessibility-tool` nel terminale integrato, poi `sat()` in `plugins` di `vite.config.js` | One plugin. Your app's code doesn't import it. |
-| 6–12 s | Browser affiancato su `vite dev`: play, «5 errors · 3 warnings» | Press play in vite dev. |
+| 0–6 s | Editor: `npm install -D seo-accessibility-tool axe-core` nel terminale integrato, poi `sat()` in `plugins` di `vite.config.js` | One plugin. Your app's code doesn't import it. |
+| 6–12 s | Browser affiancato su `vite dev`: play, «4 errors · 3 warnings» | Press play in vite dev. |
 | 12–18 s | Clic sul problema dell'immagine; nell'editor, `alt="Blue mug"` sull'`<img id="photo">` | Fix it in the source. |
-| 18–26 s | Salvataggio: Vite ricarica, il conteggio passa a «4 errors · 3 warnings» | Save. SAT runs again by itself. |
+| 18–26 s | Salvataggio: Vite ricarica, il conteggio passa a «3 errors · 3 warnings» | Save. SAT runs again by itself. |
 | 26–35 s | Terminale: `vite build`, poi l'output della build | And it's not in your build: SAT is in vite dev only. |
 
-**Come si registra**: `npx degit flgisimone/SAT/examples/vite-vanilla my-site`, `npm install`, `npm run dev`; editor e browser affiancati. Il conteggio dopo il salvataggio è stato provato il 25/10/2026 (F16-02).
+**Come si registra**: `npx degit flgisimone/SAT/examples/vite-vanilla my-site`, `npm install`, `npm run dev`; editor e browser affiancati. Con axe-core nel template (F17) il conteggio passa da 4 a 3 errori, provato il 25/10/2026 con il plugin di `dist/`; senza axe era da 5 a 4 (F16-02).
 
 **Invito**: il tutorial su Dev.to (F16-02), quando è pubblicato; prima, il README.
 
@@ -91,7 +112,7 @@ Sei video brevi, uno per idea. Li registra e li pubblica il maintainer; il testo
 - **LinkedIn**: The accessibility check I'll actually run is the one already open while I code.<br><br>SAT's Vite plugin adds a panel to vite dev only: no import in the app, nothing in the build. Fix an issue in the editor, save, and the panel checks the page again on reload. Step-by-step tutorial, from a starter to CI: <link Dev.to> #vite #accessibility
 - **YouTube Shorts**: titolo «Accessibility checks in vite dev, with one plugin»; descrizione: «Tutorial: <link Dev.to> · https://github.com/flgisimone/SAT»
 
-## 5. CI e report — 30 s
+## 6. CI e report — 30 s
 
 **Idea**: gli stessi controlli del pannello fanno fallire la pull request, e il report dice dove.
 
@@ -111,7 +132,7 @@ Sei video brevi, uno per idea. Li registra e li pubblica il maintainer; il testo
 - **LinkedIn**: A panel in the dev server helps the person who opens it. CI helps the whole team.<br><br>sat-check runs SAT's checks on your build in Chromium, writes JSON and HTML reports and exits with 1 above the limits you set. On a project with many issues you can start the limit at today's count and lower it over time, so the build fails only on new ones. Guide for GitHub Actions and GitLab CI: https://github.com/flgisimone/SAT/blob/develop/docs/guides/ci.md #ci #accessibility
 - **YouTube Shorts**: titolo «Fail the pull request on accessibility errors»; descrizione: «sat-check, SAT's CLI for CI. Guide: https://github.com/flgisimone/SAT/blob/develop/docs/guides/ci.md»
 
-## 6. Una modifica nata da un feedback — 30 s
+## 7. Una modifica nata da un feedback — 30 s
 
 **Da non registrare finché non c'è**: serve una modifica rilasciata su npm che nasce da una issue o una discussione di qualcuno esterno. Prima non esiste, e un video su una modifica inventata non si fa.
 

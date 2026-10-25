@@ -1,4 +1,5 @@
 {
+  "panelWithAxe": "4 errors · 3 warnings",
   "options": { "rules": { "link-text": "warning" } },
   "issues": [
     { "ruleId": "image-alt", "severity": "error", "selector": "[id=\"photo\"]" },

@@ -11,7 +11,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.10",
-    "seo-accessibility-tool": "^1.18.0",
+    "seo-accessibility-tool": "^1.19.0",
     "vite": "^8.3.5"
   }
 }

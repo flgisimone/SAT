@@ -30,10 +30,11 @@
 <body>
   <aside class="demo" aria-label="About this demo">
     <p><strong>SAT demo.</strong> This page has 8 accessibility and SEO issues on purpose. SAT finds them: boxes mark the elements, and the panel lists the issues (the counts at the bottom open it). Click an issue to reach its element.</p>
-    <p><code id="install">npm install -D seo-accessibility-tool</code><button type="button" id="copy">Copy</button> · <a href="https://github.com/flgisimone/SAT">SAT on GitHub</a></p>
+    <p>In your project, the Vite plugin shows this panel in <code>vite dev</code> and gives the same issues to your AI agent (Claude Code, Cursor, Copilot, Codex, Gemini CLI, Windsurf, Zed) through MCP, so it fixes them in your source code. <a href="https://github.com/flgisimone/SAT/blob/develop/docs/guides/ai-agents.md">Connect your agent</a></p>
+    <p><code id="install">npm install -D seo-accessibility-tool axe-core</code><button type="button" id="copy">Copy</button> · <a href="https://github.com/flgisimone/SAT">SAT on GitHub</a></p>
     <details>
       <summary>What is this</summary>
-      <p>SAT is a visual accessibility and SEO debugger for development: a panel in your dev server that shows WCAG, ARIA and SEO issues on the page, next to the elements. The same checks run in Playwright tests and in CI.</p>
+      <p>SAT is an accessibility and SEO panel for development: in <code>vite dev</code> it shows WCAG, WAI-ARIA and SEO issues on the page, next to the elements, each with its source. With <code>sat({ mcp: true })</code> your agent reads them with <code>sat_issues</code>, fixes the code and checks again with <code>sat_recheck</code>; with axe-core installed, its rules run too. Here, without a dev server, there is only the panel.</p>
     </details>
     <p>Automated checks find only part of the issues: SAT doesn't certify WCAG conformance, and it doesn't see iframes, canvas, or states that appear after an interaction. <a href="https://github.com/flgisimone/SAT#what-sat-does-not-do">What SAT does not do</a></p>
   </aside>

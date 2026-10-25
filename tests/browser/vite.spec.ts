@@ -35,14 +35,14 @@ test('vite dev: SAT starts on its own, with the options of the plugin', async ({
     await expect(page.locator('.results')).toHaveText(/^0 errors · [1-9]\d* warnings?$/);
 });
 
-test('vite build: the bundle has no SAT', async () => {
+test('vite build: the bundle has no SAT, no endpoint and no token, even with ai and mcp on', async () => {
     const outDir = mkdtempSync(join(tmpdir(), 'sat-vite-'));
-    await build({ ...config(), build: { outDir, emptyOutDir: true } });
+    await build({ ...config(), plugins: [sat({ ai: true, mcp: true })], build: { outDir, emptyOutDir: true } });
 
     const files = readdirSync(outDir, { recursive: true, withFileTypes: true }).filter((entry) => entry.isFile());
     const output = files.map((entry) => readFileSync(join(entry.parentPath, entry.name), 'utf8')).join('\n');
     expect(output).toContain('<h1>One</h1>');
-    expect(output).not.toMatch(/sat-panel|seo-accessibility-tool|__sat/);
+    expect(output).not.toMatch(/sat-panel|seo-accessibility-tool|__sat|x-sat-token|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/);
 });
 
 test.describe('Fix with AI (ai: true), with tests/fake-claude/claude in place of Claude Code', () => {
@@ -82,5 +82,50 @@ test.describe('Fix with AI (ai: true), with tests/fake-claude/claude in place of
 
         await page.getByRole('button', { name: 'Dismiss' }).click();
         await expect(page.locator('.fix')).toBeHidden();
+    });
+});
+
+test.describe('MCP server (mcp: true) on the page with known issues', () => {
+    const expected = JSON.parse(readFileSync(new URL('../../examples/page/expected.json', import.meta.url), 'utf8')) as { options: object };
+    let app: string;
+    let mcpServer: ViteDevServer;
+    let id = 1;
+
+    const tool = async (name: string, args: object = {}) => {
+        const response = await fetch(`${mcpServer.resolvedUrls!.local[0]}__sat/mcp`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream' },
+            body: JSON.stringify({ jsonrpc: '2.0', id: id++, method: 'tools/call', params: { name, arguments: args } }),
+        });
+        const { result } = await response.json() as { result: { structuredContent?: { pages: Array<{ issues: Array<{ ruleId: string; severity: string }> }> } } };
+        return result.structuredContent?.pages[0]?.issues ?? [];
+    };
+    const severities = (issues: Array<{ severity: string }>) => issues.map((issue) => issue.severity).sort().join(',');
+
+    test.beforeAll(async () => {
+        // A copy outside the repository: axe-core isn't installed there, so the counts are SAT's own.
+        app = mkdtempSync(join(tmpdir(), 'sat-mcp-'));
+        writeFileSync(join(app, 'index.html'), readFileSync(new URL('../../examples/page/index.html', import.meta.url), 'utf8'));
+        mcpServer = await createServer({ ...config(), root: app, plugins: [sat({ ...expected.options, mcp: true })], server: { port: 0, host: '127.0.0.1' } });
+        await mcpServer.listen();
+    });
+
+    test.afterAll(async () => {
+        await mcpServer.close();
+        rmSync(app, { recursive: true, force: true });
+    });
+
+    test('the page sends its results; sat_issues returns them, sat_recheck what is left after a fix', async ({ page }) => {
+        await page.goto(mcpServer.resolvedUrls!.local[0]);
+        await page.locator('#sat-run-button').click();
+        await expect(page.locator('.results')).toHaveText('5 errors · 3 warnings');
+        await expect.poll(async () => severities(await tool('sat_issues'))).toBe('error,error,error,error,error,warning,warning,warning');
+
+        // The fix the agent would make: alt text on the photo. Vite reloads the page.
+        const file = join(app, 'index.html');
+        writeFileSync(file, readFileSync(file, 'utf8').replace('id="photo"', 'id="photo" alt="A red bike"'));
+        const left = await tool('sat_recheck');
+        expect(severities(left)).toBe('error,error,error,error,warning,warning,warning');
+        expect(left.map((issue) => issue.ruleId)).not.toContain('image-alt');
     });
 });
