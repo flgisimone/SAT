@@ -80,7 +80,7 @@
   },
   "homepage": "https://github.com/flgisimone/SAT#readme",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "build": "rollup -c && rollup -c rollup.dts.config.cjs",

@@ -4,7 +4,7 @@ Thanks for helping. Bug reports, false positives and rule proposals are as usefu
 
 ## Setup
 
-Node 22 for development (the package itself runs on Node 20 or later).
+Node 26 for development, as in [.nvmrc](.nvmrc) (`nvm use`); the package itself runs on Node 22 or later.
 
 ```bash
 git clone https://github.com/flgisimone/SAT.git && cd SAT

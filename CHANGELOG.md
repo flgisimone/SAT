@@ -18,10 +18,10 @@ The first version on npm after 1.6.0: npm goes from 1.6.0 to 1.18.0. Versions 1.
 - [`examples/`](examples/): small projects for the Vite plugin, React, Vue and the CLI, on one page with known issues and the list of the issues SAT reports on it (`examples/page/expected.json`).
 - README: **What SAT does not do**, with the optional features and what they need.
 - `CONTRIBUTING.md`, `SECURITY.md`, issue templates (bug, false positive, new rule) and a pull request template.
-- `npm run smoke` and a CI job: the package made by `npm pack` is installed in a copy of each example and tried there, on Node 20.
+- `npm run smoke` and a CI job: the package made by `npm pack` is installed in a copy of each example and tried there, on Node 22.
 
 ### Changed
-- `package.json`: `engines.node` is `>=20` (the CLI and the Playwright helper need it for Playwright), a description of what SAT does, revised keywords, repository and homepage URLs; `CHANGELOG.md` is part of the package.
+- `package.json`: `engines.node` is `>=22`, the oldest Node still supported (Node 20 reached its end of life in April 2026), a description of what SAT does, revised keywords, repository and homepage URLs; `CHANGELOG.md` is part of the package.
 
 ## 1.17.0 — 2026-10-25, published on npm in 1.18.0
 
