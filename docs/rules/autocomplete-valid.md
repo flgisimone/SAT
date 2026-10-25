@@ -24,6 +24,6 @@ Browsers and assistive technologies use the value to fill in personal data and t
 
 - [WCAG 2.2: input purposes for user interface components](https://www.w3.org/TR/WCAG22/#input-purposes)
 
-With the [axe-core engine](../../README.md#-axe-core-engine-optional) this rule is off: axe checks the same thing.
+With the [axe-core engine](../../README.md#axe-core-engine-optional) this rule is off: axe checks the same thing.
 
 [All rules](../../README.md#rules)

@@ -1,63 +1,62 @@
-# SEO Accessibility Tool (SAT) 🕵️‍♂️ for Developers
+# SAT: SEO Accessibility Tool
 
-An accessibility and SEO validation tool focused on **heading structure best practices** and **universal accessibility compliance**.  
-Detects common issues in heading usage (`<h1>`-`<h6>`), ARIA roles, contrast, labels, and more — with a visual UI panel.
+**Catch accessibility and SEO issues before your users do.**
 
----
+SAT is a visual accessibility and SEO debugger for development: a panel in your dev server shows WCAG, ARIA and SEO issues on the page, next to the elements, and the same checks run in Playwright tests and in CI.
 
-## 🚀 Features
+[![npm](https://img.shields.io/npm/v/seo-accessibility-tool)](https://www.npmjs.com/package/seo-accessibility-tool)
+[![License: MIT](https://img.shields.io/github/license/flgisimone/SAT)](LICENSE)
+[![CI](https://github.com/flgisimone/SAT/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/flgisimone/SAT/actions/workflows/ci.yml)
 
-✅ Framework-agnostic core logic (React, Vue, Svelte, Angular, Vanilla), a Vite plugin and a browser extension  
-✅ Validates heading structure, ARIA roles and attributes, names and labels, contrast, target size, tables, forms, media, images, SEO meta tags, canonical, hreflang, Open Graph, JSON-LD and image loading, with the W3C ACT test cases as specification  
-✅ Optional axe-core engine for about 90 more accessibility rules  
-✅ Injects a floating toggle button to analyze any page  
-✅ Results panel in light and dark theme: counters that filter, issues by category and rule with their WCAG criterion or source, a heading map; click an issue to jump to the element  
-✅ Never changes your page: highlights are drawn on SAT's own layer  
-✅ Fix with AI: copy a ready prompt for any issue, or (Vite plugin, opt-in) let Claude Code fix it in your source and check it is gone  
-✅ Follows single-page apps: route changes rerun the checks  
-✅ Supports progressive checks via custom options  
-✅ Runs in CI: Playwright helper and the `sat-check` command with JSON/HTML reports, limits and a link crawler
+**[Try the live demo](https://flgisimone.github.io/SAT/)**: a page with known issues and SAT already on, nothing to install.
 
----
+<img src="docs/images/sat.gif" width="800" alt="SAT on a page with known issues: the play button runs the checks, boxes appear on the elements, the panel lists the issues by rule, and clicking one flashes its element">
 
-## 📦 Installation
+## Install
 
 ```bash
-npm install seo-accessibility-tool
+npm install -D seo-accessibility-tool
 ```
 
-To try it first, the [examples](examples/) are small projects (Vite plugin, React, Vue, CLI) on the same page with known issues.
+## Quick start
+
+With Vite (Svelte, SvelteKit, Solid, Preact, Vue, React, vanilla):
+
+1. Install the package (above).
+2. Add the plugin:
+
+   ```ts
+   // vite.config.ts
+   import { defineConfig } from "vite";
+   import { sat } from "seo-accessibility-tool/vite";
+
+   export default defineConfig({
+     plugins: [sat()],
+   });
+   ```
+
+3. Run `npm run dev` and open the page.
+
+You see the SAT dock in a corner of the page. Press play: boxes appear on the elements with issues (red for errors, amber for warnings), and the counts button opens the panel with the issues by rule, each with its WCAG criterion or source. Click an issue to jump to its element. SAT is only in `vite dev`: `vite build` doesn't include it.
+
+The [examples](examples/) are small projects (Vite plugin, React, Vue, CLI) on the same page with known issues.
+
+## Use it with
+
+| With | How |
+|---|---|
+| Vite | [Plugin](#vite-plugin), no import in the app |
+| React | [`useSATChecker`](#react) |
+| Vue 3 | [`useSatChecker`](#vue-3) |
+| Svelte, Angular | [`satChecker`](#svelte-and-angular) in the entry point |
+| Vanilla JS, other bundlers | [`satChecker`](#vanilla-js) |
+| Any site, without installing | [Browser extension](#browser-extension) |
+| Playwright tests | [`toHaveNoSATErrors`](#playwright) |
+| CI | [`sat-check`](#cli-and-ci): JSON and HTML reports, limits, link crawler |
 
 ---
 
-## ⚛️ React Integration
-
-```tsx
-import { useSATChecker } from "seo-accessibility-tool/react";
-
-function App() {
-  useSATChecker(); // Runs SAT when component mounts
-  return <div>My App</div>;
-}
-```
-
----
-
-## 🧪 Vue 3 Integration
-
-```vue
-<script setup lang="ts">
-import { useSatChecker } from "seo-accessibility-tool/vue";
-
-useSatChecker(); // Call it directly in setup: SAT starts when the component is mounted
-</script>
-```
-
----
-
-## ⚡ Vite plugin
-
-Adds SAT to the pages of `vite dev` without touching the app's code. `vite build` and `vite preview` don't include it.
+## Vite plugin
 
 ```ts
 // vite.config.ts
@@ -69,16 +68,35 @@ export default defineConfig({
 });
 ```
 
-It takes the options that fit in JSON (`rules`, `wcagLevel`, `allowedLinkTexts`, `observeDom`, the 1.x flags), `axe: true` to run axe-core too (install `axe-core`) and `ai: true` for [Fix with AI](#-fix-with-ai). It works with any app Vite serves: Svelte, SvelteKit, Solid, Preact, Vue, React. `vite` is an optional peer dependency (5 or later).
+It takes the options that fit in JSON (`rules`, `wcagLevel`, `allowedLinkTexts`, `observeDom`, the 1.x flags), `axe: true` to run [axe-core](#axe-core-engine-optional) too and `ai: true` for [Fix with AI](#fix-with-ai). `vite` is an optional peer dependency (5 or later).
 
----
+## React
 
-## 🧡 Svelte and Angular
+```tsx
+import { useSATChecker } from "seo-accessibility-tool/react";
 
-No wrapper is needed: `satChecker` starts the panel from the app's entry point.
+function App() {
+  useSATChecker(); // starts SAT when the component mounts, in development
+  return <div>My App</div>;
+}
+```
+
+## Vue 3
+
+```vue
+<script setup lang="ts">
+import { useSatChecker } from "seo-accessibility-tool/vue";
+
+useSatChecker(); // in setup: SAT starts when the component is mounted, in development
+</script>
+```
+
+## Svelte and Angular
+
+No wrapper is needed: `satChecker` starts the panel from the app's entry point. With Vite, the plugin above is enough.
 
 ```ts
-// Svelte (or SvelteKit, in a +layout.svelte onMount): with Vite, the plugin above is enough
+// Svelte (or SvelteKit, in a +layout.svelte onMount)
 import { satChecker } from "seo-accessibility-tool/sat-controller";
 
 satChecker(); // starts when NODE_ENV is "development"
@@ -94,9 +112,16 @@ import { AppComponent } from "./app/app.component";
 bootstrapApplication(AppComponent).then(() => satChecker({ enabled: isDevMode() }));
 ```
 
----
+## Vanilla JS
 
-## 🧭 Browser extension
+```ts
+import { satChecker } from "seo-accessibility-tool/sat-controller";
+
+satChecker(); // starts when process.env.NODE_ENV is "development" (Vite, webpack, Next…)
+satChecker({ enabled: true }); // or always, without a bundler
+```
+
+## Browser extension
 
 Checks any page, a public site included, without installing SAT in a project. Build it and load it unpacked in Chrome or Edge:
 
@@ -105,39 +130,28 @@ npm install && npm run build
 # chrome://extensions → Developer mode → Load unpacked → dist/extension
 ```
 
-A click on the SAT button in the toolbar adds the panel to the open tab. The extension asks only for `activeTab` and `scripting`: it can read a tab only after its button is clicked there, and nothing leaves the browser. It also works on pages with a strict Content Security Policy.
+A click on the SAT button in the toolbar adds the panel to the open tab. The extension asks only for `activeTab` and `scripting`: it reads a tab only after its button is clicked there, and nothing leaves the browser. It works on pages with a strict Content Security Policy too.
 
 ---
 
-## 🖱️ UI Behavior
+## The panel
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/panel-dark.png">
-  <img src="docs/images/panel-light.png" alt="The SAT panel next to a page: counters, issues by rule with WCAG criteria, and a box on an image with its tag">
+  <img src="docs/images/panel-light.png" alt="The SAT panel next to a page: counters, issues by rule with WCAG criteria, and a box on an image without alt text">
 </picture>
 
-- The play button runs the checks and becomes a stop button that turns SAT off; the arrow runs them again; the counts button opens the results panel
-- **Summary**: errors, warnings, accessibility and SEO counters; each is a toggle button that hides or shows those issues in the list and on the page
-- **Issues**: by category, then by rule, rules with errors first. Each rule shows its title, its count, its WCAG criteria (or its source, such as Google, for rules without one) and a link to its page, "Why and how to fix". Messages are visible in the list: the first five per rule, then "Show N more". Click an issue to scroll to the element, focus it (when it can take focus) and flash its box
-- **Structure**: the H1–H6 tree of the page, with skipped levels marked; click a heading to jump to it
-- Boxes over the page show each issue (red: error, amber dashed: warning). Pointing at a box, or clicking it, shows a tag with the severity and title of its issues. Boxes and tags are drawn in SAT's own layer, so the page's elements, styles and attributes are never changed
-- Light and dark theme from the system setting (`prefers-color-scheme`); short transitions, off with `prefers-reduced-motion`
-- The arrow in the panel header moves SAT to the other side of the window; the side is remembered in `localStorage`
-- The panel lives in a Shadow DOM: the page's CSS doesn't affect it and its CSS doesn't leak into the page
-- Single-page apps: when SAT is on, a route change (`pushState`, `replaceState`, back/forward) runs the checks again. Use `observeDom` to rerun them on any DOM change
-- **Copy fix prompt** on every issue and **Copy prompt for all** on every rule put a prompt for an AI coding agent in the clipboard (see [Fix with AI](#-fix-with-ai))
-- Keyboard: Tab through the dock and the panel, Escape closes the panel and returns focus to the counts button
-- The panel passes SAT's own rules and axe-core in both themes (contrast, target size, names), checked in the tests
-- SAT stays on across reloads until you stop it (a flag in `localStorage`)
-- Runs only when `process.env.NODE_ENV === "development"` (set by Vite, webpack, Next, etc.); the Vite plugin and the browser extension start it anyway
+- **Dock**: play runs the checks and becomes stop; the arrow runs them again; the counts button opens the panel. SAT stays on across reloads until you stop it.
+- **Summary**: errors, warnings, accessibility and SEO counters, each a toggle that filters the list and the boxes.
+- **Issues**: by category, then by rule, errors first. Each rule has its title, WCAG criteria (or its source, such as Google) and "Why and how to fix". Click an issue to scroll to the element, focus it and flash its box.
+- **Structure**: the H1–H6 tree of the page, skipped levels marked.
+- **Boxes** over the page: red for errors, amber dashed for warnings; point at one for its issues. They are drawn on SAT's own layer: your page's elements, styles and attributes are never changed, and the panel's Shadow DOM keeps its CSS and yours apart.
+- **Single-page apps**: a route change (`pushState`, `replaceState`, back/forward) runs the checks again; `observeDom` reruns them on any DOM change.
+- Light and dark theme from the system, keyboard navigation (Escape closes the panel), no animations with `prefers-reduced-motion`. The panel passes SAT's own rules and axe-core in both themes.
 
----
+## Fix with AI
 
-## 🤖 Fix with AI
-
-SAT can hand an issue to an AI coding agent, which fixes it in your source code. Two levels:
-
-1. **Copy fix prompt** (everywhere: Vite, React, Vue, vanilla, the browser extension). The button on an issue, or **Copy prompt for all** on a rule, copies a prompt you paste into your agent (Claude Code, Cursor, Copilot…). Where the clipboard is unavailable, the prompt appears selected in a text box. The same prompt comes from the API:
+1. **Copy fix prompt**, everywhere: the button on an issue, or **Copy prompt for all** on a rule, copies a prompt for your coding agent (Claude Code, Cursor, Copilot…). It has the rule, its source, the page URL and, for each issue, the message, the selector, the element's HTML and, with Vue and Svelte in development, the component file. It asks for the smallest fix in the source, and quotes the page as data, not instructions. The same prompt comes from the API:
 
    ```ts
    import { fixPrompt, seoAccessibilityTool } from "seo-accessibility-tool";
@@ -146,28 +160,13 @@ SAT can hand an issue to an AI coding agent, which fixes it in your source code.
    const prompt = fixPrompt(issues.filter((issue) => issue.ruleId === "image-alt"), { url: location.href });
    ```
 
-   The prompt has the rule, severity, WCAG criterion or source, the documentation link, the page URL and, for each issue, the message, the selector, the element's HTML (cut to about 2 KB) and, with Vue and Svelte in development, the component file (Svelte with its line). It asks for the smallest fix in the source, not in the DOM, and to say so instead of changing code when the content comes from data or a CMS. Page content is in fenced blocks declared as data, not instructions.
+2. **Fix with AI** (optional, Vite plugin only): with `sat({ ai: true })` every issue gets a **Fix with AI** button that runs [Claude Code](https://code.claude.com) (`claude -p`) in your project, shows its progress and the files it changed, then checks the page again: **Fixed** or **Still present**. Requires Claude Code installed and signed in; SAT handles no API keys.
 
-2. **Fix with AI** (Vite plugin only, opt-in): SAT runs [Claude Code](https://code.claude.com) in your project.
+**What goes to the model.** SAT sends nothing anywhere. With Fix with AI on, Claude Code sends the prompt (which quotes the page) and the files it reads to the model, as when you use it directly.
 
-   ```ts
-   // vite.config.ts
-   plugins: [sat({ ai: true })],
-   ```
+**Safety.** The dev server answers `POST /__sat/fix` only for this computer, its own pages and a token created at every start. Claude Code gets `Read`, `Edit`, `Grep` and `Glob` only: no shell, no web, no MCP servers. SAT keeps no copies of your files: it warns about uncommitted changes, so commit first and review with `git diff`.
 
-   The panel gets a **Fix with AI** button on every issue and **Fix all with AI** on every rule. SAT starts `claude -p` in the project root with the prompt, shows the agent's last messages (with a button to cancel), lists the files it changed, then checks the page again after Vite's update: **Fixed** if the issues are gone, **Still present** with the agent's summary if not. One fix runs at a time.
-
-   Requirements: Claude Code installed (`claude` in the `PATH`) and signed in. SAT uses your installation and your account: it handles no API keys and no costs.
-
-**What goes to the model.** SAT itself sends nothing anywhere. With **Fix with AI** turned on, Claude Code sends the prompt (which quotes the page as described above) and the files it reads to the model, as it does when you use it directly. Copying a prompt sends nothing: you decide where to paste it.
-
-**Security of the endpoint.** With `ai: true` the dev server answers `POST /__sat/fix` only for connections from this computer, from the dev server's own pages (`Origin`) and with a token created at every start of the dev server and given only to its pages. Claude Code runs with the tools `Read`, `Edit`, `Grep` and `Glob` only: no shell, no web, no MCP servers. `vite build` and `vite preview` contain neither the endpoint nor the token.
-
-**Undo with git.** SAT keeps no copies of your files. It warns when the repository has uncommitted changes and lists the files the agent changed: commit before a fix, and review it with `git diff`.
-
----
-
-## 🧩 Configuration
+## Configuration
 
 Turn rules off or change their severity with `rules`, as in ESLint:
 
@@ -191,58 +190,56 @@ useSATChecker({
 | `observeDom`       | Controller only: while SAT is on, reruns the checks this many ms after the DOM stops changing    | off     |
 | `engines`          | Other checkers run with SAT's rules, e.g. `[axe()]` (see below)                                  | `[]`    |
 
+The 1.x options `enableCheck*` still work but are deprecated; `rules` takes precedence.
+
 ### Rules
 
 Each rule follows an official source, cited on its page in [`docs/rules/`](docs/rules/): WCAG 2.2 and the W3C ACT rules, WAI-ARIA 1.2, the HTML standard, Google Search Central. Requirements are errors, recommendations are warnings, and what the sources call valid is not reported.
 
-| Rule                | Category | Checks                                                                    | Default    | 1.x option |
-|---------------------|----------|---------------------------------------------------------------------------|------------|------------|
-| `h1`                | seo      | The page has an `<h1>` (several are valid)                                | warning    | `enableCheckH1` |
-| `h1-visible`        | seo      | The first `<h1>` is rendered (not hidden)                                 | warning    | `enableCheckH1Visible` |
-| `heading-order`     | a11y     | The first heading of the page is an `<h1>`                                | warning    | `enableCheckHeadingOrder` |
-| `heading-levels`    | a11y     | Skipped heading levels (e.g. H2 → H4)                                     | warning    | `enableCheckJumpLevels` |
-| `accessible-name`   | a11y     | Buttons, links, menu items, `<summary>`, headings, `svg[role="img"]` and `<object>` have an accessible name | error | `enableCheckAriaLabel` |
-| `aria-roles`        | a11y     | Invalid `role` values (error), redundant roles (warning)                  | error      | `enableCheckAriaRolesWithSuggestions` |
-| `aria-attributes`   | a11y     | Unknown `aria-*` attributes, invalid values, missing required states, attributes the role doesn't support or prohibits | error | — |
-| `aria-hidden-focus` | a11y     | Elements reachable with Tab inside `aria-hidden="true"`                   | error      | — |
-| `landmarks`         | a11y     | Several visible `<main>` (error); no main, several page-level header/footer, unlabelled repeated navs (warning) | error | `enableCheckUniqueLandmarks` |
-| `color-contrast`    | a11y     | WCAG text contrast: below AA (error), below AAA with `wcagLevel: "AAA"` (warning) | error | `enableCheckTextElementContrast` |
-| `form-label`        | a11y     | Form fields have a label (placeholder is not enough)                      | error      | `enableCheckInputLabel` |
-| `focus-management`  | a11y     | Hidden focusable elements (error), positive tabindex and non-interactive tab stops (warning) | error | `enableCheckFocusManagement` |
-| `image-alt`         | a11y     | `<img>` without `alt` (error), alt text that looks like a file name (warning) | error  | `enableCheckImageAlt` |
-| `link-href`         | a11y     | `href=""`, `#` or `javascript:`                                           | error      | `enableCheckEmptyLinks` |
-| `link-target-blank` | seo      | `target="_blank"` with `rel="opener"` (HTML already implies noopener)    | off        | `enableCheckExternalLinksRel` |
-| `tabindex-negative` | a11y     | Visible native controls removed from the tab order with `tabindex="-1"`   | warning    | `enableCheckTabindexNegativeOne` |
-| `link-text`         | a11y     | Vague link texts ("click here", "more")                                    | off        | `enableCheckNonDescriptiveLinks` |
-| `html-lang`         | a11y     | `<html>` has a `lang`; every `lang` is a valid language tag               | error      | `enableCheckHtmlLang` |
-| `iframe-name`       | a11y     | `<iframe>` has a `title`, `aria-label` or `aria-labelledby`               | error      | — |
-| `label-in-name`     | a11y     | The visible label of a button or link is part of its `aria-label`         | error      | — |
-| `target-size`       | a11y     | Targets under 24×24 px too close to other targets (WCAG 2.2, browser only) | error     | — |
-| `autocomplete-valid`| a11y     | `autocomplete` values follow the HTML autofill tokens                     | error      | — |
-| `table-headers`     | a11y     | `headers` pointing outside the table, header cells without cells          | error      | — |
-| `meta-viewport`     | a11y     | `user-scalable=no` or `maximum-scale` below 2 (zoom blocked)              | error      | — |
-| `meta-refresh`      | a11y     | `<meta http-equiv="refresh">` with a delay (1 s to 20 h)                  | error      | — |
-| `media-autoplay`    | a11y     | `<video>`/`<audio>` that autoplay with sound and no controls              | warning    | — |
-| `seo-meta`          | seo      | One `<title>` and one meta description (error), meta viewport (warning); no length limits | error | `enableCheckSeoMeta` |
-| `canonical`         | seo      | Several or empty canonicals (error), missing or relative canonical (warning) | warning   | — |
-| `robots-meta`       | seo      | `noindex`, `nofollow` or `none` in a robots meta tag                      | warning    | — |
-| `social-meta`       | seo      | Required Open Graph properties, absolute `og:image`/`og:url`, `twitter:card` | warning | — |
-| `hreflang`          | seo      | Invalid language codes, relative URLs, one language with two URLs         | error      | — |
-| `structured-data`   | seo      | JSON-LD that doesn't parse, items without `@type`, properties Google requires for rich results (Product, Event, Breadcrumb…) | error | — |
-| `mixed-content`     | seo      | `http:` resources on an `https:` page: scripts, frames, styles (error), images and media (warning) | error | — |
-| `image-size`        | seo      | Visible `<img>` without `width` and `height` (layout shift)               | warning    | — |
-| `image-lazy-load`   | seo      | `loading="lazy"` on images visible when the page opens                    | warning    | — |
-| `link-broken`       | seo      | HEAD request to each internal link to find 4xx/5xx (skips logout-like URLs); `sat-check --depth` finds SPA 404s too | off | `enableCheckBrokenInternalLinks` |
+| Rule                | Category | Checks                                                                    | Default    |
+|---------------------|----------|---------------------------------------------------------------------------|------------|
+| `h1`                | seo      | The page has an `<h1>` (several are valid)                                | warning    |
+| `h1-visible`        | seo      | The first `<h1>` is rendered (not hidden)                                 | warning    |
+| `heading-order`     | a11y     | The first heading of the page is an `<h1>`                                | warning    |
+| `heading-levels`    | a11y     | Skipped heading levels (e.g. H2 → H4)                                     | warning    |
+| `accessible-name`   | a11y     | Buttons, links, menu items, `<summary>`, headings, `svg[role="img"]` and `<object>` have an accessible name | error |
+| `aria-roles`        | a11y     | Invalid `role` values (error), redundant roles (warning)                  | error      |
+| `aria-attributes`   | a11y     | Unknown `aria-*` attributes, invalid values, missing required states, attributes the role doesn't support or prohibits | error |
+| `aria-hidden-focus` | a11y     | Elements reachable with Tab inside `aria-hidden="true"`                   | error      |
+| `landmarks`         | a11y     | Several visible `<main>` (error); no main, several page-level header/footer, unlabelled repeated navs (warning) | error |
+| `color-contrast`    | a11y     | WCAG text contrast: below AA (error), below AAA with `wcagLevel: "AAA"` (warning) | error |
+| `form-label`        | a11y     | Form fields have a label (placeholder is not enough)                      | error      |
+| `focus-management`  | a11y     | Hidden focusable elements (error), positive tabindex and non-interactive tab stops (warning) | error |
+| `image-alt`         | a11y     | `<img>` without `alt` (error), alt text that looks like a file name (warning) | error  |
+| `link-href`         | a11y     | `href=""`, `#` or `javascript:`                                           | error      |
+| `link-target-blank` | seo      | `target="_blank"` with `rel="opener"` (HTML already implies noopener)    | off        |
+| `tabindex-negative` | a11y     | Visible native controls removed from the tab order with `tabindex="-1"`   | warning    |
+| `link-text`         | a11y     | Vague link texts ("click here", "more")                                    | off        |
+| `html-lang`         | a11y     | `<html>` has a `lang`; every `lang` is a valid language tag               | error      |
+| `iframe-name`       | a11y     | `<iframe>` has a `title`, `aria-label` or `aria-labelledby`               | error      |
+| `label-in-name`     | a11y     | The visible label of a button or link is part of its `aria-label`         | error      |
+| `target-size`       | a11y     | Targets under 24×24 px too close to other targets (WCAG 2.2, browser only) | error     |
+| `autocomplete-valid`| a11y     | `autocomplete` values follow the HTML autofill tokens                     | error      |
+| `table-headers`     | a11y     | `headers` pointing outside the table, header cells without cells          | error      |
+| `meta-viewport`     | a11y     | `user-scalable=no` or `maximum-scale` below 2 (zoom blocked)              | error      |
+| `meta-refresh`      | a11y     | `<meta http-equiv="refresh">` with a delay (1 s to 20 h)                  | error      |
+| `media-autoplay`    | a11y     | `<video>`/`<audio>` that autoplay with sound and no controls              | warning    |
+| `seo-meta`          | seo      | One `<title>` and one meta description (error), meta viewport (warning); no length limits | error |
+| `canonical`         | seo      | Several or empty canonicals (error), missing or relative canonical (warning) | warning   |
+| `robots-meta`       | seo      | `noindex`, `nofollow` or `none` in a robots meta tag                      | warning    |
+| `social-meta`       | seo      | Required Open Graph properties, absolute `og:image`/`og:url`, `twitter:card` | warning |
+| `hreflang`          | seo      | Invalid language codes, relative URLs, one language with two URLs         | error      |
+| `structured-data`   | seo      | JSON-LD that doesn't parse, items without `@type`, properties Google requires for rich results (Product, Event, Breadcrumb…) | error |
+| `mixed-content`     | seo      | `http:` resources on an `https:` page: scripts, frames, styles (error), images and media (warning) | error |
+| `image-size`        | seo      | Visible `<img>` without `width` and `height` (layout shift)               | warning    |
+| `image-lazy-load`   | seo      | `loading="lazy"` on images visible when the page opens                    | warning    |
+| `link-broken`       | seo      | HEAD request to each internal link to find 4xx/5xx (skips logout-like URLs); `sat-check --depth` finds SPA 404s too | off |
 
-Each rule has a page in [docs/rules](docs/rules) on what it checks, why and how to fix it; the panel links to it from every rule, and each issue has its URL in `help`, the rule's readable name in `title` and, for rules without a WCAG criterion, its source in `source`.
+The panel links each rule to its page; each issue carries its URL in `help`, the rule's name in `title` and, for rules without a WCAG criterion, its source in `source`.
 
-The 1.x options `enableCheck*` still work (`true` turns the rule on, `false` off) but are deprecated; `rules` takes precedence.
+## axe-core engine (optional)
 
----
-
-## ♿ axe-core engine (optional)
-
-[axe-core](https://github.com/dequelabs/axe-core) checks about 90 accessibility rules. Install it and pass the engine:
+[axe-core](https://github.com/dequelabs/axe-core) adds about 90 accessibility rules:
 
 ```bash
 npm install -D axe-core
@@ -252,43 +249,27 @@ npm install -D axe-core
 import { satChecker } from "seo-accessibility-tool/sat-controller";
 import { axe } from "seo-accessibility-tool/axe";
 
-satChecker({ engines: [axe()] });
+satChecker({ engines: [axe()] }); // with React or Vue: useSATChecker({ engines: [axe()] })
 ```
 
-- axe's violations appear in the panel as `axe/<rule>` (e.g. `axe/image-alt`), with a link to Deque's page on the rule. Critical and serious ones are errors, the others warnings; results axe can't decide are not shown.
-- The SAT rules axe covers are off while it runs, so a problem is reported once: `accessible-name`, `aria-roles`, `aria-attributes`, `aria-hidden-focus`, `landmarks`, `color-contrast`, `form-label`, `focus-management`, `image-alt`, `html-lang`, `heading-levels`, `iframe-name`, `label-in-name`, `autocomplete-valid`, `table-headers`, `meta-viewport`, `meta-refresh`, `media-autoplay`. `target-size` stays on: axe's own rule is off by default. Setting one in `rules` turns it back on.
-- `rules` sets axe rules too: `rules: { "axe/region": "off" }`. `axe(options)` takes axe's run options, e.g. `axe({ runOnly: ["wcag2a", "wcag2aa"] })`.
-- axe adds about 550 KB (150 KB gzipped) and makes a run slower: 0.1–1.5 s instead of 5–50 ms on real pages. It checks the page's own document only.
+- axe's violations appear as `axe/<rule>` with a link to Deque's page; critical and serious ones are errors, the others warnings.
+- The SAT rules axe covers are off while it runs, so a problem is reported once (`target-size` stays on); setting one in `rules` turns it back on. `rules` sets axe rules too: `{ "axe/region": "off" }`. `axe(options)` takes axe's run options, e.g. `axe({ runOnly: ["wcag2a", "wcag2aa"] })`.
+- axe adds about 550 KB (150 KB gzipped) and makes a run slower: 0.1–1.5 s instead of 5–50 ms on real pages.
 
-With React or Vue pass the same option: `useSATChecker({ engines: [axe()] })`.
-
----
-
-## 🔎 Results without the panel
-
-```ts
-import { seoAccessibilityTool } from "seo-accessibility-tool";
-
-const { issues, errors, warnings } = await seoAccessibilityTool({ rules: { "link-text": "warning" } });
-// issues: [{ ruleId, severity, category, message, title?, wcag?, source?, element?, selector?, help? }]
-```
-
-The page is not changed. `selector` matches only the element of the issue. `satReset` is deprecated and does nothing. `errorMessages` and `warningMessages` (lists of strings) are still returned but deprecated.
-
-`runSAT(options?, document?)` runs the same checks and returns plain data, ready for `JSON.stringify` (no DOM nodes):
+## Results without the panel
 
 ```ts
 import { runSAT } from "seo-accessibility-tool";
 
-const { issues, summary } = await runSAT();
+const { issues, summary } = await runSAT({ rules: { "link-text": "warning" } });
 // issues: [{ ruleId, severity, category, message, title?, wcag?, source?, selector?, help? }], summary: { errors, warnings }
 ```
 
----
+`runSAT(options?, document?)` returns plain data, ready for `JSON.stringify`. `seoAccessibilityTool(options)` returns the same issues with their DOM `element`. The page is never changed; `satReset` is deprecated and does nothing.
 
-## 🎭 Playwright
+## Playwright
 
-`seo-accessibility-tool/playwright` checks a page in your end-to-end tests. The page doesn't need to import SAT: the helper adds it for the run. `@playwright/test` is an optional peer dependency.
+`seo-accessibility-tool/playwright` checks a page in your end-to-end tests; the page doesn't need to import SAT. `@playwright/test` is an optional peer dependency.
 
 ```ts
 import { test } from "@playwright/test";
@@ -305,13 +286,11 @@ test("report", async ({ page }) => {
 });
 ```
 
-- Both take the SAT options that can cross into the page (`rules`, `wcagLevel`, `allowedLinkTexts`, the 1.x flags) and `axe: true` to run axe-core too (install `axe-core`).
+- Both take the options that can cross into the page (`rules`, `wcagLevel`, `allowedLinkTexts`, the 1.x flags) and `axe: true` (install `axe-core`).
 - `expect` is Playwright's own, extended: use it in place of the one from `@playwright/test`, or merge it with yours through `mergeExpects`.
 - Pages with a strict Content Security Policy block the added script: create the context with `bypassCSP: true`.
 
----
-
-## 🧪 CLI and CI
+## CLI and CI
 
 ```bash
 npm install -D seo-accessibility-tool @playwright/test
@@ -334,7 +313,7 @@ npx sat-check http://localhost:5173/ http://localhost:5173/pricing
 
 Exit codes: 0 within the limits, 1 above them, 2 for a wrong command or a run that couldn't start.
 
-**Broken links.** With `--depth` every link is opened in Chromium, so a single-page app resolves the route with its own router. A link is broken when the server answers 4xx/5xx, the navigation fails, or the page shows the `--not-found` text; it is reported as `link-broken` on the page that links to it. Logout, delete and similar URLs are never opened. Set its severity or turn it off with `rules` in `--config`; the in-page `link-broken` rule (HEAD requests) doesn't run in the CLI.
+**Broken links.** With `--depth` every link is opened in Chromium, so a single-page app resolves the route with its own router. A link is broken when the server answers 4xx/5xx, the navigation fails, or the page shows the `--not-found` text; logout, delete and similar URLs are never opened.
 
 **GitHub Actions:**
 
@@ -359,7 +338,7 @@ jobs:
 
 ---
 
-## 🚧 What SAT does not do
+## What SAT does not do
 
 - **It doesn't certify WCAG conformance.** Automated checks find a part of the WCAG failures. The rest needs a person: keyboard use, screen readers (NVDA, JAWS, VoiceOver), zoom and reflow, whether alt texts, labels and captions make sense. No errors in SAT means no errors SAT can detect.
 - **It doesn't guarantee a position on Google.** The SEO rules check technical requirements from Google Search Central (title, description, canonical, hreflang, structured data); they don't judge content, links from other sites or ranking.
@@ -375,36 +354,25 @@ jobs:
 
 | Feature | Needs |
 |---|---|
-| [axe-core engine](#-axe-core-engine-optional) | `npm install -D axe-core` (4.10 or later); adds about 550 KB and makes a run slower |
-| [Fix with AI](#-fix-with-ai) | The Vite plugin with `ai: true`, [Claude Code](https://code.claude.com) installed and signed in; Claude Code sends the prompt, which quotes the page, to the model |
-| [Playwright helper](#-playwright) and [CLI](#-cli-and-ci) | `@playwright/test` and Chromium (`npx playwright install chromium`), Node 22 or later |
-| [Browser extension](#-browser-extension) | Built from this repository and loaded unpacked in Chrome or Edge; it isn't on the Chrome Web Store |
+| [axe-core engine](#axe-core-engine-optional) | `npm install -D axe-core` (4.10 or later); adds about 550 KB and makes a run slower |
+| [Fix with AI](#fix-with-ai) | The Vite plugin with `ai: true`, [Claude Code](https://code.claude.com) installed and signed in; Claude Code sends the prompt, which quotes the page, to the model |
+| [Playwright helper](#playwright) and [CLI](#cli-and-ci) | `@playwright/test` and Chromium (`npx playwright install chromium`), Node 22 or later |
+| [Browser extension](#browser-extension) | Built from this repository and loaded unpacked in Chrome or Edge; it isn't on the Chrome Web Store |
 
----
+## Contributing
 
-## 🛠️ Development
+Bug reports, false positives and ideas are welcome in the [issues](https://github.com/flgisimone/SAT/issues); see [CONTRIBUTING.md](CONTRIBUTING.md), and [SECURITY.md](SECURITY.md) for security issues.
 
 ```bash
 npm install
 npm run verify       # type check, lint, unit tests, build
 npm run verify:e2e   # build + browser tests (Chromium)
 npm run smoke        # npm pack, then the package installed in a copy of each example
+npm run media        # the README images, from examples/page (the GIF needs ffmpeg)
 ```
 
-- How to contribute: [CONTRIBUTING.md](CONTRIBUTING.md); security issues: [SECURITY.md](SECURITY.md)
-- Conventions: [CONVENTIONS.md](CONVENTIONS.md); agent rules: [AGENTS.md](AGENTS.md)
-- Roadmap and backlog by phase: [plan/README.md](plan/README.md)
-- Changes: [CHANGELOG.md](CHANGELOG.md)
+Conventions: [CONVENTIONS.md](CONVENTIONS.md) · agent rules: [AGENTS.md](AGENTS.md) · roadmap: [plan/README.md](plan/README.md) · changes: [CHANGELOG.md](CHANGELOG.md)
 
----
+## License
 
-## 📄 License
-
-[MIT License](LICENSE) © 2025–2026 [Giulio Simone Floresta](https://github.com/flgisimone)
-
----
-
-## 🔗 References
-
-- [WCAG 2.1 Guidelines](https://www.w3.org/TR/WCAG21/)
-- [WAI-ARIA Authoring Practices](https://www.w3.org/WAI/ARIA/apg/)
+[MIT](LICENSE) © 2025–2026 [Giulio Simone Floresta](https://github.com/flgisimone)

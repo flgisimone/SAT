@@ -25,6 +25,6 @@ Redirect on the server (HTTP 301/302), or with a delay of 0; let users choose wh
 - [Failure F40: time-limited meta redirect](https://www.w3.org/WAI/WCAG22/Techniques/failures/F40)
 - [Failure F41: meta refresh reloading the page](https://www.w3.org/WAI/WCAG22/Techniques/failures/F41)
 
-With the [axe-core engine](../../README.md#-axe-core-engine-optional) this rule is off: axe checks the same thing.
+With the [axe-core engine](../../README.md#axe-core-engine-optional) this rule is off: axe checks the same thing.
 
 [All rules](../../README.md#rules)

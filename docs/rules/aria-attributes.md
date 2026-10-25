@@ -33,6 +33,6 @@ Browsers ignore misspelled attributes and invalid values, so the state never rea
 - [WAI-ARIA 1.2: characteristics of states and properties](https://www.w3.org/TR/wai-aria-1.2/#propcharacteristic_value)
 - [WAI-ARIA 1.2: prohibited states and properties](https://www.w3.org/TR/wai-aria-1.2/#prohibitedattributes)
 
-With the [axe-core engine](../../README.md#-axe-core-engine-optional) this rule is off: axe checks the same thing.
+With the [axe-core engine](../../README.md#axe-core-engine-optional) this rule is off: axe checks the same thing.
 
 [All rules](../../README.md#rules)

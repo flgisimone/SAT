@@ -27,6 +27,6 @@ The exception for an equivalent control elsewhere on the page can't be detected:
 
 - [Understanding 2.5.8: Target Size (Minimum)](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html)
 
-axe-core has a `target-size` rule too, off by default, so this rule stays on with the [axe-core engine](../../README.md#-axe-core-engine-optional).
+axe-core has a `target-size` rule too, off by default, so this rule stays on with the [axe-core engine](../../README.md#axe-core-engine-optional).
 
 [All rules](../../README.md#rules)

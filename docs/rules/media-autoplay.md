@@ -23,6 +23,6 @@ Sound that starts on its own covers the screen reader's voice: users can't hear 
 
 - [Failure F23: audio that plays for more than 3 seconds without a way to stop it](https://www.w3.org/WAI/WCAG22/Techniques/failures/F23)
 
-With the [axe-core engine](../../README.md#-axe-core-engine-optional) this rule is off: axe checks the same thing.
+With the [axe-core engine](../../README.md#axe-core-engine-optional) this rule is off: axe checks the same thing.
 
 [All rules](../../README.md#rules)

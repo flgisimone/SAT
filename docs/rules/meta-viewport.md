@@ -22,6 +22,6 @@ Users who need larger text can't zoom the page to 200%.
 
 - [Understanding 1.4.4: Resize Text](https://www.w3.org/WAI/WCAG22/Understanding/resize-text.html)
 
-With the [axe-core engine](../../README.md#-axe-core-engine-optional) this rule is off: axe checks the same thing.
+With the [axe-core engine](../../README.md#axe-core-engine-optional) this rule is off: axe checks the same thing.
 
 [All rules](../../README.md#rules)

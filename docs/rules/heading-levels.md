@@ -27,6 +27,6 @@ Use the next level down, and style headings with CSS instead of choosing the lev
 
 - [WAI tutorial: Headings](https://www.w3.org/WAI/tutorials/page-structure/headings/)
 
-With the [axe-core engine](../../README.md#-axe-core-engine-optional) this rule is off: axe checks the same thing.
+With the [axe-core engine](../../README.md#axe-core-engine-optional) this rule is off: axe checks the same thing.
 
 [All rules](../../README.md#rules)

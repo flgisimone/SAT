@@ -22,6 +22,6 @@ Screen readers announce the frame by its name: without one, users don't know wha
 
 - [Technique H64: title on frames](https://www.w3.org/WAI/WCAG22/Techniques/html/H64)
 
-With the [axe-core engine](../../README.md#-axe-core-engine-optional) this rule is off: axe checks the same thing.
+With the [axe-core engine](../../README.md#axe-core-engine-optional) this rule is off: axe checks the same thing.
 
 [All rules](../../README.md#rules)

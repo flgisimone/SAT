@@ -25,6 +25,6 @@ Start the `aria-label` with the visible text, or remove it.
 
 - [Technique G208: visible label text in the accessible name](https://www.w3.org/WAI/WCAG22/Techniques/general/G208)
 
-With the [axe-core engine](../../README.md#-axe-core-engine-optional) this rule is off: axe checks the same thing.
+With the [axe-core engine](../../README.md#axe-core-engine-optional) this rule is off: axe checks the same thing.
 
 [All rules](../../README.md#rules)

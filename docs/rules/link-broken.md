@@ -16,6 +16,6 @@ Broken links waste crawl budget and frustrate users.
 
 Fix or remove the link. In single-page apps the dev server usually answers 200 for every route, so client-side 404s can't be found this way. Turn the rule on with `rules: { "link-broken": "error" }`.
 
-To find the 404s of a single-page app, use the CLI: `npx sat-check <url> --depth 2 --not-found "Page not found"` opens each internal link in Chromium, lets the app's router render it and reports the link when the server answers 4xx/5xx or the page shows the not-found text. See [CLI and CI](../../README.md#-cli-and-ci).
+To find the 404s of a single-page app, use the CLI: `npx sat-check <url> --depth 2 --not-found "Page not found"` opens each internal link in Chromium, lets the app's router render it and reports the link when the server answers 4xx/5xx or the page shows the not-found text. See [CLI and CI](../../README.md#cli-and-ci).
 
 [All rules](../../README.md#rules)

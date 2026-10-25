@@ -29,6 +29,6 @@ Add visible text, or an `aria-label` for icon-only controls.
 
 - [WAI-ARIA APG: Providing accessible names](https://www.w3.org/WAI/ARIA/apg/practices/names-and-descriptions/)
 
-With the [axe-core engine](../../README.md#-axe-core-engine-optional) this rule is off: axe checks the same thing.
+With the [axe-core engine](../../README.md#axe-core-engine-optional) this rule is off: axe checks the same thing.
 
 [All rules](../../README.md#rules)
