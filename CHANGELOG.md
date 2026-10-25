@@ -17,6 +17,7 @@ The first version on npm after 1.6.0: npm goes from 1.6.0 to 1.18.0. Versions 1.
 - `LICENSE` file (MIT), now part of the package.
 - [`examples/`](examples/): small projects for the Vite plugin, React, Vue and the CLI, on one page with known issues and the list of the issues SAT reports on it (`examples/page/expected.json`).
 - README: **What SAT does not do**, with the optional features and what they need.
+- README rewritten: quick start with the Vite plugin, a GIF of the panel, a table of the integrations. A [live demo](https://flgisimone.github.io/SAT/) on GitHub Pages, which is now the package's `homepage`.
 - `CONTRIBUTING.md`, `SECURITY.md`, issue templates (bug, false positive, new rule) and a pull request template.
 - `npm run smoke` and a CI job: the package made by `npm pack` is installed in a copy of each example and tried there, on Node 22.
 

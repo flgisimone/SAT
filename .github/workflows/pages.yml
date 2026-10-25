@@ -1,0 +1,38 @@
+name: Demo
+
+# The public demo on GitHub Pages: demo/ with the panel's bundle (dist/sat-controller.js and its chunks).
+on:
+  push:
+    branches: [develop]
+    paths: [src/**, demo/**, .github/workflows/pages.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx rollup -c --silent
+      - run: mkdir site && cp demo/index.html dist/sat-controller.js site/ && cp -r dist/chunks site/
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

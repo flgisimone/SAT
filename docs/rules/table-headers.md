@@ -33,6 +33,6 @@ Point `headers` to `<th>` cells of the same table, and add the missing cells or 
 - [Technique H43: id and headers attributes](https://www.w3.org/WAI/WCAG22/Techniques/html/H43)
 - [WAI tables tutorial](https://www.w3.org/WAI/tutorials/tables/)
 
-With the [axe-core engine](../../README.md#-axe-core-engine-optional) this rule is off: axe checks the same thing.
+With the [axe-core engine](../../README.md#axe-core-engine-optional) this rule is off: axe checks the same thing.
 
 [All rules](../../README.md#rules)

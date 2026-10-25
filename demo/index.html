@@ -1,0 +1,88 @@
+<!doctype html>
+<!-- The public demo (GitHub Pages): examples/page/index.html with a bar on top and SAT already on.
+     The page keeps its issues on purpose (examples/page/expected.json); the bar must add none.
+     .github/workflows/pages.yml publishes this folder with dist/sat-controller.js and dist/chunks/. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example Shop</title>
+  <meta property="og:title" content="Example Shop">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://shop.example/cover.png">
+  <meta property="og:url" content="https://shop.example/">
+  <meta name="twitter:card" content="summary_large_image">
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; background: #fff; }
+    .muted { color: #595959; }
+    .faint { color: #b8b8b8; }
+    .demo { margin: -2rem -1rem 2rem; padding: 1rem; background: #f6f8fa; border-bottom: 1px solid #d1d9e0; font-size: 0.95rem; line-height: 1.5; }
+    .demo p { margin: 0 0 0.5rem; }
+    .demo a { color: #0550ae; }
+    .demo code { background: #fff; border: 1px solid #d1d9e0; border-radius: 6px; padding: 0.25rem 0.5rem; }
+    .demo button { min-height: 2rem; margin-left: 0.25rem; padding: 0 0.75rem; font: inherit; color: #1f2328; background: #fff; border: 1px solid #d1d9e0; border-radius: 6px; cursor: pointer; }
+    .demo details { margin-top: 0.5rem; }
+    .demo summary { cursor: pointer; }
+    /* Wide screens: the page to the right of SAT's panel, which opens on the left. */
+    @media (min-width: 75rem) { body { margin-left: 30rem; } }
+  </style>
+</head>
+<body>
+  <aside class="demo" aria-label="About this demo">
+    <p><strong>SAT demo.</strong> This page has 8 accessibility and SEO issues on purpose. SAT finds them: boxes mark the elements, and the panel lists the issues (the counts at the bottom open it). Click an issue to reach its element.</p>
+    <p><code id="install">npm install -D seo-accessibility-tool</code><button type="button" id="copy">Copy</button> · <a href="https://github.com/flgisimone/SAT">SAT on GitHub</a></p>
+    <details>
+      <summary>What is this</summary>
+      <p>SAT is a visual accessibility and SEO debugger for development: a panel in your dev server that shows WCAG, ARIA and SEO issues on the page, next to the elements. The same checks run in Playwright tests and in CI.</p>
+    </details>
+    <p>Automated checks find only part of the issues: SAT doesn't certify WCAG conformance, and it doesn't see iframes, canvas, or states that appear after an interaction. <a href="https://github.com/flgisimone/SAT#what-sat-does-not-do">What SAT does not do</a></p>
+  </aside>
+  <header><p>Example Shop</p></header>
+  <main>
+    <h1>Example Shop</h1>
+    <p>Every section below has one issue on purpose, next to a similar pattern that is valid.</p>
+
+    <h2>Images</h2>
+    <img id="photo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80'%3E%3Crect width='120' height='80' fill='%2399c'/%3E%3C/svg%3E" width="120" height="80">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80'%3E%3Crect width='120' height='80' fill='%23c99'/%3E%3C/svg%3E" alt="Red mug" width="120" height="80">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='4'%3E%3Crect width='120' height='4' fill='%23ccc'/%3E%3C/svg%3E" alt="" width="120" height="4">
+
+    <h2>Shipping</h2>
+    <h4 id="returns">Returns</h4>
+    <p>Returns are free within 30 days.</p>
+    <h3>Exchanges</h3>
+    <p>Exchanges are free too.</p>
+
+    <h2>Newsletter</h2>
+    <form>
+      <p><label for="name">Name</label> <input id="name" type="text" autocomplete="name"></p>
+      <p><input id="email" type="email" placeholder="Email" autocomplete="email"></p>
+      <p><button type="submit">Subscribe</button></p>
+    </form>
+
+    <h2>Terms</h2>
+    <p class="muted">Prices include VAT.</p>
+    <p class="faint" id="fine-print">Offers end on Sunday.</p>
+    <p>Read the <a href="/terms">terms of sale</a>. For returns, <a id="click-here" href="/returns">click here</a>.</p>
+  </main>
+  <script type="module">
+    import { satChecker } from './sat-controller.js';
+
+    // The options of examples/page/expected.json; enabled: true starts SAT outside development.
+    satChecker({ enabled: true, rules: { 'link-text': 'warning' } });
+    const ui = document.querySelector('sat-panel').shadowRoot;
+    const results = ui.querySelector('.results');
+    if (results.hidden) ui.querySelector('#sat-run-button').click(); // not already on from a previous visit
+    if (matchMedia('(min-width: 48rem)').matches) results.click(); // on a phone the panel would cover the page
+
+    document.getElementById('copy').addEventListener('click', async (event) => {
+      try {
+        await navigator.clipboard.writeText(document.getElementById('install').textContent);
+        event.target.textContent = 'Copied';
+      } catch {
+        getSelection().selectAllChildren(document.getElementById('install'));
+      }
+    });
+  </script>
+</body>
+</html>

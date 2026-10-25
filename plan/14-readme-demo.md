@@ -2,7 +2,7 @@
 
 **Obiettivo**: chi arriva sul repository o su npm capisce in dieci secondi a cosa serve SAT e lo vede funzionare senza installare niente.
 
-> **Stato: da iniziare.** Fonte: roadmap di crescita del 25/10/2026, fasi 1 e 2.
+> **Stato: codice completato il 25/10/2026; restano al maintainer l'attivazione di GitHub Pages e le impostazioni del repository (§4).** Fonte: roadmap di crescita del 25/10/2026, fasi 1 e 2.
 
 ---
 
@@ -23,7 +23,7 @@
 - GIF di 10–20 secondi, sotto i 5 MB, dal video con `ffmpeg` se è installato; altrimenti lo script dice come farla. `ponytail:` niente dipendenza npm per la conversione.
 
 **Criteri di accettazione**
-- [ ] `npm run media` rigenera screenshot e GIF senza passi manuali (con `ffmpeg` installato).
+- [x] `npm run media` rigenera screenshot e GIF senza passi manuali (con `ffmpeg` installato).
 
 #### F14-02 · Demo su GitHub Pages — M
 **Dipendenze**: F13-04
@@ -33,8 +33,8 @@
 - La demo passa a sua volta SAT nella barra che aggiunge (gli errori sono solo quelli voluti).
 
 **Criteri di accettazione**
-- [ ] Test in Chromium sulla demo costruita: il pannello si apre, i problemi sono quelli di `expected.json`, la barra non ne aggiunge.
-- [ ] La demo è online e il link funziona da mobile (provato dopo il push).
+- [x] Test in Chromium sulla demo costruita: il pannello si apre, i problemi sono quelli di `expected.json`, la barra non ne aggiunge.
+- [ ] La demo è online e il link funziona da mobile (provato dopo il push). *Provata da mobile in locale, sul sito come lo costruisce il workflow; online dopo l'attivazione di Pages (§4).*
 
 #### F14-03 · README riscritto — M
 **Dipendenze**: F14-01, F14-02
@@ -50,8 +50,8 @@
 - `homepage` in `package.json` passa alla demo.
 
 **Criteri di accettazione**
-- [ ] La parte visibile senza scorrere su GitHub (desktop) contiene messaggio, GIF e link alla demo; controllata anche da mobile.
-- [ ] Ogni comando e snippet del README è provato da `npm run smoke` o da un test esistente.
+- [x] La parte visibile senza scorrere su GitHub (desktop) contiene messaggio, GIF e link alla demo; controllata anche da mobile.
+- [x] Ogni comando e snippet del README è provato da `npm run smoke` o da un test esistente (eccezioni dichiarate nelle note).
 
 #### F14-04 · Repository su GitHub — S
 **Dipendenze**: F14-02
@@ -59,3 +59,25 @@
 
 **Criteri di accettazione**
 - [ ] Checklist completata e segnata nelle note della fase.
+
+## 3. Note
+
+- **La demo usa `sat-controller.js`, non lo script dell'estensione**: `dist/extension/sat.js` chiama `satChecker({ enabled: true })` senza opzioni, e la pagina di F13-04 vuole `link-text` acceso (`options` di `expected.json`). Il workflow pubblica `demo/index.html` con `dist/sat-controller.js` e `dist/chunks/`; la pagina importa `./sat-controller.js` con `enabled: true`, quindi parte fuori dallo sviluppo come l'estensione. Il test (`tests/browser/demo.spec.ts`) la serve con lo stesso layout tramite `openPage`.
+- **`demo/index.html` è una copia della pagina di F13-04** con la barra (`<aside aria-label="About this demo">`) e lo script, come gli esempi: se si allontana da `expected.json` il test fallisce. Accende SAT cliccando il bottone del dock (solo se non è già acceso da una visita precedente, flag in `localStorage`) e apre il pannello dai contatori. Sotto i 48rem il pannello resta chiuso (coprirebbe la pagina) e la barra dice che i contatori lo aprono; sopra i 75rem la pagina si sposta a destra del pannello.
+- **Workflow `pages.yml`** su push in `develop` che tocca `src/`, `demo/` o il workflow stesso, più `workflow_dispatch`. Fallisce finché Pages non è attivo con sorgente «GitHub Actions» (§4): il `GITHUB_TOKEN` non può attivarlo da sé.
+- **`npm run media`** (`scripts/media.mjs`): la pagina di F13-04 con SAT importato e non ancora acceso, il contenuto spostato a destra perché il pannello non lo copra. Screenshot 1200×760 a 2× in `panel-light.png` e `panel-dark.png`, `social.png` 1280×640, `sat.gif` da un video 1200×720 (10 fps, 800 px, circa 14 s, 1,7 MB). Il video non mostra il puntatore: lo script aggiunge un pallino che segue il mouse, solo nella registrazione. Senza `ffmpeg` salva gli screenshot e dice come fare la GIF.
+- **ffmpeg su questa postazione**: `brew install ffmpeg` fallisce (python@3.15 non compila su macOS 14, configurazione Tier 3 di Homebrew); la GIF è stata fatta con il binario del pacchetto `ffmpeg-static` installato fuori dal progetto e messo nel `PATH`. L'ffmpeg di Playwright non ha l'encoder GIF.
+- **Snippet del README e prove**: Vite (`examples/vite-vanilla`, smoke), React ed esempi Vue (smoke), `satChecker` ed `enabled` (`panel.spec.ts`, `bundles.spec.ts`), axe (`axe.spec.ts`), `runSAT`/`fixPrompt` (`example-page.spec.ts`, `fixPrompt.test.ts`), Playwright (`playwright-helper.spec.ts`), CLI e opzioni (`cli.spec.ts`, `examples/cli`), estensione (`npm run build`, `extension.spec.ts`). Non provati alla lettera: lo snippet Angular (Angular non è fra le dipendenze di sviluppo; usa solo `satChecker` ed `enabled`) e il workflow GitHub Actions d'esempio (i suoi comandi `sat-check` sono in `cli.spec.ts`).
+- **README**: emoji tolte, colonna «1.x option» della tabella regole tolta (le opzioni 1.x sono nel CHANGELOG, «Upgrading from 1.6.0»); le ancore `README.md#-…` di `docs/rules/` aggiornate. Comando d'installazione `npm install -D`, come negli esempi.
+- **CHANGELOG**: voce nella 1.18.0, non ancora pubblicata (su npm c'è la 1.6.0).
+
+## 4. Checklist del maintainer (F14-04)
+
+Impostazioni del repository su GitHub, lette dall'API pubblica il 25/10/2026: descrizione «Universal Accessibility & SEO Checker», sito su npm, Pages e Discussions spente.
+
+- [ ] Settings → Pages → Build and deployment → Source: **GitHub Actions**; poi Actions → Demo → Run workflow (o un push su `develop`) e prova di https://flgisimone.github.io/SAT/ da desktop e da telefono.
+- [ ] Descrizione: «Catch accessibility and SEO issues before your users do. A visual a11y and SEO debugger for your dev server, Playwright and CI.»
+- [ ] Sito: https://flgisimone.github.io/SAT/
+- [ ] Topic: `accessibility`, `a11y`, `wcag`, `aria`, `seo`, `devtools`, `vite-plugin`, `playwright`, `react`, `vue`, `svelte`, `ci`.
+- [ ] Settings → General → Social preview: `docs/images/social.png` (1280×640, da `npm run media`).
+- [ ] Settings → General → Features → Discussions attive, con una categoria «Feedback»; Settings → Code security → Private vulnerability reporting (da F13).
