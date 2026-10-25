@@ -2,7 +2,7 @@
 
 **Obiettivo**: correggere i bug e i falsi positivi trovati nella revisione, mettere una rete di sicurezza (CI, test in browser) e organizzare il progetto come oneoffice (piano a fasi, CONVENTIONS, AGENTS, tokensave, `verify`). Esito: la versione 1.7.0, pronta da pubblicare.
 
-> **Stato: completata** (24/10/2026, branch `fase/f1-stabilizzazione`, unito in `develop`), tranne F1-07 e F1-08, che spettano al maintainer.
+> **Stato: completata** (24/10/2026, branch `fase/f1-stabilizzazione`, unito in `develop`). F1-07 superato dalla 1.18.0 (F13); F1-08 chiuso il 25/10/2026 cancellando il branch.
 >
 > Note di implementazione:
 > - Il lavoro è partito sul branch `fix/review-fixes` ed è proseguito su `fase/f1-stabilizzazione`, che lo contiene.
@@ -77,16 +77,16 @@
 - [x] `npm run verify` e `npm run verify:e2e` passano e stampano solo riepiloghi.
 - [x] `npm run usage` legge i consumi delle sessioni del progetto.
 
-#### F1-07 · Pubblicazione 1.7.0 — S
+#### ~~F1-07 · Pubblicazione 1.7.0 — S~~ (superato: la prima versione pubblicata dopo la 1.6.0 è la 1.18.0, F13-07)
 **Dipendenze**: F1-01 … F1-06
 - Dal maintainer, dopo il merge: `npm run build && npm publish`; tag `v1.7.0`.
 
 **Criteri di accettazione**
-- [ ] `npm view seo-accessibility-tool version` restituisce 1.7.0.
+- Superato il 25/10/2026: la 1.7.0 non è mai stata pubblicata, si passa dalla 1.6.0 alla 1.18.0.
 
 #### F1-08 · Branch `feature/SAT-45` — S
 **Dipendenze**: —
 - Il branch (23/03/2025, «Remove Color Overlay and add console.log for all resolved») non è mai stato unito: decidere se recuperarlo o cancellarlo.
 
 **Criteri di accettazione**
-- [ ] Il branch è unito o cancellato, con il motivo in questa sezione.
+- [x] Il branch è unito o cancellato, con il motivo in questa sezione. *Cancellato il 25/10/2026 (ultimo commit `915102a`): toccava file della vecchia struttura, sostituiti dalle regole di `src/core/rules/` (F2); il problema che risolveva, gli stili scritti sulla pagina, è già risolto dallo strato del pannello (F3); i log in console sono sostituiti dai risultati strutturati e le gravità dalle fonti ufficiali (F8).*
