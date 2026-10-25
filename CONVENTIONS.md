@@ -549,7 +549,7 @@ Consider other consumers of shared components, hooks, services, and types before
 - ESLint flat config (`eslint.config.js`) with `@eslint/js` and `typescript-eslint` recommended rules.
 - Vitest with jsdom; `tests/setup.ts` makes `getContext` return `null` like a browser without canvas.
 - Playwright with Chromium only (`playwright.config.ts`).
-- CI (`.github/workflows/ci.yml`) runs `verify` and `verify:e2e` on pull requests and on `develop`, then `smoke` on Node 20 (the minimum in `engines`).
+- CI (`.github/workflows/ci.yml`) runs `verify` and `verify:e2e` on pull requests and on `develop`, then `smoke` on Node 22 (the minimum in `engines`). Development and the other jobs use the Node of `.nvmrc` (26).
 - `npm run smoke` (`scripts/smoke.mjs`) packs the package with `npm pack` and installs the tarball in a copy of each folder of `examples/`: the tarball holds `LICENSE`, `README.md`, `CHANGELOG.md` and `dist/` only, no optional peer dependency gets installed, and each example reports the issues of `examples/page/expected.json`. `examples/` is outside `tsc`, ESLint and the package; when `examples/page/index.html` changes, its copies in the examples and `expected.json` change with it.
 
 ### 12.3 Plan and Agent Rules

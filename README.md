@@ -347,7 +347,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
-        with: { node-version: 22, cache: npm }
+        with: { node-version: lts/*, cache: npm }
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run build && (npx vite preview --port 4173 &) && curl -s --retry 10 --retry-connrefused -o /dev/null http://localhost:4173/
@@ -377,7 +377,7 @@ jobs:
 |---|---|
 | [axe-core engine](#-axe-core-engine-optional) | `npm install -D axe-core` (4.10 or later); adds about 550 KB and makes a run slower |
 | [Fix with AI](#-fix-with-ai) | The Vite plugin with `ai: true`, [Claude Code](https://code.claude.com) installed and signed in; Claude Code sends the prompt, which quotes the page, to the model |
-| [Playwright helper](#-playwright) and [CLI](#-cli-and-ci) | `@playwright/test` and Chromium (`npx playwright install chromium`), Node 20 or later |
+| [Playwright helper](#-playwright) and [CLI](#-cli-and-ci) | `@playwright/test` and Chromium (`npx playwright install chromium`), Node 22 or later |
 | [Browser extension](#-browser-extension) | Built from this repository and loaded unpacked in Chrome or Edge; it isn't on the Chrome Web Store |
 
 ---
