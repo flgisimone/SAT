@@ -1,6 +1,6 @@
 name: False positive
 description: SAT reports markup that is valid
-labels: [false positive]
+labels: [false-positive]
 body:
   - type: input
     id: rule

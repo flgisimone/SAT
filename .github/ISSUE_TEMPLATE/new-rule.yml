@@ -1,6 +1,6 @@
 name: New rule
 description: Propose a check SAT doesn't have
-labels: [new rule]
+labels: [new-rule]
 body:
   - type: textarea
     id: check
