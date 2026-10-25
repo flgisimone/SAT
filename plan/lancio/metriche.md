@@ -13,7 +13,7 @@ Una riga a settimana, il lunedì. Le metriche servono a scegliere le fasi succes
 
 | Periodo npm | Versione | Download | Stelle | Fork | Issue aperte | Visite (Insights) | Feedback per tema | Note |
 |---|---|---|---|---|---|---|---|---|
-| 2026-10-16 – 2026-10-22 | 1.6.0 | 2 | 0 | 0 | 0 | | | Prima del lancio: 1.18.0 non ancora pubblicata |
+| 2026-10-16 – 2026-10-22 | 1.6.0 | 2 | 0 | 0 | 0 | | | Prima del lancio: 1.19.0 non ancora pubblicata (la 1.18.0 non si pubblica, F17) |
 
 ## Revisione settimanale
 
