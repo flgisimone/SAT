@@ -1,10 +1,10 @@
 {
   "name": "seo-accessibility-tool",
-  "version": "1.18.0",
+  "version": "1.19.0",
   "author": "Giulio Simone Floresta",
   "license": "MIT",
   "type": "module",
-  "description": "Visual accessibility and SEO debugger for web apps: a panel in your dev server that shows WCAG, ARIA and SEO issues on the page, plus a Playwright helper and a CLI for CI",
+  "description": "Accessibility and SEO panel for vite dev that gives the issues to your AI agent over MCP: WCAG, ARIA and SEO checks on the page, axe-core when installed, plus a Playwright helper and a CLI for CI",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
@@ -68,6 +68,9 @@
     "vite-plugin",
     "playwright",
     "axe-core",
+    "mcp",
+    "mcp-server",
+    "ai-agent",
     "ci",
     "browser-extension"
   ],

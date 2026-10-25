@@ -2,7 +2,7 @@
 
 Questo backlog descrive come far crescere SAT (SEO Accessibility Tool) da un insieme di controlli con un pannello a uno strumento affidabile per lo sviluppo e la CI. L'analisi di partenza è in [00-analisi.md](00-analisi.md).
 
-SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, non va in produzione e non invia dati della pagina a nessun servizio. Fa eccezione la correzione con l'IA (F12), che va attivata esplicitamente: i dati li manda l'agente dell'utente, non SAT.
+SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, non va in produzione e non invia dati della pagina a nessun servizio. Fanno eccezione la correzione con l'IA (F12) e il server MCP (F17), che vanno attivati esplicitamente: i dati li manda l'agente dell'utente, non SAT.
 
 | Entry point | Contenuto | Chi lo usa |
 |---|---|---|
@@ -10,7 +10,7 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | `seo-accessibility-tool/sat-controller` | `satChecker(options)`: bottone e pannello nella pagina | Vanilla JS |
 | `seo-accessibility-tool/react` | `useSATChecker(options)` | App React |
 | `seo-accessibility-tool/vue` | `useSatChecker(options)` | App Vue 3 |
-| `seo-accessibility-tool/vite` | `sat(options)`: plugin che aggiunge SAT alle pagine di `vite dev` | Progetti Vite (Svelte, Solid, React, Vue…) |
+| `seo-accessibility-tool/vite` | `sat(options)`: plugin che aggiunge SAT alle pagine di `vite dev`, con il server MCP per gli agenti IA (`mcp: true`) e axe-core se installato | Progetti Vite (Svelte, Solid, React, Vue…) |
 | `seo-accessibility-tool/axe` | `axe(options)`: axe-core come motore aggiuntivo (`engines: [axe()]`) | Chi vuole le circa 90 regole di axe |
 | `seo-accessibility-tool/playwright` | `checkPage(page, options)`, `expect(page).toHaveNoSATErrors()` | Test end-to-end |
 | `sat-check` (bin) | CLI: report in console, JSON e HTML, soglie, crawler dei link interni | CI |
@@ -28,8 +28,8 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | Test | Unit test in jsdom per la logica; test in Chromium sul bundle per tutto ciò che dipende da layout, colori e visibilità | jsdom non ha layout né canvas (F1-04) |
 | Rilascio | Semver; i cambi di comportamento vanno in `CHANGELOG.md`; la pubblicazione su npm la fa il maintainer | CONVENTIONS §8 |
 | Gravità | Errore per un requisito normativo (WCAG A/AA, «must» di HTML e WAI-ARIA, requisito di Google), avviso per una raccomandazione, niente per ciò che le fonti dichiarano valido; ogni regola cita la sua fonte | Revisione del 24/10/2026 sulle fonti ufficiali ([00-analisi-linee-guida.md](00-analisi-linee-guida.md)) |
-| Correzione con l'IA | «Copy fix prompt» ovunque; «Fix with AI» solo con il plugin Vite e `ai: true`, che lancia Claude Code (`claude -p`) con strumenti limitati; nessun altro agente finché non viene chiesto | Serve un processo Node nel progetto; con un solo agente la sicurezza la controlla SAT (F12, decisione del 24/10/2026) |
-| Dati della pagina | Non si inviano a nessun servizio, salvo con la correzione con l'IA attivata esplicitamente: li manda l'agente dell'utente, non SAT | Eccezione opt-in (F12) |
+| Correzione con l'IA | «Copy fix prompt» ovunque; «Fix with AI» solo con il plugin Vite e `ai: true`, che lancia Claude Code (`claude -p`) con strumenti limitati; nessun altro agente nel pulsante; gli altri agenti passano dal server MCP (F17) | Serve un processo Node nel progetto; con un solo agente la sicurezza la controlla SAT (F12, decisione del 24/10/2026) |
+| Dati della pagina | Non si inviano a nessun servizio, salvo con la correzione con l'IA o il server MCP attivati esplicitamente: li manda l'agente dell'utente, non SAT | Eccezione opt-in (F12, F17) |
 | Crescita e adozione | Dopo F12 il lavoro passa dalla funzionalità alla distribuzione: installazione verificata, README, demo, guide, kit di lancio (F13–F16); le fasi successive nascono dai feedback | Roadmap del 25/10/2026: su npm c'è ancora la 1.6.0 e non esiste una demo pubblica |
 | Messaggio e agenti IA | SAT si presenta come il pannello di accessibilità e SEO in `vite dev` che passa i problemi all'agente dell'utente; server MCP nel plugin Vite (`mcp: true`) per qualsiasi agente; «Fix with AI» resta per Claude Code; CLI, Playwright ed estensione restano in secondo piano | Valutazione del 25/10/2026: per CI, crawler ed estensione esistono strumenti più maturi, il pannello nel dev server con l'IA no (F17) |
 | axe-core nel plugin Vite | Acceso da solo quando `axe-core` è installato nel progetto, `axe: false` lo spegne; resta peer dependency opzionale | Toglie l'obiezione «perché non axe?» senza rotture (F17) |

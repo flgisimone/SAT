@@ -2,7 +2,7 @@
 
 **Obiettivo**: SAT si presenta come una cosa sola, il pannello di accessibilità e SEO nel dev server Vite che passa i problemi all'IA, e funziona con qualsiasi agente che parla MCP (Claude Code, Cursor, Copilot in VS Code, Codex, Gemini CLI, Windsurf, Zed) con una riga di configurazione. axe-core diventa il motore consigliato e si accende da solo quando è installato. Esito: la 1.19.0, la prima pubblicata dopo la 1.6.0.
 
-> **Stato: in corso.** Fonte: valutazione del 25/10/2026 (76 download al mese, 0 stelle; per CI, crawler ed estensione esistono `@axe-core/playwright`, `pa11y-ci`, `unlighthouse`, axe DevTools e Lighthouse; il pannello nel dev server con SEO e correzione con l'IA non ha un equivalente diffuso fuori da Astro).
+> **Stato: completata (25/10/2026), con un passo del maintainer aperto**: la prova a mano con Cursor o VS Code (F17-03), che qui non sono installati. Versione 1.19.0, da pubblicare a cura del maintainer (checklist di F13 §4). Fonte: valutazione del 25/10/2026 (76 download al mese, 0 stelle; per CI, crawler ed estensione esistono `@axe-core/playwright`, `pa11y-ci`, `unlighthouse`, axe DevTools e Lighthouse; il pannello nel dev server con SEO e correzione con l'IA non ha un equivalente diffuso fuori da Astro).
 
 ---
 
@@ -28,8 +28,8 @@
 - Se un client importante supporta solo stdio: valutare un ponte `npx sat-check mcp --url <dev server>`; altrimenti niente ponte.
 
 **Criteri di accettazione**
-- [ ] Tabella client → trasporto, configurazione, `Origin` nelle note della fase, con link e data.
-- [ ] Decisione su ponte stdio scritta nelle note.
+- [x] Tabella client → trasporto, configurazione, `Origin` nelle note della fase, con link e data.
+- [x] Decisione su ponte stdio scritta nelle note. *Nessun ponte: tutti e sette i client supportano HTTP.*
 
 #### F17-02 · Risultati dal pannello al dev server — S
 **Dipendenze**: —
@@ -38,8 +38,8 @@
 - Il plugin può chiedere una nuova analisi alle pagine aperte con un evento personalizzato su `server.ws` (`sat:run`); il controller risponde rieseguendo e rimandando i risultati.
 
 **Criteri di accettazione**
-- [ ] Test unitari: richiesta senza token, da un'altra origine o con `mcp` spento rifiutata; l'ultimo risultato sostituisce il precedente per lo stesso URL.
-- [ ] `vite build` non contiene né l'endpoint né il token.
+- [x] Test unitari: richiesta senza token, da un'altra origine o con `mcp` spento rifiutata; l'ultimo risultato sostituisce il precedente per lo stesso URL. *`tests/viteMcp.test.ts`, `tests/mcpResults.test.ts`.*
+- [x] `vite build` non contiene né l'endpoint né il token. *Test di build in `tests/browser/vite.spec.ts` con `ai` e `mcp` accesi.*
 
 #### F17-03 · Endpoint MCP — M
 **Dipendenze**: F17-01, F17-02
@@ -51,9 +51,9 @@
 - All'avvio di `vite dev` il plugin stampa l'URL dell'endpoint e il comando per Claude Code; con `server.strictPort` spento avvisa che la porta può cambiare.
 
 **Criteri di accettazione**
-- [ ] Test unitari: `initialize`, `tools/list`, `tools/call` per i due strumenti, metodo sconosciuto (errore JSON-RPC), richiesta non da loopback, `Host` estraneo, `Origin` estraneo, `mcp` spento.
-- [ ] Test in Chromium con il plugin: la pagina con errori voluti manda i risultati, `sat_issues` restituisce i suoi 5 errori e 3 avvisi, `sat_recheck` dopo una modifica del file della fixture restituisce un problema in meno.
-- [ ] Prova a mano con almeno due client della tabella di F17-01 (Claude Code e uno fra Cursor e VS Code), con l'esito nelle note.
+- [x] Test unitari: `initialize`, `tools/list`, `tools/call` per i due strumenti, metodo sconosciuto (errore JSON-RPC), richiesta non da loopback, `Host` estraneo, `Origin` estraneo, `mcp` spento. *Anche le richieste 2026-07-28: `server/discover`, header da confrontare, versione sconosciuta; `sat_recheck` con un client WebSocket al posto della pagina.*
+- [x] Test in Chromium con il plugin: la pagina con errori voluti manda i risultati, `sat_issues` restituisce i suoi 5 errori e 3 avvisi, `sat_recheck` dopo una modifica del file della fixture restituisce un problema in meno.
+- [ ] Prova a mano con almeno due client della tabella di F17-01 (Claude Code e uno fra Cursor e VS Code), con l'esito nelle note. *Claude Code 2.1.310 e il client dell'SDK TypeScript ufficiale (quello di Gemini CLI) funzionano; Cursor e VS Code non sono installati qui: passo del maintainer.*
 
 #### F17-04 · axe acceso quando è installato — S
 **Dipendenze**: —
@@ -63,8 +63,8 @@
 - `examples/` e `expected.json`: gli esempi Vite installano `axe-core`, i contatori attesi si aggiornano; lo smoke test lo prova dal tarball.
 
 **Criteri di accettazione**
-- [ ] Test unitari: con `axe-core` risolvibile il modulo virtuale importa l'adattatore, senza no, con `axe: false` no anche se c'è.
-- [ ] `npm run smoke` passa con gli esempi aggiornati.
+- [x] Test unitari: con `axe-core` risolvibile il modulo virtuale importa l'adattatore, senza no, con `axe: false` no anche se c'è.
+- [x] `npm run smoke` passa con gli esempi aggiornati. *vite-vanilla con axe-core: 4 errori e 3 avvisi nel pannello (`panelWithAxe`).*
 
 #### F17-05 · README, guide e documenti del progetto — M
 **Dipendenze**: F17-03, F17-04
@@ -79,8 +79,8 @@
 - `plan/README.md`: decisioni (agenti, axe, superficie, versione), fase F17 nella tabella.
 
 **Criteri di accettazione**
-- [ ] Ogni configurazione del README corrisponde a quella verificata in F17-01, con la data.
-- [ ] Gli esempi di codice del README sono provati (smoke test o test in Chromium).
+- [x] Ogni configurazione del README corrisponde a quella verificata in F17-01, con la data.
+- [x] Gli esempi di codice del README sono provati (smoke test o test in Chromium). *`sat({ mcp: true })` con `strictPort` è il config di vite-vanilla (smoke); il comando per Claude Code è quello della prova a mano.*
 
 #### F17-06 · Demo e materiali di lancio — S
 **Dipendenze**: F17-05
@@ -89,7 +89,7 @@
 - `npm run media` rigenera le immagini se il pannello cambia.
 
 **Criteri di accettazione**
-- [ ] Ogni materiale mostra solo funzioni della 1.19.0; nessuna promessa assoluta (F14).
+- [x] Ogni materiale mostra solo funzioni della 1.19.0; nessuna promessa assoluta (F14). *I video sono sette: il nuovo è il 2, quello del feedback diventa il 7. Conteggi con axe verificati (4 → 3 errori dopo l'`alt`).*
 
 #### F17-07 · Rilascio 1.19.0 — S
 **Dipendenze**: F17-01 … F17-06
@@ -97,7 +97,7 @@
 - Versione in `package.json`; checklist del maintainer di F13 §4 aggiornata a `v1.19.0`; F13, F15, F16 rimandano alla 1.19.0 per i passi dopo la pubblicazione.
 
 **Criteri di accettazione**
-- [ ] `npm run verify`, `npm run verify:e2e` e `npm run smoke` passano; la pubblicazione resta al maintainer.
+- [x] `npm run verify`, `npm run verify:e2e` e `npm run smoke` passano; la pubblicazione resta al maintainer. *190 test unitari, 81 in Chromium, smoke con il tarball 1.19.0.*
 
 ## 3. Note
 

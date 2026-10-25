@@ -2,7 +2,7 @@
 
 **Obiettivo**: chi non conosce SAT lo installa da npm su un progetto pulito, segue solo il README e lo vede funzionare. Il pacchetto pubblicato è quello documentato: oggi su npm c'è la 1.6.0 (aprile 2025), mentre il README descrive la 1.17.0.
 
-> **Stato: completata (25/10/2026), versione 1.18.0, da pubblicare a cura del maintainer** (checklist in fondo). Fonte: roadmap di crescita del 25/10/2026, fase 0 e parte della fase 6.
+> **Stato: completata (25/10/2026), versione 1.18.0, che non si pubblica: si pubblica la 1.19.0 di F17** con la checklist in fondo, aggiornata. Fonte: roadmap di crescita del 25/10/2026, fase 0 e parte della fase 6.
 
 ---
 
@@ -103,12 +103,14 @@
 
 ## 4. Checklist di rilascio (maintainer)
 
+Aggiornata in F17: la versione da pubblicare è la **1.19.0**, che comprende la 1.18.0.
+
 1. `git checkout develop && git pull`
 2. `npm ci`
 3. `npm run verify`
 4. `npm run verify:e2e`
 5. `npm run smoke`
-6. `npm publish --dry-run`: controlla versione 1.18.0 e file (`LICENSE`, `README.md`, `CHANGELOG.md`, `package.json`, `dist/`)
+6. `npm publish --dry-run`: controlla versione 1.19.0 e file (`LICENSE`, `README.md`, `CHANGELOG.md`, `package.json`, `dist/`)
 7. `npm publish`
-8. `git tag v1.18.0 && git push origin v1.18.0`
-9. Release su GitHub dal tag `v1.18.0`, con la sezione «Upgrading from 1.6.0» del CHANGELOG come testo
+8. `git tag v1.19.0 && git push origin v1.19.0`
+9. Release su GitHub dal tag `v1.19.0`, con la sezione «Upgrading from 1.6.0» del CHANGELOG come testo
