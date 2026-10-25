@@ -30,6 +30,10 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | Gravità | Errore per un requisito normativo (WCAG A/AA, «must» di HTML e WAI-ARIA, requisito di Google), avviso per una raccomandazione, niente per ciò che le fonti dichiarano valido; ogni regola cita la sua fonte | Revisione del 24/10/2026 sulle fonti ufficiali ([00-analisi-linee-guida.md](00-analisi-linee-guida.md)) |
 | Correzione con l'IA | «Copy fix prompt» ovunque; «Fix with AI» solo con il plugin Vite e `ai: true`, che lancia Claude Code (`claude -p`) con strumenti limitati; nessun altro agente finché non viene chiesto | Serve un processo Node nel progetto; con un solo agente la sicurezza la controlla SAT (F12, decisione del 24/10/2026) |
 | Dati della pagina | Non si inviano a nessun servizio, salvo con la correzione con l'IA attivata esplicitamente: li manda l'agente dell'utente, non SAT | Eccezione opt-in (F12) |
+| Crescita e adozione | Dopo F12 il lavoro passa dalla funzionalità alla distribuzione: installazione verificata, README, demo, guide, kit di lancio (F13–F16); le fasi successive nascono dai feedback | Roadmap del 25/10/2026: su npm c'è ancora la 1.6.0 e non esiste una demo pubblica |
+| Versione dopo F13 | **1.18.0**, la prima pubblicata dopo la 1.6.0: si passa da 1.6.0 a 1.18.0 su npm | Si pubblica dopo aver verificato l'installazione pulita (decisione del 25/10/2026) |
+| Demo pubblica | GitHub Pages, da un workflow del repository; niente StackBlitz | Gratuita e sotto controllo del maintainer (25/10/2026) |
+| Estensione sul Chrome Web Store | Non ora; si riconsidera dopo i primi feedback | Account, privacy policy e revisione prima di sapere se serve (25/10/2026) |
 | Ordine dopo F7 | Prima le regole (F8, F9, F10), poi il pannello (F11), che mostra così titoli e fonti definitivi | Scelta del 24/10/2026 |
 | Versione dopo F12 | **1.17.0**: `fixPrompt`, «Copy fix prompt» nel pannello, «Fix with AI» con Claude Code dal plugin Vite (`ai: true`) | Funzioni nuove senza rotture di API (F12) |
 | Versione dopo F11 | **1.16.0**: pannello in stile DevTools con temi, contatori che filtrano, titoli e fonti delle regole (`Issue.title`, `Issue.source`) | Funzioni nuove senza rotture di API (F11) |
@@ -63,6 +67,10 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | F10 | [10-dati-strutturati-google.md](10-dati-strutturati-google.md) | Proprietà obbligatorie di Google nei dati strutturati, 1.15.0 | F8 |
 | F11 | [11-pannello-professionale.md](11-pannello-professionale.md) | Pannello in stile DevTools: token, tema scuro, icone SVG, riepilogo, problemi leggibili con fonte, 1.16.0 | F8, F9 |
 | F12 | [12-correzione-ia.md](12-correzione-ia.md) | Correzione con l'IA: prompt da copiare, link agli editor, «Fix with AI» con Claude Code dal plugin Vite, 1.17.0 | F11 |
+| F13 | [13-pronto-da-provare.md](13-pronto-da-provare.md) | LICENSE, metadati, `npm pack` installato in progetti puliti in CI, `examples/`, pagina con errori voluti, limiti dichiarati, CONTRIBUTING e template, 1.18.0 pubblicata dal maintainer | F12 |
+| F14 | [14-readme-demo.md](14-readme-demo.md) | Immagini riproducibili con Playwright, demo su GitHub Pages, README riscritto attorno al messaggio, impostazioni del repository | F13 |
+| F15 | [15-guide-adozione.md](15-guide-adozione.md) | Guide in `docs/guides/`: CI, configurazione, SPA, troubleshooting; esempio da clonare | F13 |
+| F16 | [16-kit-lancio.md](16-kit-lancio.md) | Script dei video, tutorial per Dev.to, post per le community, registro delle metriche, triage dei feedback | F14 (F16-04 subito) |
 
 ```
 F1 ─► F2 ─┬─► F3 ──────────┬─► F6
