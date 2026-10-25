@@ -2,7 +2,7 @@
 
 **Obiettivo**: materiali pronti per far conoscere SAT a sviluppatori che possono usarlo, e un modo semplice per capire cosa funziona. Gli agenti preparano i materiali; li pubblica il maintainer.
 
-> **Stato: completata (25/10/2026), con due passi del maintainer aperti**: creare le etichette `false-positive` e `new-rule` (F16-05) e rifare i passi del tutorial con la 1.18.0 da npm prima di pubblicarlo (F16-02). Materiali in `plan/lancio/`; li pubblica il maintainer. Fonte: roadmap di crescita del 25/10/2026, fasi 3, 4 e 7.
+> **Stato: completata (25/10/2026), con un passo del maintainer aperto**: rifare i passi del tutorial con la 1.18.0 da npm prima di pubblicarlo (F16-02). Materiali in `plan/lancio/`; li pubblica il maintainer. Fonte: roadmap di crescita del 25/10/2026, fasi 3, 4 e 7.
 
 ---
 
@@ -54,7 +54,7 @@
 - Scritto in `CONTRIBUTING.md`; le etichette le crea il maintainer.
 
 **Criteri di accettazione**
-- [ ] Le etichette esistono sul repository e i template di F13-06 le assegnano. *I template ora assegnano `bug`, `false-positive` e `new-rule` (prima `false positive` e `new rule`, etichette che non esistevano: GitHub le ignora). Per la documentazione si usa `documentation`, che esiste già, invece di `docs`. Esistono `bug`, `documentation`, `good first issue`; restano da creare `false-positive` e `new-rule` (maintainer).*
+- [x] Le etichette esistono sul repository e i template di F13-06 le assegnano. *I template ora assegnano `bug`, `false-positive` e `new-rule` (prima `false positive` e `new rule`, etichette che non esistevano: GitHub le ignora). Per la documentazione si usa `documentation`, che esiste già, invece di `docs`. Esistono `bug`, `documentation`, `good first issue`; `false-positive` e `new-rule` create dal maintainer, verificate il 25/10/2026.*
 
 ## 3. Dopo il lancio
 
