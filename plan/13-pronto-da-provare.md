@@ -103,14 +103,14 @@
 
 ## 4. Checklist di rilascio (maintainer)
 
-Aggiornata in F17: la versione da pubblicare è la **1.19.0**, che comprende la 1.18.0.
+Aggiornata in F21: la versione da pubblicare è la **2.0.0**, che comprende F18–F21. Prima del rilascio, con `ffmpeg` installato, `npm run media` rifà anche `docs/images/sat.gif` con «Send to agent».
 
 1. `git checkout develop && git pull`
 2. `npm ci`
 3. `npm run verify`
 4. `npm run verify:e2e`
 5. `npm run smoke`
-6. `npm publish --dry-run`: controlla versione 1.19.0 e file (`LICENSE`, `README.md`, `CHANGELOG.md`, `package.json`, `dist/`)
+6. `npm publish --dry-run`: controlla versione 2.0.0 e file (`LICENSE`, `README.md`, `CHANGELOG.md`, `package.json`, `dist/`)
 7. `npm publish`
-8. `git tag v1.19.0 && git push origin v1.19.0`
-9. Release su GitHub dal tag `v1.19.0`, con la sezione «Upgrading from 1.6.0» del CHANGELOG come testo
+8. `git tag v2.0.0 && git push origin v2.0.0`
+9. Release su GitHub dal tag `v2.0.0`, con l'introduzione e la sezione «Upgrading from 1.x» del CHANGELOG come testo

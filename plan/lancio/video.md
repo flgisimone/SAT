@@ -1,10 +1,10 @@
 # Script dei video
 
-Sette video brevi, uno per idea; il messaggio è il pannello in `vite dev` che passa i problemi all'agente IA (F17), CI e report vengono dopo. Li registra e li pubblica il maintainer; il testo a schermo, i sottotitoli e le didascalie sono in inglese, come il README.
+Otto video brevi, uno per idea; il messaggio è il pannello in `vite dev` che passa i problemi all'agente IA (F17) e l'agente che controlla da solo il proprio lavoro (2.0, video 8), CI e report vengono dopo. Li registra e li pubblica il maintainer; il testo a schermo, i sottotitoli e le didascalie sono in inglese, come il README.
 
 ## Regole comuni
 
-- **Solo la 1.19.0**: ogni scena usa funzioni del pacchetto pubblicato. Prima di registrare, `npm view seo-accessibility-tool version` deve dare 1.19.0 o successiva.
+- **Solo funzioni pubblicate**: ogni scena usa funzioni del pacchetto su npm. I video 1–7 vanno con la 1.19.0 o successiva, il video 8 con la 2.0.0: prima di registrare, `npm view seo-accessibility-tool version`.
 - **Formato**: registrazione 16:9 a 1200×720 o più (X, LinkedIn). Per YouTube Shorts, che vuole il verticale, la stessa clip al centro di un fotogramma 1080×1920 con il testo sopra e sotto:
   `ffmpeg -i clip.webm -vf "scale=1080:-2,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:white" -c:v libx264 -pix_fmt yuv420p short.mp4` (da provare: `ffmpeg` non era installato quando è stato scritto).
 - **Sottotitoli sempre accesi**: chi scorre i social guarda senza audio. Il testo a schermo coincide con i sottotitoli; frasi brevi, almeno due secondi l'una. Niente musica che copra una voce.
@@ -131,6 +131,27 @@ Sette video brevi, uno per idea; il messaggio è il pannello in `vite dev` che p
 - **X**: The checks from the dev panel, in CI: sat-check opens your pages in Chromium, prints rule, message and selector, writes an HTML report and fails the PR above the limit. Already have many issues? Start the limit at today's count. https://github.com/flgisimone/SAT/blob/develop/docs/guides/ci.md
 - **LinkedIn**: A panel in the dev server helps the person who opens it. CI helps the whole team.<br><br>sat-check runs SAT's checks on your build in Chromium, writes JSON and HTML reports and exits with 1 above the limits you set. On a project with many issues you can start the limit at today's count and lower it over time, so the build fails only on new ones. Guide for GitHub Actions and GitLab CI: https://github.com/flgisimone/SAT/blob/develop/docs/guides/ci.md #ci #accessibility
 - **YouTube Shorts**: titolo «Fail the pull request on accessibility errors»; descrizione: «sat-check, SAT's CLI for CI. Guide: https://github.com/flgisimone/SAT/blob/develop/docs/guides/ci.md»
+
+## 8. L'agente controlla da solo — 45 s
+
+**Idea**: con la 2.0 l'agente non aspetta che qualcuno guardi la pagina: controlla da solo la route che ha appena scritto, corregge e ricontrolla; dal pannello gli si manda quello che si vede.
+
+| Tempo | Inquadratura | Testo a schermo / sottotitoli |
+|---|---|---|
+| 0–6 s | Terminale: `npx sat-check init --claude`, l'elenco dei file scritti | One command: your agent knows SAT. |
+| 6–16 s | Claude Code: «Add a newsletter form to /»; poi la chiamata a `sat_check` sulla route, senza browser aperto | It writes the component, then checks the page itself. Headless, no browser window. |
+| 16–24 s | La risposta: «/: 0 fixed, 2 new, 0 remaining.»; la chiamata a `sat_rule` | It sees what its edit added, and reads how to fix it. |
+| 24–32 s | La modifica nel componente; di nuovo `sat_check`: «2 fixed» | It fixes the source and checks again. |
+| 32–42 s | Browser con il pannello: «Send to agent» su un problema; accanto compare *Queued*, poi *Taken by the agent*, poi *Verified* | Something you see? Send it. The panel shows what the agent did. |
+| 42–45 s | Il pannello | Your agent, your model. SAT checks. |
+
+**Come si registra**: `npx degit flgisimone/SAT/examples/vite-vanilla my-site`, `npm install`, `npm install -D playwright && npx playwright install chromium`, `npx sat-check init --claude`, `npm run dev` con la porta fissa; Claude Code nella cartella del progetto. Il componente e i problemi che l'agente introduce cambiano da una prova all'altra: il testo a schermo segue quello che SAT dice nella registrazione, mai un numero inventato. Per la scena del pannello si chiede poi all'agente «Fix the issues I sent from SAT»; i passaggi di stato si vedono nel pannello e non serve tagliare. Approvazioni di Claude Code fuori inquadratura o tagliate.
+
+**Invito**: `npx sat-check init`.
+
+- **X**: SAT 2.0: your coding agent checks the page it just wrote. `npx sat-check init`, and it runs sat_check on the route in headless Chromium, reads the rule, fixes the source and checks again. Spot something yourself? "Send to agent" from the panel. https://github.com/flgisimone/SAT
+- **LinkedIn**: The hard part of letting an agent write UI isn't the code, it's knowing what the rendered page got wrong.<br><br>SAT 2.0, an open source accessibility and SEO checker for vite dev, closes that loop: after `npx sat-check init` the agent checks each route it touches in headless Chromium, reads how to fix each rule and checks again, and the answer says what it fixed, what is new and what remains. From the panel in the browser you can send it any issue you see, and watch it go from queued to verified.<br><br>Automated checks find part of the issues: review the diff, and test with a keyboard and a screen reader. https://github.com/flgisimone/SAT #accessibility #ai
+- **YouTube Shorts**: titolo «My AI agent checks its own accessibility issues»; descrizione: «SAT 2.0 for vite dev: sat_check, Send to agent. https://github.com/flgisimone/SAT»
 
 ## 7. Una modifica nata da un feedback — 30 s
 

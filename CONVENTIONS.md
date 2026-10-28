@@ -309,10 +309,12 @@ src/
     satDom.ts                 DOM helpers shared by every rule (queryTargets, describeElement)
     issue.ts                  Issue, Severity, Category, cssSelector
     satOptions.ts             SATOptions, rule settings, Engine
-    aiFix.ts                  "Fix with AI" in the page: calls the Vite plugin's endpoint, checks the result
+    aiFix.ts                  "Fix with Claude Code" in the page: calls the Vite plugin's endpoint, checks the result
+    mcpResults.ts, agentQueue.ts  what the page sends to the MCP server: results, "Send to agent", the states of the queue
   ui/                         panel in a shadow root (satUI.ts), boxes over the page (overlay.ts), styles (DOM built by hand, no framework)
   integrations/               vite.ts: Vite plugin that adds satChecker to `vite dev` pages (entry: "./vite");
                               fixServer.ts: the plugin's `POST /__sat/fix` endpoint, which runs Claude Code; mcpServer.ts: `POST /__sat/mcp` (Node only);
+                              queueServer.ts: `POST /__sat/queue`, the issues sent to the agent and their state;
                               headlessCheck.ts: `sat_check`, the dev server's pages in headless Chromium, with the project's Playwright
   engines/                    axe.ts: other checkers as `Engine`s (entry: "./axe"), with their package as optional peer dependency
   headless/                   runs in Node with Playwright: playwright.ts (entry: "./playwright"), cli.ts (bin `sat-check`), report.ts;
@@ -332,7 +334,7 @@ plan/                         backlog and phases (plan/README.md)
 - Engines translate another checker's results into `Issue`s and list the SAT rules they replace; `core/` knows only the `Engine` interface, never the checker's package.
 - `headless/` runs SAT only inside the page, through `dist/sat-inject.js`: Node code never calls the rules directly and imports `core/` and `sat/` only for types and pure helpers.
 - The public API is what the five entry points in `package.json` `exports` and the `sat-check` command expose. Anything else is internal and may change.
-- "Fix with AI" runs only from the Vite plugin with `ai: true`: the endpoint accepts loopback connections from the dev server's origins with the token of its run, and Claude Code gets only `Read`, `Edit`, `Grep` and `Glob`. Anything that widens this is a security-sensitive change (§9.4).
+- "Fix with Claude Code" runs only from the Vite plugin with `ai: true`: the endpoint accepts loopback connections from the dev server's origins with the token of its run, and Claude Code gets only `Read`, `Edit`, `Grep` and `Glob`. Anything that widens this is a security-sensitive change (§9.4).
 
 ## 6. Writing Checks
 
@@ -440,7 +442,7 @@ Runtime dependencies end up in every integrator's development bundle: add one on
 
 - Never commit secrets or private credentials.
 - Never render page content or messages with `innerHTML`; use `textContent`.
-- Do not send page content anywhere: SAT works locally in the browser. The one exception is "Fix with AI", turned on explicitly (`ai: true`): the user's Claude Code sends the prompt to the model, SAT does not.
+- Do not send page content anywhere: SAT works locally in the browser. The exceptions are turned on explicitly: "Fix with Claude Code" (`ai: true`) and the MCP server with "Send to agent" (`mcp: true`). The user's agent sends the prompt to the model, SAT does not.
 - Treat URLs, user-provided values, API responses, and browser storage as potentially untrusted where appropriate.
 
 Security-sensitive changes require explicit reasoning and proportionate verification.

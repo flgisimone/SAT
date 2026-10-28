@@ -34,7 +34,7 @@
     <p><code id="install">npm install -D seo-accessibility-tool axe-core</code><button type="button" id="copy">Copy</button> · <a href="https://github.com/flgisimone/SAT">SAT on GitHub</a></p>
     <details>
       <summary>What is this</summary>
-      <p>SAT is an accessibility and SEO panel for development: in <code>vite dev</code> it shows WCAG, WAI-ARIA and SEO issues on the page, next to the elements, each with its source. With <code>sat({ mcp: true })</code> your agent reads them with <code>sat_issues</code>, fixes the code and checks again with <code>sat_recheck</code>; with axe-core installed, its rules run too. Here, without a dev server, there is only the panel.</p>
+      <p>SAT is an accessibility and SEO panel for development: in <code>vite dev</code> it shows WCAG, WAI-ARIA and SEO issues on the page, next to the elements, each with its source. After <code>npx sat-check init</code> your agent checks its routes with <code>sat_check</code>, fixes the code and checks again; in the panel, <em>Send to agent</em> puts an issue in its queue and shows when the agent has fixed and verified it. With axe-core installed, its rules run too. Here, without a dev server, there is only the panel.</p>
     </details>
     <p>Automated checks find only part of the issues: SAT doesn't certify WCAG conformance, and it doesn't see iframes, canvas, or states that appear after an interaction. <a href="https://github.com/flgisimone/SAT#what-sat-does-not-do">What SAT does not do</a></p>
   </aside>

@@ -4,7 +4,8 @@ import type { Issue } from "./issue";
 import type { SATOptions } from "./satOptions";
 import { createSATUI } from "../ui/satUI";
 import { createFixController } from "./aiFix";
-import { sendResults } from "./mcpResults";
+import { changeQueue, sendResults } from "./mcpResults";
+import { pageKey } from "./agentQueue";
 
 let satHasRun = false;
 
@@ -93,7 +94,7 @@ export function satChecker(customOptions: Partial<SATOptions> = {}): void {
         if (!running || id !== runId) return;
         ui.showResults(issues, headingOutline(document), performance.now() - startTime);
         fixer?.checked(issues);
-        if (customOptions.mcp) sendResults(customOptions.mcp, issues);
+        if (mcp) sendResults(mcp, issues);
     };
 
     const runSoon = (delay: number) => {
@@ -122,18 +123,29 @@ export function satChecker(customOptions: Partial<SATOptions> = {}): void {
         ui.setRunning(false);
     };
 
-    const ui = createSATUI(() => (running ? stop() : start()), run, customOptions.aiFix && {
-        fix: (issues) => fixer!.fix(issues),
-        cancel: () => fixer!.cancel(),
+    const { mcp } = customOptions;
+    const ui = createSATUI(() => (running ? stop() : start()), run, {
+        fix: customOptions.aiFix && {
+            fix: (issues) => fixer!.fix(issues),
+            cancel: () => fixer!.cancel(),
+        },
+        agent: mcp?.queue ? { change: (change) => changeQueue(mcp, { url: location.href.split("#")[0], ...change }) } : undefined,
+        suggestMcp: customOptions.suggestMcp,
     });
     const fixer = customOptions.aiFix && createFixController(customOptions.aiFix, ui.showFix, run);
 
+    // The dev server says what the agent did with the issues sent from this page.
+    mcp?.status?.(({ page, issues }) => {
+        if (page === pageKey(location.href)) ui.showAgent(issues);
+    });
+
     // An agent asked for a new check (sat_recheck): SAT turns on if it was off.
-    customOptions.mcp?.listen?.(() => (running ? run() : start()));
+    mcp?.listen?.(() => (running ? run() : start()));
 
     onRouteChange(() => {
         if (!running) return;
         ui.clearHighlights(); // the old page's elements are gone
+        if (mcp?.queue) ui.showAgent([]); // the new page's issues sent come with its results
         runSoon(ROUTE_DELAY);
     });
 

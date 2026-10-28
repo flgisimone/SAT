@@ -141,5 +141,5 @@ The Vite plugin sets `enabled` itself (SAT is in `vite dev` only) and takes `obs
 | `enabled` | `boolean` | `NODE_ENV === "development"` |
 | `observeDom` | `number` (ms) | off |
 | `axe` | `boolean`: Vite plugin, Playwright, CLI config | Vite plugin: `true` when `axe-core` is installed; otherwise `false` |
-| `ai` | `boolean`: Vite plugin, [Fix with AI](../../README.md#fix-with-ai-claude-code-one-click) | `false` |
-| `mcp` | `boolean`: Vite plugin, [MCP server](ai-agents.md) for AI agents | `false` |
+| `ai` | `boolean`: Vite plugin, [Fix with Claude Code](../../README.md#from-the-panel-to-the-agent) | `false` |
+| `mcp` | `boolean`: Vite plugin, [MCP server](ai-agents.md) for AI agents and [Send to agent](ai-agents.md#send-to-agent) | `false` |

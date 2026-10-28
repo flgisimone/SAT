@@ -35,6 +35,40 @@ test('vite dev: SAT starts on its own, with the options of the plugin', async ({
     await expect(page.locator('.results')).toHaveText(/^0 errors · [1-9]\d* warnings?$/);
 });
 
+test('the actions of an issue follow the options: Send to agent (mcp), Fix with Claude Code (ai), Copy fix prompt always', async ({ page }) => {
+    const actions = async (url: string) => {
+        await page.goto(url);
+        await page.locator('#sat-run-button').click();
+        await page.locator('.results').click();
+        return page.locator('.row').first().locator('.ghost').evaluateAll((buttons) => buttons.map((button) => button.getAttribute('aria-label')));
+    };
+    const hint = page.locator('.hint');
+
+    // Without mcp and ai the panel suggests mcp, until the hint is closed.
+    expect(await actions(server.resolvedUrls!.local[0])).toEqual(['Copy fix prompt']);
+    await expect(hint).toHaveText('Send issues to your AI agent: add sat({ mcp: true }) to vite.config.');
+    await page.getByRole('button', { name: 'Close hint' }).click();
+    await expect(hint).toBeHidden();
+    await page.reload();
+    await page.locator('.results').click();
+    await expect(page.locator('.row').first()).toBeVisible();
+    await expect(hint).toBeHidden();
+
+    for (const [options, expected] of [
+        [{ ai: true }, ['Fix with Claude Code', 'Copy fix prompt']],
+        [{ ai: true, mcp: true }, ['Send to agent', 'Fix with Claude Code', 'Copy fix prompt']],
+    ] as const) {
+        const other = await createServer({ ...config(), plugins: [sat({ ...options, rules: { h1: 'warning' } })], server: { port: 0, host: '127.0.0.1' } });
+        await other.listen();
+        try {
+            expect(await actions(other.resolvedUrls!.local[0])).toEqual(expected);
+            await expect(hint).toBeHidden();
+        } finally {
+            await other.close();
+        }
+    }
+});
+
 test('vite build: the bundle has no SAT, no endpoint and no token, even with ai and mcp on', async () => {
     const outDir = mkdtempSync(join(tmpdir(), 'sat-vite-'));
     await build({ ...config(), plugins: [sat({ ai: true, mcp: true })], build: { outDir, emptyOutDir: true } });
@@ -74,7 +108,7 @@ test.describe('Fix with AI (ai: true), with tests/fake-claude/claude in place of
         await expect(page.locator('.results')).toHaveText(/^1 error · /);
         await page.locator('.results').click();
 
-        await page.locator('.rule', { hasText: 'Images have alternative text' }).getByRole('button', { name: 'Fix with AI', exact: true }).click();
+        await page.locator('.rule', { hasText: 'Images have alternative text' }).getByRole('button', { name: 'Fix with Claude Code', exact: true }).click();
         await expect(page.locator('.fix-status')).toHaveText('Fixed · Images have alternative text', { timeout: 15_000 });
         await expect(page.locator('.fix-files li')).toHaveText(['main.js']);
         await expect(page.locator('.results')).toHaveText(/^0 errors · /);
@@ -97,7 +131,7 @@ test.describe('MCP server (mcp: true) on the page with known issues', () => {
             headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream' },
             body: JSON.stringify({ jsonrpc: '2.0', id: id++, method: 'tools/call', params: { name, arguments: args } }),
         });
-        const { result } = await response.json() as { result: { structuredContent?: { pages: Array<{ issues: Array<{ ruleId: string; severity: string }> }> } } };
+        const { result } = await response.json() as { result: { structuredContent?: { pages: Array<{ issues: Array<{ ruleId: string; severity: string; requested?: boolean }> }> } } };
         return result.structuredContent?.pages[0]?.issues ?? [];
     };
     const severities = (issues: Array<{ severity: string }>) => issues.map((issue) => issue.severity).sort().join(',');
@@ -127,6 +161,35 @@ test.describe('MCP server (mcp: true) on the page with known issues', () => {
         const left = await tool('sat_recheck');
         expect(severities(left)).toBe('error,error,error,error,warning,warning,warning');
         expect(left.map((issue) => issue.ruleId)).not.toContain('image-alt');
+    });
+
+    test('Send to agent: sat_issues returns the issue first; the panel shows it queued, taken, then verified after the fix and sat_recheck', async ({ page }) => {
+        const file = join(app, 'index.html');
+        writeFileSync(file, readFileSync(new URL('../../examples/page/index.html', import.meta.url), 'utf8'));
+        await page.goto(mcpServer.resolvedUrls!.local[0]);
+        await page.locator('#sat-run-button').click();
+        await expect(page.locator('.results')).toHaveText('5 errors · 3 warnings');
+        await page.locator('.results').click();
+
+        const row = page.locator('.rule', { hasText: 'Images have alternative text' }).locator('.row').first();
+        const send = row.getByRole('button', { name: 'Send to agent', exact: true });
+        await send.click();
+        await expect(page.getByRole('status')).toHaveText('Sent to agent: 1 issue');
+        await expect(row.locator('.agent-status')).toHaveText('Queued');
+        await expect(send).toHaveAttribute('aria-pressed', 'true');
+
+        await expect.poll(async () => (await tool('sat_issues'))[0]).toMatchObject({ ruleId: 'image-alt', requested: true });
+        await expect(row.locator('.agent-status')).toHaveText('Taken by the agent');
+        await expect(page.getByRole('status')).toHaveText('Taken by the agent: Images have alternative text');
+
+        // The agent's fix: Vite reloads the page, which checks again on its own.
+        writeFileSync(file, readFileSync(file, 'utf8').replace('id="photo"', 'id="photo" alt="A red bike"'));
+        expect((await tool('sat_recheck')).map((issue) => issue.ruleId)).not.toContain('image-alt');
+        await page.locator('.results').click();
+        const sent = page.locator('.agent-list li');
+        await expect(sent).toHaveText(['VerifiedImages have alternative text']);
+        await page.getByRole('button', { name: 'Clear done' }).click();
+        await expect(page.locator('.agent')).toBeHidden();
     });
 
     test('sat_check checks a route in headless Chromium with no page open; images only when asked', async () => {

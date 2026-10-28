@@ -1,11 +1,12 @@
 # SAT with your AI agent
 
-SAT finds accessibility and SEO issues on the page in `vite dev`; your coding agent fixes them in the source. This guide connects the two through SAT's MCP server, which works with any agent that speaks [MCP](https://modelcontextprotocol.io) over HTTP, and shows the other two ways: **Fix with AI** with Claude Code, and **Copy fix prompt**.
+SAT finds accessibility and SEO issues on the page in `vite dev`; your coding agent fixes them in the source. This guide connects the two through SAT's MCP server, which works with any agent that speaks [MCP](https://modelcontextprotocol.io) over HTTP, and shows how the panel hands issues to the agent: **Send to agent**, **Fix with Claude Code** and **Copy fix prompt**.
 
 | Way | Agents | Needs |
 |---|---|---|
 | [MCP server](#the-mcp-server) | Claude Code, Cursor, VS Code (Copilot), Codex CLI, Gemini CLI, Windsurf, Zed | Vite plugin with `mcp: true` |
-| [Fix with AI](#fix-with-ai) | Claude Code, from a button in the panel | Vite plugin with `ai: true` |
+| [Send to agent](#send-to-agent) | Any agent connected to the MCP server, from a button in the panel | Vite plugin with `mcp: true` |
+| [Fix with Claude Code](#fix-with-claude-code) | Claude Code, from a button in the panel | Vite plugin with `ai: true` |
 | [Copy fix prompt](#copy-fix-prompt) | Any, by pasting | Nothing: every integration |
 
 ## The MCP server
@@ -219,9 +220,19 @@ More in [SECURITY.md](../../SECURITY.md).
 
 SAT implements the MCP specification [2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28) (stateless requests, `server/discover`) and the earlier versions with the `initialize` handshake (2025-03-26 to 2025-11-25), which most clients still use. Responses are JSON, never SSE; no sessions, no notifications to the client. Clients that speak only stdio need a bridge: see [Troubleshooting](troubleshooting.md#my-agent-supports-only-stdio-servers).
 
-## Fix with AI
+## Send to agent
 
-With `sat({ ai: true })` every issue in the panel gets a **Fix with AI** button that runs Claude Code (`claude -p`) in the project with `Read`, `Edit`, `Grep` and `Glob` only, shows its progress and the files it changed, then checks the page again: **Fixed** or **Still present**. It needs Claude Code installed and signed in. `ai` and `mcp` can be on together. Details in the [README](../../README.md#fix-with-ai-claude-code-one-click).
+With `sat({ mcp: true })` every issue in the panel gets a **Send to agent** button, and every rule **Send all to agent**. The issue goes in a queue in the dev server; MCP lets the agent ask, not the server push, so the agent gets it the next time it calls `sat_issues`:
+
+- `sat_issues` returns the issues you sent first, with `requested: true`, and says *"The user asked to fix these first"*; with `requested: true` as argument it returns only them, each with its fix prompt (made by the page, which has the element).
+- The panel shows the state next to the issue, and lists what you sent, with an announcement for screen readers at each change: **Queued**, **Taken by the agent** (`sat_issues` returned it), **Fixed** (the page checked again and the issue is gone), **Verified** (gone after the agent's `sat_check` or `sat_recheck`). A fixed issue leaves the queue by itself.
+- Press the button again to take an issue back; **Clear done** removes the fixed ones from the list.
+
+Tell your agent *"Fix the issues I sent from SAT"*, or let it find them: the server's instructions tell it to fix the requested issues first. The queue is in the dev server's memory, like the results, and `POST /__sat/queue` has the protection of `/__sat/results`: this computer, the dev server's pages, the token of this run.
+
+## Fix with Claude Code
+
+With `sat({ ai: true })` every issue in the panel gets a **Fix with Claude Code** button that runs Claude Code (`claude -p`) in the project with `Read`, `Edit`, `Grep` and `Glob` only, shows its progress and the files it changed, then checks the page again: **Fixed** or **Still present**. It needs Claude Code installed and signed in. `ai` and `mcp` can be on together. Details in the [README](../../README.md#from-the-panel-to-the-agent).
 
 ## Copy fix prompt
 

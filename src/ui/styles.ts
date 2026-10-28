@@ -139,7 +139,7 @@ button.item:hover { background: var(--sat-hover); }
 
 .live { font-size: 12px; color: var(--sat-muted); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.prompt-box, .fix { margin: 0 14px 10px; padding: 6px 10px 8px; border: 1px solid var(--sat-border); border-radius: 8px; background: var(--sat-surface); font-size: 12px; }
+.prompt-box, .fix, .agent, .hint { margin: 0 14px 10px; padding: 6px 10px 8px; border: 1px solid var(--sat-border); border-radius: 8px; background: var(--sat-surface); font-size: 12px; }
 .box-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .box-head p { margin: 0; }
 .prompt-box textarea {
@@ -147,11 +147,18 @@ button.item:hover { background: var(--sat-hover); }
     font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--sat-fg);
     background: var(--sat-bg); border: 1px solid var(--sat-border); border-radius: 6px;
 }
-.fix p, .fix ul { margin: 4px 0 0; overflow-wrap: anywhere; }
+.fix p, .fix ul, .agent ul { margin: 4px 0 0; overflow-wrap: anywhere; }
 .fix-warning { display: flex; gap: 6px; align-items: flex-start; }
 .fix-log, .fix-summary { color: var(--sat-muted); }
 .fix-files li { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .fix-label { font-weight: 600; }
+.hint code { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; }
+.agent-list li { display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: center; }
+.agent-state:empty { display: none; }
+.agent-status { display: inline-flex; gap: 4px; align-items: center; font-size: 12px; font-weight: 600; color: var(--sat-muted); white-space: nowrap; }
+.agent-status svg { width: 12px; height: 12px; }
+.agent-status.fixed, .agent-status.verified { color: var(--sat-accent); }
+.send[aria-pressed="true"] { color: var(--sat-accent); background: var(--sat-hover); }
 
 .outline { padding: 6px 10px; }
 .outline ul { padding-left: 18px; border-left: 1px solid var(--sat-border); margin-left: 14px; }

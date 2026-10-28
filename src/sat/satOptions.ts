@@ -44,4 +44,6 @@ export interface SATOptions {
     aiFix?: AIFixEndpoint;
     /** Controller only: where the results go for the agents that use SAT's MCP server. Set by the Vite plugin with `mcp: true`. */
     mcp?: MCPEndpoint;
+    /** Controller only: shows once a hint to turn on the plugin's `mcp`. Set by the Vite plugin without `mcp` and `ai`. */
+    suggestMcp?: boolean;
 }
