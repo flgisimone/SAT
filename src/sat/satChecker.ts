@@ -89,7 +89,7 @@ export function satChecker(customOptions: Partial<SATOptions> = {}): void {
             issues = [{ ruleId: "sat", severity: "error", category: "a11y", message: RUN_FAILED }];
         }
 
-        // Stopped, or a newer run started while this one waited (e.g. on link-broken requests).
+        // Stopped, or a newer run started while this one waited (e.g. on an engine).
         if (!running || id !== runId) return;
         ui.showResults(issues, headingOutline(document), performance.now() - startTime);
         fixer?.checked(issues);

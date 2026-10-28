@@ -34,7 +34,6 @@ import { structuredData } from './seo/structured-data';
 import { mixedContent } from './seo/mixed-content';
 import { imageSize } from './seo/image-size';
 import { imageLazyLoad } from './seo/image-lazy-load';
-import { linkBroken } from './seo/link-broken';
 
 export type { Rule, RuleContext, RuleId, Report, WcagLevel } from './rule';
 
@@ -75,5 +74,4 @@ export const rules: Rule[] = [
     mixedContent,
     imageSize,
     imageLazyLoad,
-    linkBroken,
 ];

@@ -1,7 +1,6 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import type { Page } from '@playwright/test';
-import { ruleHelp } from '../sat/issue';
 import type { CheckPageOptions } from './playwright';
 import { formatIssues, htmlReport, plural, totals, type PageReport } from './report';
 
@@ -16,13 +15,12 @@ Checks each page in Chromium (Playwright) and exits with 1 when the limits are e
   --config <file>      JSON file with SAT options, e.g. { "rules": { "link-text": "warning" } }
   --axe                runs axe-core too (needs the axe-core package)
   --wcag-level <level> AA (default) or AAA, which adds the AAA criteria as warnings
-  --depth <n>          follows same-origin links this many levels deep and checks those pages too,
-                       reporting broken links (default 0: only the given URLs)
-  --max-pages <n>      stops after this many pages (default 100)
-  --not-found <text>   a page showing this text is a broken link (the "not found" view of an SPA)
   -h, --help           shows this help`;
 
 class UsageError extends Error {}
+
+/** A page that can't be opened: the message is enough, without a stack. */
+class PageError extends Error {}
 
 function count(value: string | undefined, name: string, fallback: number): number {
     if (value === undefined) return fallback;
@@ -43,9 +41,6 @@ function readArgs(argv: string[]) {
             config: { type: 'string' },
             axe: { type: 'boolean' },
             'wcag-level': { type: 'string' },
-            depth: { type: 'string' },
-            'max-pages': { type: 'string' },
-            'not-found': { type: 'string' },
             help: { type: 'boolean', short: 'h' },
         },
     });
@@ -74,83 +69,22 @@ function readArgs(argv: string[]) {
             ...(values.axe && { axe: true }),
             ...(wcagLevel && { wcagLevel }),
         } as CheckPageOptions,
-        depth: count(values.depth, 'depth', 0),
-        maxPages: count(values['max-pages'], 'max-pages', 100),
-        notFound: values['not-found'],
     };
 }
 
 type Args = ReturnType<typeof readArgs>;
 
-/** Why the page just opened counts as a broken link, if it does. */
-async function brokenReason(page: Page, status: number | undefined, notFound: string | undefined): Promise<string | undefined> {
-    if (status !== undefined && status >= 400) return `status ${status}`;
-    if (notFound && (await page.getByText(notFound).count()) > 0) return `shows "${notFound}"`;
-    return undefined;
-}
-
-interface Visit {
-    url: string;
-    depth: number;
-    /** The checked page that links here, and the first link's selector. */
-    from?: { report: PageReport; selector: string; count: number };
-}
-
-/**
- * Checks the pages breadth first. Every page opens with a real navigation, so an SPA resolves
- * the route with its own router. ponytail: one page at a time; open tabs in parallel if large sites get slow.
- */
-async function crawl(page: Page, args: Args, checkPage: typeof import('./playwright').checkPage): Promise<PageReport[]> {
-    const { rules = {}, ...rest } = args.options;
-    const brokenSetting = rules['link-broken'];
-    // The crawler replaces the in-page rule, which can't see an SPA's 404s.
-    const options: CheckPageOptions = { ...rest, rules: { ...rules, 'link-broken': 'off' } };
-
+/** Checks the pages one at a time. ponytail: open tabs in parallel if many URLs get slow. */
+async function checkAll(page: Page, args: Args, checkPage: typeof import('./playwright').checkPage): Promise<PageReport[]> {
     const pages: PageReport[] = [];
-    const queue: Visit[] = args.urls.map((url) => ({ url, depth: 0 }));
-    const seen = new Set(args.urls);
-
-    const addBroken = (report: PageReport, message: string, selector?: string) => {
-        if (brokenSetting === 'off') return;
-        const severity = brokenSetting === 'warning' ? 'warning' : 'error';
-        report.issues.push({ ruleId: 'link-broken', severity, category: 'seo', message, selector, help: ruleHelp('link-broken') });
-        report.summary[severity === 'error' ? 'errors' : 'warnings']++;
-    };
-
-    for (let visit = queue.shift(); visit && pages.length < args.maxPages; visit = queue.shift()) {
-        let reason: string | undefined;
-        try {
-            const response = await page.goto(visit.url, { waitUntil: 'load' });
-            // Let an SPA render after load; a page that never goes quiet is checked anyway.
-            await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => undefined);
-            reason = await brokenReason(page, response?.status(), args.notFound);
-        } catch (error) {
-            reason = `request failed: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`;
-        }
-
-        if (reason) {
-            if (visit.from) {
-                addBroken(visit.from.report, `Broken internal link: ${visit.url} (${reason}), used by ${visit.from.count} link(s).`, visit.from.selector);
-            } else {
-                const report: PageReport = { url: visit.url, issues: [], summary: { errors: 0, warnings: 0 } };
-                addBroken(report, `Page can't be checked: ${visit.url} (${reason}).`);
-                pages.push(report);
-            }
-            continue;
-        }
-
-        const report: PageReport = { url: visit.url, ...(await checkPage(page, options)) };
-        pages.push(report);
-
-        if (visit.depth >= args.depth) continue;
-        const links = await page.evaluate(() => window.__sat!.internalLinks());
-        for (const link of links) {
-            if (seen.has(link.url)) continue;
-            seen.add(link.url);
-            queue.push({ url: link.url, depth: visit.depth + 1, from: { report, selector: link.selector, count: link.count } });
-        }
+    for (const url of args.urls) {
+        await page.goto(url, { waitUntil: 'load' }).catch((error: Error) => {
+            throw new PageError(`Can't open ${url}: ${error.message.split('\n')[0]}. Is the server started?`);
+        });
+        // Let an SPA render after load; a page that never goes quiet is checked anyway.
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => undefined);
+        pages.push({ url, ...(await checkPage(page, args.options)) });
     }
-
     return pages;
 }
 
@@ -185,7 +119,7 @@ async function main(argv: string[]): Promise<number> {
     let pages: PageReport[];
     try {
         // SAT is added to the page as an inline script: a strict Content Security Policy would block it.
-        pages = await crawl(await browser.newPage({ bypassCSP: true }), args, helper.checkPage);
+        pages = await checkAll(await browser.newPage({ bypassCSP: true }), args, helper.checkPage);
     } finally {
         await browser.close();
     }
@@ -201,7 +135,8 @@ async function main(argv: string[]): Promise<number> {
 main(process.argv.slice(2)).then(
     (code) => { process.exitCode = code; },
     (error) => {
-        console.error(error instanceof UsageError || String(error?.code).startsWith('ERR_PARSE_ARGS') ? `${error.message}\n\n${USAGE}` : error);
+        if (error instanceof PageError) console.error(error.message);
+        else console.error(error instanceof UsageError || String(error?.code).startsWith('ERR_PARSE_ARGS') ? `${error.message}\n\n${USAGE}` : error);
         process.exitCode = 2;
     },
 );

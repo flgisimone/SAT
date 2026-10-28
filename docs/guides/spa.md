@@ -18,7 +18,7 @@ Data loaded after the route renders (a list from an API, a lazy component) isn't
 - **`observeDom`** reruns them on their own, this many milliseconds after the DOM stops changing:
 
   ```ts
-  useSATChecker({ observeDom: 500 }); // or sat({ observeDom: 500 }) in vite.config
+  sat({ observeDom: 500 }); // in vite.config, or satChecker({ observeDom: 500 }) without Vite
   ```
 
   Any change counts: elements added or removed, attributes, text. A page that never stops changing (a clock, a carousel) is checked when it pauses for that long, or not at all: raise the delay, or use the rerun button instead.
@@ -30,14 +30,11 @@ Data loaded after the route renders (a list from an API, a lazy component) isn't
 `sat-check` opens every URL with a real navigation, waits for the `load` event and then for the network to go quiet (at most 5 seconds), and checks the page. A route rendered by the app's router is checked as a user would see it.
 
 ```bash
-npx sat-check http://localhost:4173/ --depth 2 --not-found "Page not found"
+npx sat-check http://localhost:4173/ http://localhost:4173/products
 ```
 
 - **The server must answer every route with the app** (a "history fallback"). `vite preview` and most dev servers do; for a static host, configure the fallback to `index.html`.
-- **`--depth`** follows the links of each page, same origin only, and checks those pages too.
-- **`--not-found`**: a single-page app shows its "not found" view with status 200, so the server alone can't tell a broken link. With `--not-found "Page not found"` a page that shows that text is a broken link, reported as `link-broken` on the page that links to it.
-
-More on the crawler and the limits in [ci.md](ci.md).
+- SAT checks the routes you list; it doesn't follow links. More on the limits in [ci.md](ci.md).
 
 In Playwright tests, `checkPage` and `toHaveNoSATErrors` check the page as it is when they run: wait for the content first, as for any assertion.
 
@@ -46,10 +43,6 @@ await page.goto("/products");
 await expect(page.getByRole("list", { name: "Products" })).toBeVisible();
 await expect(page).toHaveNoSATErrors();
 ```
-
-## The in-page broken-link check
-
-The `link-broken` rule (off by default) sends a HEAD request for each internal link of the page and reports 4xx and 5xx answers. In a single-page app it can't find a missing route: the server answers 200 with the app for every path, and the "not found" view appears only when the app runs. Use `sat-check --depth` with `--not-found` for that.
 
 ## What SAT doesn't see
 

@@ -1,5 +1,33 @@
 # Changelog
 
+## 2.0.0 — unreleased
+
+SAT is one thing: the accessibility and SEO panel in `vite dev` that gives the issues to your AI agent. This version removes the 1.x options deprecated since 1.8.0 and the parts outside that job.
+
+### Upgrading from 1.x
+
+| 1.x | 2.0 |
+|---|---|
+| `enableCheckImageAlt: false` (every `enableCheck*` option) | `rules: { "image-alt": "off" }`; `true` is the default, so remove it |
+| `result.errorMessages`, `result.warningMessages` | `result.issues.filter((issue) => issue.severity === "error").map((issue) => issue.message)` |
+| `satReset()` | Remove it: SAT never changes the page (since 1.9.0) |
+| `useSATChecker(options)` from `seo-accessibility-tool/react` | `sat(options)` from `seo-accessibility-tool/vite` in `vite.config`; without Vite, `satChecker(options)` from `seo-accessibility-tool/sat-controller` once in the entry point |
+| `useSatChecker(options)` from `seo-accessibility-tool/vue` | The same: the Vite plugin, or `satChecker(options)` in `main.ts` |
+| `sat-check <url> --depth 2 --not-found "…"` | `sat-check` with each URL to check; to crawl a site and find broken links, [unlighthouse](https://unlighthouse.dev) or [pa11y-ci](https://github.com/pa11y/pa11y-ci) with a sitemap |
+| `rules: { "link-broken": "error" }` | Remove it: the rule is gone, with the crawler |
+| The browser extension (`dist/extension`) | The Vite plugin in your project, or `sat-check <url>` for any page |
+
+### Removed
+- The `enableCheck*` options, the `errorMessages`/`warningMessages` result fields and `satReset`, deprecated since 1.8.0 and 1.9.0.
+- The `seo-accessibility-tool/react` and `seo-accessibility-tool/vue` entry points (`useSATChecker`, `useSatChecker`); `react` and `vue` are no longer peer dependencies.
+- The browser extension.
+- The crawler of `sat-check` (`--depth`, `--max-pages`, `--not-found`) and the `link-broken` rule.
+
+### Changed
+- `sat-check` exits with 2 and "Can't open <url>" when a page doesn't answer, instead of reporting it as a `link-broken` error.
+- `examples/react` and `examples/vue` use the Vite plugin.
+- The build empties `dist/` first, so files of removed entry points don't reach the package.
+
 ## 1.19.0 — 2026-10-25
 
 The first version on npm after 1.6.0: npm goes from 1.6.0 to 1.19.0. Versions 1.7.0 to 1.18.0, below, were never published on their own; all their changes are in 1.19.0. This version gives the issues of the page in `vite dev` to any AI agent through MCP, and runs axe-core in the Vite plugin when it is installed.

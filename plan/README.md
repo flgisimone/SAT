@@ -7,14 +7,11 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | Entry point | Contenuto | Chi lo usa |
 |---|---|---|
 | `seo-accessibility-tool` | `seoAccessibilityTool(options)`: esegue i controlli e restituisce i risultati | Script, test, integrazioni future |
-| `seo-accessibility-tool/sat-controller` | `satChecker(options)`: bottone e pannello nella pagina | Vanilla JS |
-| `seo-accessibility-tool/react` | `useSATChecker(options)` | App React |
-| `seo-accessibility-tool/vue` | `useSatChecker(options)` | App Vue 3 |
+| `seo-accessibility-tool/sat-controller` | `satChecker(options)`: bottone e pannello nella pagina | Progetti senza Vite (SvelteKit, Angular, Next.js, vanilla) |
 | `seo-accessibility-tool/vite` | `sat(options)`: plugin che aggiunge SAT alle pagine di `vite dev`, con il server MCP per gli agenti IA (`mcp: true`) e axe-core se installato | Progetti Vite (Svelte, Solid, React, Vue…) |
 | `seo-accessibility-tool/axe` | `axe(options)`: axe-core come motore aggiuntivo (`engines: [axe()]`) | Chi vuole le circa 90 regole di axe |
 | `seo-accessibility-tool/playwright` | `checkPage(page, options)`, `expect(page).toHaveNoSATErrors()` | Test end-to-end |
-| `sat-check` (bin) | CLI: report in console, JSON e HTML, soglie, crawler dei link interni | CI |
-| `dist/extension` | Estensione per Chrome/Edge: SAT su qualsiasi pagina | Chi controlla siti senza installare SAT |
+| `sat-check` (bin) | CLI: report in console, JSON e HTML, soglie | CI |
 
 ## Decisioni
 

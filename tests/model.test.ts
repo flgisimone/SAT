@@ -1,9 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { runSAT, seoAccessibilityTool } from '../src/core/seoAccessibilityTool';
+import { runSAT, seoAccessibilityTool, type Engine } from '../src/core/seoAccessibilityTool';
 import { rules } from '../src/core/rules';
 import { cssSelector } from '../src/sat/issue';
-import { LEGACY_OPTIONS, type LegacyOptions } from '../src/sat/satOptions';
 
 beforeEach(() => {
     document.body.innerHTML = '';
@@ -56,10 +55,10 @@ describe('Issue', () => {
 });
 
 describe('rule registry', () => {
-    it('has the 36 rules with unique ids', () => {
+    it('has the 35 rules with unique ids', () => {
         const ids = rules.map((rule) => rule.id);
-        expect(ids).toHaveLength(36);
-        expect(new Set(ids).size).toBe(36);
+        expect(ids).toHaveLength(35);
+        expect(new Set(ids).size).toBe(35);
     });
 
     it('every rule has a short title, and a source when it has no WCAG criterion; issues carry both', async () => {
@@ -102,61 +101,44 @@ describe('rules option', () => {
         expect(await ofRule('image-alt', { rules: { 'image-alt': 'off' } })).toEqual([]);
     });
 
-    it('wins over the 1.x option', async () => {
-        expect(await ofRule('image-alt', { enableCheckImageAlt: false, rules: { 'image-alt': 'warning' } })).toHaveLength(2);
-        expect(await ofRule('image-alt', { enableCheckImageAlt: true, rules: { 'image-alt': 'off' } })).toEqual([]);
+    it('counts follow the severity', async () => {
+        const r = await seoAccessibilityTool({ rules: { 'image-alt': 'warning' } });
+        expect(r.errors).toBe(r.issues.filter((issue) => issue.severity === 'error').length);
+        expect(r.errors + r.warnings).toBe(r.issues.length);
+        expect(r.issues.filter((issue) => issue.ruleId === 'image-alt').every((issue) => issue.severity === 'warning')).toBe(true);
     });
 
-    it('counts and 1.x message lists follow the severity', async () => {
-        const r = await seoAccessibilityTool({ rules: { 'image-alt': 'warning' } });
-        expect(r.errors).toBe(r.errorMessages.length);
-        expect(r.warnings).toBe(r.warningMessages.length);
-        expect(r.errors + r.warnings).toBe(r.issues.length);
-        expect(r.errorMessages.join()).not.toContain('alt attribute');
-    });
 });
 
-describe('1.x enableCheck* options', () => {
-    it.each(Object.entries(LEGACY_OPTIONS))('%s controls the rule %s', async (key, id) => {
-        const spies = rules.map((rule) => vi.spyOn(rule, 'run').mockImplementation(() => undefined));
-        const target = spies[rules.findIndex((rule) => rule.id === id)];
-
-        await seoAccessibilityTool({ [key as keyof LegacyOptions]: false });
-        expect(target).not.toHaveBeenCalled();
-
-        await seoAccessibilityTool({ [key as keyof LegacyOptions]: true });
-        expect(target).toHaveBeenCalledTimes(1);
-    });
-
-    it('without options, all rules run but link-target-blank, link-text and link-broken', async () => {
+describe('defaults', () => {
+    it('without options, all rules run but link-target-blank and link-text', async () => {
         const spies = rules.map((rule) => vi.spyOn(rule, 'run').mockImplementation(() => undefined));
         await seoAccessibilityTool();
         const ran = rules.filter((_, i) => spies[i].mock.calls.length > 0).map((rule) => rule.id);
-        expect(ran).toEqual(rules.map((rule) => rule.id).filter((id) => !['link-target-blank', 'link-text', 'link-broken'].includes(id)));
+        expect(ran).toEqual(rules.map((rule) => rule.id).filter((id) => !['link-target-blank', 'link-text'].includes(id)));
     });
 });
 
 describe('run context', () => {
     it('two overlapping runs on different documents keep separate results', async () => {
-        vi.spyOn(globalThis, 'fetch').mockImplementation(async (url) => {
-            await new Promise((resolve) => setTimeout(resolve, String(url).endsWith('/a') ? 20 : 5));
-            return new Response(null, { status: 404 });
-        });
-
-        const page = (path: string) => {
-            const doc = document.implementation.createHTMLDocument('x');
-            doc.body.innerHTML = `<a href="${path}">link</a>`;
-            return doc;
+        // An engine that takes longer on /a, so the run on /b ends first.
+        const slow: Engine = {
+            name: 'slow',
+            replaces: [],
+            run: async (doc) => {
+                await new Promise((resolve) => setTimeout(resolve, doc.title === '/a' ? 20 : 5));
+                return [{ ruleId: 'slow/page', severity: 'error', category: 'seo', message: doc.title }];
+            },
         };
-        const only = { rules: Object.fromEntries(rules.map((rule) => [rule.id, rule.id === 'link-broken' ? 'error' : 'off'])) };
+        const only = { rules: Object.fromEntries(rules.map((rule) => [rule.id, 'off'])), engines: [slow] };
 
         const [a, b] = await Promise.all([
-            seoAccessibilityTool(only, page('/a')),
-            seoAccessibilityTool(only, page('/b')),
+            seoAccessibilityTool(only, document.implementation.createHTMLDocument('/a')),
+            seoAccessibilityTool(only, document.implementation.createHTMLDocument('/b')),
         ]);
 
-        expect(a.issues.map((i) => i.message)).toEqual([expect.stringContaining('/a (status 404)')]);
-        expect(b.issues.map((i) => i.message)).toEqual([expect.stringContaining('/b (status 404)')]);
+        expect(a.issues.map((i) => i.message)).toEqual(['/a']);
+        expect(b.issues.map((i) => i.message)).toEqual(['/b']);
     });
 });
 

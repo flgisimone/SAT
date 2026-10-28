@@ -9,7 +9,7 @@ async function targetSizeErrors(page: Page, body: string): Promise<string[]> {
     const only = { rules: Object.fromEntries(rules.map((r) => [r.id, r.id === 'target-size' ? undefined : 'off'])) };
     return page.evaluate(async (options) => {
         const { seoAccessibilityTool } = await import('/index.js');
-        return (await seoAccessibilityTool(options)).errorMessages;
+        return (await seoAccessibilityTool(options)).issues.filter((issue) => issue.severity === 'error').map((issue) => issue.message);
     }, only);
 }
 

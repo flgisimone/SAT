@@ -38,8 +38,7 @@ export type RuleId =
     | 'structured-data'
     | 'mixed-content'
     | 'image-size'
-    | 'image-lazy-load'
-    | 'link-broken';
+    | 'image-lazy-load';
 
 /** What a rule passes to `ctx.report`. */
 export interface Report {

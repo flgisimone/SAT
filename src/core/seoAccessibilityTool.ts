@@ -1,31 +1,22 @@
 import { rules, type Rule, type Report } from './rules';
 import { cssSelector, ruleHelp, type Issue } from '../sat/issue';
-import { LEGACY_OPTIONS, type LegacyOptions, type RuleSetting, type SATOptions } from '../sat/satOptions';
+import type { RuleSetting, SATOptions } from '../sat/satOptions';
 
 export type { SATOptions, RuleSetting, Engine } from '../sat/satOptions';
 export type { Issue, Severity, Category } from '../sat/issue';
 export type { RuleId, WcagLevel } from './rules';
-export { satReset } from '../sat/satReset';
 export { fixPrompt, type FixPromptContext } from './fixPrompt';
 
 export interface SATResult {
     issues: Issue[];
     errors: number;
     warnings: number;
-    /** @deprecated Use `issues`. */
-    errorMessages: string[];
-    /** @deprecated Use `issues`. */
-    warningMessages: string[];
 }
 
-/** `rules` wins over the 1.x `enableCheck*` option, then over an engine that replaces the rule, then over the rule's default. */
+/** `rules` wins over an engine that replaces the rule, then over the rule's default. */
 function settingFor(rule: Rule, options: Partial<SATOptions>): RuleSetting | 'default' {
     const explicit = options.rules?.[rule.id];
     if (explicit) return explicit;
-
-    const legacyKey = (Object.keys(LEGACY_OPTIONS) as Array<keyof LegacyOptions>).find((key) => LEGACY_OPTIONS[key] === rule.id);
-    const legacy = legacyKey && options[legacyKey];
-    if (legacy !== undefined) return legacy ? 'default' : 'off';
 
     if (options.engines?.some((engine) => engine.replaces.includes(rule.id))) return 'off';
 
@@ -87,11 +78,8 @@ export async function seoAccessibilityTool(customOptions: Partial<SATOptions> = 
         }
     }
 
-    const messagesOf = (severity: Issue['severity']) => issues.filter((issue) => issue.severity === severity).map((issue) => issue.message);
-    const errorMessages = messagesOf('error');
-    const warningMessages = messagesOf('warning');
-
-    return { issues, errors: errorMessages.length, warnings: warningMessages.length, errorMessages, warningMessages };
+    const count = (severity: Issue['severity']) => issues.filter((issue) => issue.severity === severity).length;
+    return { issues, errors: count('error'), warnings: count('warning') };
 }
 
 /** An issue without its `element`: what `runSAT` returns, ready for `JSON.stringify`. */

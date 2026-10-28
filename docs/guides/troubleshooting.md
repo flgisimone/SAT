@@ -29,7 +29,7 @@ Each entry: what you see, why, what to do. The messages in quotes are the ones S
 {@render children()}
 ```
 
-### With `satChecker`, `useSATChecker` or `useSatChecker`
+### With `satChecker`
 
 **Why.** SAT starts only when `process.env.NODE_ENV` is `"development"`. Vite, webpack and Next set it in development; without a bundler `process` doesn't exist and SAT stays off. Nothing is printed: off is the normal state outside development.
 
@@ -47,7 +47,7 @@ Each entry: what you see, why, what to do. The messages in quotes are the ones S
 
 ## The panel ignores my options
 
-**Why.** SAT starts once per page, with the options of the first call. With the Vite plugin in `vite.config` and `useSATChecker(options)` in the app, only the one that runs first counts.
+**Why.** SAT starts once per page, with the options of the first call. With the Vite plugin in `vite.config` and `satChecker(options)` in the app, only the one that runs first counts.
 
 **Fix.** Start SAT in one place only. With the Vite plugin, put the options in `sat(options)`; see [configuration.md](configuration.md#where-the-options-go).
 
@@ -76,13 +76,13 @@ browserType.launch: Executable doesn't exist at …/chrome-headless-shell
 
 **Fix.** `npx playwright install chromium`; in CI `npx playwright install --with-deps chromium`, which installs the system libraries too.
 
-### "Page can't be checked"
+### "Can't open"
 
 ```
-error   link-broken           Page can't be checked: http://localhost:4173/ (request failed: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:4173/).
+Can't open http://localhost:4173/: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:4173/. Is the server started?
 ```
 
-**Why.** Nothing answers at that URL: the server isn't started, isn't ready yet, or listens on another port. The page counts as one error, so the exit code is 1.
+**Why.** Nothing answers at that URL: the server isn't started, isn't ready yet, or listens on another port. Exit code 2.
 
 **Fix.** Start the server before `sat-check` and wait until it answers, e.g. `curl -s --retry 10 --retry-connrefused -o /dev/null http://localhost:4173/`, as in the [CI guide](ci.md#github-actions).
 
