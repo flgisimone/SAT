@@ -20,6 +20,10 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 
 | Tema | Decisione | Motivo |
 |---|---|---|
+| Cutover 2.0 | **2.0.0**, pubblicata una volta alla fine di F21: via API legacy (`enableCheck*`, `errorMessages`/`warningMessages`, `satReset`), estensione, crawler della CLI con `link-broken`, wrapper React e Vue | 1.19.0 appena pubblicata e quasi nessun utente: rompere ora costa meno; il messaggio è il pannello in `vite dev` con l'agente (analisi del 28/10/2026, F18) |
+| L'IA nello sviluppo | Oltre la correzione: l'agente controlla da solo in headless (`sat_check`), conosce le regole via MCP, riceve i problemi nuovi da un hook, la CI blocca le regressioni con una baseline; dal pannello «Send to agent» per qualsiasi agente MCP, «Fix with AI» resta per Claude Code | L'agente diventa autonomo nel ciclo scrivi → controlla → correggi (F19–F21, 28/10/2026) |
+| Sorgente per React | Prima `_debugStack` delle fiber con le source map, senza trasformazioni; se non regge, `data-sat-source` opt-in solo sugli elementi HTML | Il codice dell'app non si tocca finché si può (F19-02) |
+| Oltre Vite | Server MCP indipendente e Next.js dopo i feedback (almeno due persone) | Regola di F16 (28/10/2026) |
 | Precisione | Meglio un problema mancato che un falso positivo: ogni controllo segue la specifica (WCAG, WAI-ARIA, HTML-AAM) e non segnala i pattern validi | Se il tool segnala cose corrette, gli sviluppatori smettono di guardarlo (F1-01) |
 | Pagina ospite | SAT non modifica la pagina: i riquadri stanno in uno strato proprio, `satReset` è deprecato e non fa nulla | Il reset cancellava stili e tooltip dell'app (F1-01); i re-render cancellavano le evidenziazioni (F3-02) |
 | Link rotti | Controllo spento di default, una richiesta per URL, massimo 5 alla volta, URL tipo logout/delete esclusi | Le richieste dal browser hanno effetti collaterali e nelle SPA non trovano i 404 (F1-01); la versione completa è nella CLI, `sat-check --depth` (F5-04) |
@@ -76,6 +80,10 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | F15 | [15-guide-adozione.md](15-guide-adozione.md) | Guide in `docs/guides/`: CI, configurazione, SPA, troubleshooting; esempio da clonare | F13 |
 | F16 | [16-kit-lancio.md](16-kit-lancio.md) | Script dei video, tutorial per Dev.to, post per le community, registro delle metriche, triage dei feedback | F14 (F16-04 subito) |
 | F17 | [17-agenti-ia-posizionamento.md](17-agenti-ia-posizionamento.md) | Server MCP nel plugin Vite per ogni agente IA, axe acceso quando è installato, README e lancio attorno al pannello con l'IA, 1.19.0 | F16 |
+| F18 | [18-cutover-2.md](18-cutover-2.md) | Cutover 2.0: via API legacy, estensione, crawler con `link-broken`, wrapper React e Vue; guida di migrazione | F17 |
+| F19 | [19-ciclo-agente.md](19-ciclo-agente.md) | Ciclo dell'agente: `sat_check` headless, ID stabili e differenze, immagini degli elementi, file e riga per React | F18 |
+| F20 | [20-prevenzione.md](20-prevenzione.md) | Prevenzione: regole e prompt via MCP, `sat-check init`, skill e hook per Claude Code, baseline in CI | F19 |
+| F21 | [21-pannello-agente.md](21-pannello-agente.md) | «Send to agent» dal pannello, stato dell'agente, demo e lancio, 2.0.0 | F19 (meglio dopo F20) |
 
 ```
 F1 ─► F2 ─┬─► F3 ──────────┬─► F6
