@@ -110,3 +110,29 @@ test('--wcag-level accepts AA or AAA only', async () => {
     const aaa = await satCheck(`${origin}/about`, '--wcag-level', 'AAA');
     expect(aaa.code).toBe(0);
 });
+
+test('--baseline: the issues in the baseline pass, a new one fails; --update-baseline writes it', async () => {
+    const baseline = test.info().outputPath('sat-baseline.json');
+    const missing = await satCheck(`${origin}/photo`, '--baseline', baseline);
+    expect(missing.stdout).toContain(`No baseline at ${baseline}: create it with --update-baseline.`);
+    expect(missing.code).toBe(2);
+
+    const written = await satCheck(`${origin}/photo`, '--baseline', baseline, '--update-baseline');
+    expect(written.code).toBe(0);
+    const ids: string[] = JSON.parse(readFileSync(baseline, 'utf8'))[`${origin}/photo`];
+    expect(ids).toContainEqual(expect.stringMatching(/^image-alt /));
+
+    const same = await satCheck(`${origin}/photo`, '--baseline', baseline);
+    expect(same.stdout).toContain('0 new, 0 fixed since the baseline');
+    expect(same.code).toBe(0);
+
+    // An issue out of the baseline is new, one in the baseline that isn't on the page is fixed.
+    writeFileSync(baseline, JSON.stringify({ [`${origin}/photo`]: [...ids.filter((id) => !id.startsWith('image-alt ')), 'h1 old'] }));
+    const json = test.info().outputPath('report.json');
+    const worse = await satCheck(`${origin}/photo`, '--baseline', baseline, '--json', json);
+    expect(worse.stdout).toContain('1 new, 1 fixed since the baseline');
+    expect(worse.stdout).toMatch(/error\s+image-alt/);
+    expect(worse.stdout).toContain('fixed: h1 old');
+    expect(worse.code).toBe(1);
+    expect(JSON.parse(readFileSync(json, 'utf8')).pages[0].baseline).toEqual({ new: [ids.find((id) => id.startsWith('image-alt '))], fixed: ['h1 old'] });
+});

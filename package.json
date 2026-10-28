@@ -41,6 +41,7 @@
   },
   "files": [
     "dist",
+    "docs/rules",
     "CHANGELOG.md"
   ],
   "keywords": [

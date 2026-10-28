@@ -61,6 +61,8 @@ jobs:
       - run: npm run build
       - run: npm run preview &
       - run: curl -s --retry 10 --retry-connrefused -o /dev/null http://localhost:4173/
+      # With issues you can't fix yet: commit a baseline (sat-check … --baseline sat-baseline.json --update-baseline)
+      # and add --baseline sat-baseline.json to "check": then only the issues a change adds fail the job.
       - run: npm run check
       - uses: actions/upload-artifact@v7
         if: always()
@@ -112,13 +114,21 @@ sat:
 
 By default any error fails the build and warnings don't. `--max-warnings 0` makes warnings fail it too.
 
-### Starting on a project with many issues
+### Starting on a project with many issues: a baseline
 
-Don't turn the check off until everything is fixed: lock the current state, then lower the limits.
+Don't turn the check off until everything is fixed: accept the issues there are today, and fail on the new ones.
 
-1. Run `sat-check` once and read the totals on the last line, e.g. `1 page: 37 errors, 112 warnings`.
-2. Set the limits to those numbers: `--max-errors 37 --max-warnings 112`. The build passes today and fails as soon as a change adds an issue.
-3. Lower the limits as you fix issues, down to `--max-errors 0`.
+1. Write the baseline once, with the server running, and commit it:
+
+   ```bash
+   npx sat-check http://localhost:4173/ http://localhost:4173/pricing --baseline sat-baseline.json --update-baseline
+   ```
+
+   The file lists the `id` of each issue (rule and selector), by URL.
+2. Add `--baseline sat-baseline.json` to the check in CI. The issues in the file pass; `--max-errors` and `--max-warnings` count only the others, so a pull request that adds one fails, whoever wrote it, an AI agent included. Each page says `2 new, 1 fixed since the baseline` and lists the new issues.
+3. When you fix issues, run step 1 again and commit the shorter file. Review it as any other file: a longer baseline accepts new issues.
+
+The `id` follows the element's selector: an element whose `id` or position changes gets a new `id`, and its issue counts as new. Without a baseline, limits do the same job less precisely: `--max-errors 37` passes as long as the total doesn't grow, even if one issue is fixed and another added.
 
 To fix one rule at a time, lower its severity until its issues are fixed, in the [config file](configuration.md): `{ "rules": { "color-contrast": "warning" } }`. Turning a rule `"off"` hides its issues, new ones included.
 
@@ -126,7 +136,7 @@ To fix one rule at a time, lower its severity until its issues are fixed, in the
 
 | Option | Writes |
 |---|---|
-| `--json <file>` | `{ pages: [{ url, issues, summary }], summary }`: each issue with `id` (rule and selector, the same between runs), `ruleId`, `severity`, `category`, `message`, `title`, `wcag` or `source`, `selector`, `help` |
+| `--json <file>` | `{ pages: [{ url, issues, summary }], summary }`: each issue with `id` (rule and selector, the same between runs), `ruleId`, `severity`, `category`, `message`, `title`, `wcag` or `source`, `selector`, `help`; with `--baseline`, each page has `baseline: { new, fixed }` with the ids |
 | `--html <file>` | A standalone HTML page: the totals, then a table for each page with severity, rule (linked to its page), message and selector |
 
 Examples, made by `sat-check` on the page with known issues of [examples/page](../../examples/page): [sat-report.json](reports/sat-report.json) and [sat-report.html](https://flgisimone.github.io/SAT/report.html) ([source](reports/sat-report.html)). `npm run media`, in the SAT repository, makes them again.
@@ -145,6 +155,8 @@ List every route to check: `sat-check` opens each one in Chromium, so a single-p
 |---|---|
 | `--axe` | Runs [axe-core](configuration.md#axe-core) too (`npm install -D axe-core`) |
 | `--wcag-level AAA` | Adds the AAA criteria as warnings |
+| `--baseline <file>` | The issues in the file pass; the limits count the new ones only ([above](#starting-on-a-project-with-many-issues-a-baseline)) |
+| `--update-baseline` | Writes the issues found to the `--baseline` file and exits with 0 |
 
 ## In your Playwright tests
 

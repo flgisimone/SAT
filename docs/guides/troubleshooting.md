@@ -212,6 +212,12 @@ Can't open http://localhost:4173/: page.goto: net::ERR_CONNECTION_REFUSED at htt
 
 **Fix.** Run the agent on the computer that runs `vite dev`, with `http://localhost:<port>/__sat/mcp` as URL. A dev server in a container or a remote machine needs a port forward to `localhost`.
 
+### The Claude Code hook says nothing
+
+**Why.** `sat-check hook` stays silent when `vite dev` isn't running on the port of its command, when the edited file isn't a `.tsx`, `.jsx`, `.vue`, `.svelte`, `.html` or `.css` file, when `sat_check` fails (Playwright missing, page down) and when the edit added no issues.
+
+**Fix.** Start `vite dev` on the port in `.claude/settings.json` (`--port`, 5173 by default), then try the hook by hand: `echo '{"tool_input":{"file_path":"src/App.tsx"}}' | npx sat-check hook --port 5173 /`. If it prints nothing, call `sat_check` from the agent: its answer says what is wrong. `npx --no-install` needs SAT installed in the project.
+
 ### My agent supports only stdio servers
 
 **Why.** SAT's server speaks MCP over HTTP (Streamable HTTP). Claude Code, Cursor, VS Code, Codex CLI, Gemini CLI, Windsurf and Zed support it.

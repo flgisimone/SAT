@@ -15,6 +15,8 @@ jobs:
       - run: npm run build
       - run: npm run preview &
       - run: curl -s --retry 10 --retry-connrefused -o /dev/null http://localhost:4173/
+      # With issues you can't fix yet: commit a baseline (sat-check … --baseline sat-baseline.json --update-baseline)
+      # and add --baseline sat-baseline.json to "check": then only the issues a change adds fail the job.
       - run: npm run check
       - uses: actions/upload-artifact@v7
         if: always()
