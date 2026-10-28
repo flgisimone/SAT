@@ -23,14 +23,15 @@ describe('Vite plugin', () => {
 
     it('starts the panel with the options of the plugin', () => {
         const code = startModule({ rules: { 'link-text': 'warning' } });
-        expect(code).toContain(`satChecker({ ...{"rules":{"link-text":"warning"}}, enabled: true });`);
+        // Without mcp and ai the panel suggests mcp.
+        expect(code).toContain(`satChecker({ ...{"rules":{"link-text":"warning"}}, enabled: true, suggestMcp: true });`);
         expect(code).not.toContain('seo-accessibility-tool/axe');
     });
 
     it('adds the axe-core engine with axe: true', () => {
         const code = startModule({ axe: true });
         expect(code).toContain(`import { axe } from 'seo-accessibility-tool/axe';`);
-        expect(code).toContain('satChecker({ ...{}, enabled: true, engines: [axe()] });');
+        expect(code).toContain('satChecker({ ...{}, enabled: true, engines: [axe()], suggestMcp: true });');
     });
 
     it('turns axe-core on when the project has it, unless axe: false', () => {
@@ -44,9 +45,11 @@ describe('Vite plugin', () => {
         }
     });
 
-    it('with mcp: true the pages send their results and listen for sat:run', () => {
+    it('with mcp: true the pages send their results, listen for sat:run and sat:status, and have the queue', () => {
         const code = startModule({ mcp: true });
-        expect(code).toMatch(/mcp: \{ \.\.\.\{"url":"\/__sat\/results","token":"[0-9a-f-]{36}"\}, listen: \(run\) => import\.meta\.hot\?\.on\('sat:run', run\) \}/);
-        expect(startModule({})).not.toContain('mcp');
+        expect(code).toMatch(/mcp: \{ \.\.\.\{"url":"\/__sat\/results","queue":"\/__sat\/queue","token":"[0-9a-f-]{36}"\}, listen: \(run\) => import\.meta\.hot\?\.on\('sat:run', run\), status: \(show\) => import\.meta\.hot\?\.on\('sat:status', show\) \}/);
+        expect(code).not.toContain('suggestMcp');
+        expect(startModule({ ai: true })).not.toContain('suggestMcp');
+        expect(startModule({})).not.toContain('mcp: {');
     });
 });

@@ -7,6 +7,6 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.64.0",
-    "seo-accessibility-tool": "^1.19.0"
+    "seo-accessibility-tool": "^2.0.0"
   }
 }

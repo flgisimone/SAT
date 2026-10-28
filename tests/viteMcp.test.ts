@@ -10,6 +10,8 @@ import { mcpMiddleware, promptText, resultsStore, rulePage, ruleIds } from '../s
 import { rules } from '../src/core/rules';
 import { sat, type SATViteOptions } from '../src/integrations/vite';
 import type { PageResults } from '../src/sat/mcpResults';
+import type { AgentStatus } from '../src/sat/agentQueue';
+import { agentQueue } from '../src/integrations/queueServer';
 
 // The MCP endpoint and the results endpoint on a real Vite dev server.
 
@@ -166,6 +168,71 @@ describe('MCP endpoint, versions up to 2025-11-25 (initialize)', () => {
         const broken = await call('/__sat/mcp', { body: '{"jsonrpc":' });
         expect(broken.status).toBe(400);
         expect(broken.json.error).toMatchObject({ code: -32700 });
+    });
+});
+
+describe('Send to agent', () => {
+    const queue = (body: unknown, { token = app.token, origin = app.origin, port = app.port } = {}) =>
+        call('/__sat/queue', { body, port, headers: { 'x-sat-token': token, origin } });
+    const sent = (issue: typeof LINK) => ({ id: issue.id, message: issue.message, prompt: `Fix this issue: ${issue.message}` });
+
+    it('refuses changes without the token, from another origin, not valid, or with mcp off', async () => {
+        const body = { url: `${app.origin}/queue`, add: [sent(LINK)] };
+        expect((await queue(body, { token: 'wrong' })).status).toBe(403);
+        expect((await queue(body, { origin: 'http://evil.test' })).status).toBe(403);
+        expect((await queue({ url: '/queue', add: [{ id: 'x' }] })).status).toBe(400);
+        expect((await queue({ add: [] })).status).toBe(400);
+        expect((await queue(body, { token: off.token, origin: off.origin, port: off.port })).status).toBe(404);
+    });
+
+    it('sat_issues returns the issues sent first; they leave the queue once fixed; the pages hear every state', async () => {
+        const statuses: AgentStatus[] = [];
+        const page = new WebSocket(`ws://127.0.0.1:${app.port}/`, 'vite-hmr');
+        await new Promise((resolve) => page.addEventListener('open', resolve));
+        page.addEventListener('message', (event) => {
+            const message = JSON.parse(String(event.data)) as { type: string; event?: string; data?: AgentStatus };
+            if (message.type === 'custom' && message.event === 'sat:status') statuses.push(message.data!);
+        });
+        const states = () => statuses.at(-1)?.issues.map((issue) => `${issue.id}:${issue.state}`);
+        try {
+            await send(results(`${app.origin}/queue`, [IMG, LINK]));
+            expect((await queue({ url: `${app.origin}/queue#top`, add: [sent(LINK)] })).status).toBe(204);
+            await expect.poll(states).toEqual(['link-text a:queued']);
+            expect(statuses.at(-1)!.page).toBe('/queue');
+
+            const { json } = await rpc('tools/call', { name: 'sat_issues', arguments: { url: '/queue' } });
+            const [first] = (json.result!.structuredContent as { pages: PageResults[] }).pages;
+            expect(first.issues).toEqual([{ ...LINK, requested: true }, IMG]);
+            expect(json.result!.content![0].text).toContain('The user asked to fix these first: link-text a.');
+            await expect.poll(states).toEqual(['link-text a:taken']);
+
+            const only = await rpc('tools/call', { name: 'sat_issues', arguments: { requested: true } });
+            expect(only.json.result!.content![0].text).toContain('Fix this issue: Link text "click here"');
+            expect(only.json.result!.structuredContent).toEqual({ pages: [{ url: '/queue', issues: [{ id: LINK.id, message: LINK.message, requested: true }] }] });
+
+            // The page checks again after the fix: the issue is gone.
+            await send(results(`${app.origin}/queue`, [IMG]));
+            await expect.poll(states).toEqual(['link-text a:fixed']);
+            const none = await rpc('tools/call', { name: 'sat_issues', arguments: { url: '/queue', requested: true } });
+            expect(none.json.result!.content![0].text).toContain('The user has sent no issues');
+
+            expect((await queue({ url: `${app.origin}/queue`, remove: [LINK.id] })).status).toBe(204);
+            await expect.poll(states).toEqual([]);
+        } finally {
+            page.close();
+        }
+    });
+
+    it('an issue gone after the agent checked is verified; one still there stays with the agent', () => {
+        const changes: string[][] = [];
+        const queue = agentQueue((_page, issues) => changes.push(issues.map((issue) => `${issue.id}:${issue.state}`)));
+        queue.change({ url: 'http://localhost/a', add: [sent(IMG), sent(LINK)] });
+        queue.take('/a', [IMG.id, LINK.id]);
+        queue.checked('http://127.0.0.1/a', [LINK.id], true);
+        expect(changes.at(-1)).toEqual(['image-alt img:verified', 'link-text a:taken']);
+        expect(queue.open('/a').map((issue) => issue.id)).toEqual([LINK.id]);
+        queue.checked('/other', [], true);
+        expect(changes).toHaveLength(3);
     });
 });
 

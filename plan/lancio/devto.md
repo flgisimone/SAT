@@ -2,7 +2,7 @@
 
 Bozza da pubblicare sul profilo Dev.to del maintainer. Il testo da incollare è sotto la riga; queste note restano qui.
 
-- **Quando**: dopo la pubblicazione della 1.19.0 su npm. Prima, `npm install` nel template fallisce con `ETARGET`.
+- **Quando**: dopo la pubblicazione della 2.0.0 su npm: la sezione 4 usa `sat_check` e «Send to agent». Prima, `npm install` dà una versione senza queste funzioni.
 - **Provato il 25/10/2026** sulla pagina di `examples/` con il plugin di `dist/` (F17): con axe-core «4 errors · 3 warnings», 3 errori dopo l'`alt` sull'immagine; `sat_issues` e `sat_recheck` da Claude Code 2.1 con 5 errori e 3 avvisi a pagina senza axe. Da F16-02 (pacchetto di `npm pack` su `examples/vite-vanilla`, senza axe): `npm run check` con l'output riportato sotto ed exit code 1, `--max-errors 4` esce con 0. Il template vanilla di `npm create vite@latest` (Vite 8.3) con il solo `sat()`: «3 errors · 6 warnings».
 - **Prima di pubblicare**: rifare tutti i passi con `npm install` da npm, Claude Code compreso; la correzione dell'agente cambia da una prova all'altra, il testo non promette un numero finale.
 - **Metadati Dev.to**: tag `a11y`, `webdev`, `vite`, `ai` (massimo quattro); copertina `docs/images/social.png`; `canonical_url` assente (il testo nasce qui).
@@ -116,6 +116,10 @@ A few things worth knowing:
 - **What goes to the model**: the issues and the quoted HTML of the elements, sent by your agent, as it sends the files it reads. SAT itself sends nothing anywhere, and the MCP server is off unless you set `mcp: true`.
 - **What the agent sees**: the pages open in the browser during this `vite dev` run. A dialog or a menu has to be open when SAT runs.
 - **Review it like any other change**: `git diff`. Some fixes need a decision only you can make: "Blue mug" is an alt text, not necessarily the right one.
+
+The agent doesn't need you to keep a page open, either. Install Playwright (`npm install -D playwright && npx playwright install chromium`) and it can check any route with `sat_check`, in headless Chromium: the answer starts with what it fixed, what is new and what remains since its last check. `npx sat-check init` writes this into `AGENTS.md`, so the agent checks every page it touches without being asked.
+
+And when you spot an issue yourself, **Send to agent** on it in the panel: the agent gets it first the next time it asks SAT, and the panel shows it *Queued*, *Taken by the agent*, then *Verified* once the agent has checked again.
 
 No agent with MCP? Each issue in the panel has **Copy fix prompt**, the same prompt, to paste anywhere.
 

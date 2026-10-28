@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.0.0 — unreleased
+## 2.0.0 — 2026-10-28
 
 SAT is one thing: the accessibility and SEO panel in `vite dev` that gives the issues to your AI agent. This version removes the 1.x options deprecated since 1.8.0 and the parts outside that job.
 
@@ -25,6 +25,9 @@ SAT is one thing: the accessibility and SEO panel in `vite dev` that gives the i
 - **MCP prompts** `sat-fix` and `sat-audit`, shown as commands by the agents that support them (`/mcp__sat__sat-fix /cart` in Claude Code).
 - **`sat-check init`** prepares a project for coding agents: the SAT section of `AGENTS.md`, the `sat` server in `.mcp.json` and in the configs of Cursor, VS Code and Gemini CLI found in the project, `sat({ mcp: true })` in a simple `vite.config`. `--claude` adds a Claude Code skill and a hook: after each UI edit, `sat-check hook` checks the routes and tells the agent the issues its edit added. Running it again changes nothing; `--dry-run` writes nothing.
 - **Baseline in CI**: `sat-check --baseline <file>` lets the issues in the file pass and counts only the new ones against the limits, and says which were fixed; `--update-baseline` writes the file.
+- **Send to agent** in the panel, with `sat({ mcp: true })`: on an issue or on a rule (**Send all to agent**), it puts the issues in a queue of the dev server (`POST /__sat/queue`, with the protection of `/__sat/results`). `sat_issues` returns them first, with `requested: true` and "The user asked to fix these first"; `sat_issues({ requested: true })` returns only them, each with its fix prompt. Pressed again, the button takes the issue back.
+- **What the agent did, in the panel**: next to each issue sent and in the list of the issues sent, *Queued*, *Taken by the agent* (`sat_issues` returned it), *Fixed* (gone from the page's results), *Verified* (gone after `sat_check` or `sat_recheck`), with icon and text, announced to screen readers. The dev server sends the states to the pages as the HMR event `sat:status`; a fixed issue leaves the queue by itself, **Clear done** removes it from the list.
+- With the Vite plugin but neither `mcp` nor `ai`, the panel suggests `sat({ mcp: true })` until the hint is closed.
 - **File and line with React** in development (React 18 and 19, `@vitejs/plugin-react` and `-swc`), in the fix prompt and in the MCP results, without changing the app's code: from the stack React keeps on each element and the module's source map.
 
 ### Removed
@@ -34,6 +37,8 @@ SAT is one thing: the accessibility and SEO panel in `vite dev` that gives the i
 - The crawler of `sat-check` (`--depth`, `--max-pages`, `--not-found`) and the `link-broken` rule.
 
 ### Changed
+- The actions of an issue are in this order: Send to agent (`mcp`), Fix with Claude Code (`ai`), Copy fix prompt. The **Fix with AI** buttons are now **Fix with Claude Code** and **Fix all with Claude Code**: same feature, same `ai: true`.
+- README: the quick start is `npx sat-check init` and the cycle (the agent checks with `sat_check`; you send from the panel); the panel images show Send to agent.
 - `sat-check` exits with 2 and "Can't open <url>" when a page doesn't answer, instead of reporting it as a `link-broken` error.
 - `examples/react` and `examples/vue` use the Vite plugin; in `examples/react` the photo without alt text is rendered by React.
 - The build empties `dist/` first, so files of removed entry points don't reach the package.

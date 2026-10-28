@@ -108,19 +108,25 @@ Can't open http://localhost:4173/: page.goto: net::ERR_CONNECTION_REFUSED at htt
 
 **Fix.** Create the context with `bypassCSP: true`, e.g. `test.use({ bypassCSP: true })`.
 
-## Fix with AI
+## Send to agent and Fix with Claude Code
 
-### There is no "Fix with AI" button
+### There is no "Send to agent" or "Fix with Claude Code" button
 
-**Why.** The button exists only with the Vite plugin and `ai: true`; "Copy fix prompt" is everywhere.
+**Why.** "Send to agent" exists only with the Vite plugin and `mcp: true`, "Fix with Claude Code" only with `ai: true`; "Copy fix prompt" is everywhere.
 
-**Fix.** `sat({ ai: true })` in `vite.config`, then restart the dev server.
+**Fix.** `sat({ mcp: true })` (or `ai: true`) in `vite.config`, then restart the dev server.
+
+### The issue stays "Queued"
+
+**Why.** The agent gets the issues you sent only when it calls `sat_issues`: MCP doesn't let the server push them.
+
+**Fix.** Ask the agent to fix the issues you sent from SAT. If it doesn't call `sat_issues`, check that it is connected to the MCP server ([below](#the-agent-doesnt-see-sat-mcp-server)).
 
 ### "Claude Code is not installed or not in the PATH"
 
 > Claude Code is not installed or not in the PATH. Install it from https://code.claude.com/docs/en/setup and sign in with `claude`.
 
-**Why.** Fix with AI runs `claude` in the project, from the terminal where `vite dev` runs.
+**Why.** Fix with Claude Code runs `claude` in the project, from the terminal where `vite dev` runs.
 
 **Fix.** Install Claude Code, run `claude` once in a terminal to sign in, then start `vite dev` from a terminal where `claude` works. If Claude Code is installed but not signed in, the panel shows Claude Code's own message: signing in fixes it too.
 
@@ -134,7 +140,7 @@ Can't open http://localhost:4173/: page.goto: net::ERR_CONNECTION_REFUSED at htt
 
 **Why.** The page is open on another device, through `vite --host`. Only this computer may run Claude Code in the project or send results to the MCP server.
 
-**Fix.** Use Fix with AI and the MCP server from a browser on the computer that runs `vite dev`.
+**Fix.** Use Send to agent, Fix with Claude Code and the MCP server from a browser on the computer that runs `vite dev`.
 
 ### "SAT accepts requests from the dev server's pages only."
 

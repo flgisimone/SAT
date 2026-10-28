@@ -1,7 +1,8 @@
 import { fixPrompt } from '../core/fixPrompt';
 import type { OutlineHeading } from '../core/rules/headings';
+import type { AgentState, QueueChange, QueuedIssue } from '../sat/agentQueue';
 import type { FixView } from '../sat/aiFix';
-import type { Category, Issue, Severity } from '../sat/issue';
+import { issueIds, type Category, type Issue, type Severity } from '../sat/issue';
 import { icon, type IconName } from './icons';
 import { createOverlay } from './overlay';
 import { STYLES } from './styles';
@@ -15,6 +16,8 @@ export interface SATUI {
     clearHighlights(): void;
     /** Shows the progress and result of "Fix with AI" (`null` hides it). */
     showFix(view: FixView | null): void;
+    /** Shows the issues sent to the agent of this page, with their state. */
+    showAgent(issues: QueuedIssue[]): void;
 }
 
 /** "Fix with AI" actions: present only when the Vite plugin runs with `ai: true`. */
@@ -22,6 +25,20 @@ export interface FixActions {
     fix(issues: Issue[]): void;
     /** Stops the running fix, or dismisses the result of the last one. */
     cancel(): void;
+}
+
+/** "Send to agent": present only when the Vite plugin runs with `mcp: true`. */
+export interface AgentActions {
+    /** Changes the agent's queue of this page; resolves false when the dev server can't be reached. */
+    change(change: Omit<QueueChange, 'url'>): Promise<boolean>;
+}
+
+/** What the panel offers besides the checks. */
+export interface PanelActions {
+    fix?: FixActions;
+    agent?: AgentActions;
+    /** Shows, until closed, how to turn on "Send to agent" (Vite plugin without `mcp` and `ai`). */
+    suggestMcp?: boolean;
 }
 
 type Filter = Severity | Category;
@@ -42,6 +59,7 @@ const CATEGORIES: Array<[Category, string]> = [
 /** Issues listed per rule before "Show N more". */
 const FIRST_ISSUES = 5;
 const SIDE_KEY = 'sat-side';
+const HINT_KEY = 'sat-mcp-hint';
 /** How long a confirmation such as "Copied" stays visible. */
 const NOTICE_TIME = 3000;
 
@@ -52,6 +70,15 @@ const FIX_STATUS: Record<FixView['state'], (view: FixView) => string> = {
     'still-present': () => 'Still present',
     failed: (view) => (view.summary === 'Cancelled.' ? 'Fix cancelled' : 'Fix failed'),
 };
+
+const AGENT_STATUS: Record<AgentState, string> = {
+    queued: 'Queued',
+    taken: 'Taken by the agent',
+    fixed: 'Fixed',
+    verified: 'Verified',
+};
+
+const isOpen = (issue: QueuedIssue | undefined) => issue?.state === 'queued' || issue?.state === 'taken';
 
 function el<K extends keyof HTMLElementTagNameMap>(
     tag: K,
@@ -84,6 +111,26 @@ function severityIcon(severity: Severity): SVGSVGElement {
     return icon(severity, severity === 'error' ? 'Error' : 'Warning');
 }
 
+function agentStatus(state: AgentState): HTMLSpanElement {
+    return el('span', { className: `agent-status ${state}` }, icon(state), AGENT_STATUS[state]);
+}
+
+function hintClosed(): boolean {
+    try {
+        return localStorage.getItem(HINT_KEY) === 'closed';
+    } catch {
+        return false;
+    }
+}
+
+function closeHint(): void {
+    try {
+        localStorage.setItem(HINT_KEY, 'closed');
+    } catch {
+        // storage unavailable: the hint comes back on reload
+    }
+}
+
 function storedSide(): Side {
     try {
         return localStorage.getItem(SIDE_KEY) === 'right' ? 'right' : 'left';
@@ -106,7 +153,7 @@ function storeSide(side: Side): void {
  * whose counters filter the issues, the issues by category and rule, and the heading structure.
  * Built in a shadow root.
  */
-export function createSATUI(onToggle: () => void, onRerun: () => void, fixActions?: FixActions): SATUI {
+export function createSATUI(onToggle: () => void, onRerun: () => void, { fix: fixActions, agent: agentActions, suggestMcp }: PanelActions = {}): SATUI {
     const host = document.createElement('sat-panel');
     host.setAttribute('data-sat-ignore', '');
     const root = host.attachShadow({ mode: 'open' });
@@ -137,6 +184,17 @@ export function createSATUI(onToggle: () => void, onRerun: () => void, fixAction
         promptText,
     );
     const fixBox = el('div', { className: 'fix', hidden: true });
+    const agentBox = el('div', { className: 'agent', hidden: true });
+    const hint = el('div', { className: 'hint', hidden: !suggestMcp || hintClosed() },
+        el('div', { className: 'box-head' },
+            el('p', {}, 'Send issues to your AI agent: add ', el('code', { textContent: 'sat({ mcp: true })' }), ' to vite.config.'),
+            iconButton('ghost', 'close', 'Close hint', () => {
+                hint.hidden = true;
+                closeHint();
+                closeButton.focus();
+            }),
+        ),
+    );
 
     const shown = new Map<Filter, boolean>(FILTERS.map(([filter]) => [filter, true]));
     const counters = new Map<Filter, HTMLButtonElement>();
@@ -163,8 +221,10 @@ export function createSATUI(onToggle: () => void, onRerun: () => void, fixAction
     const panel = el('section', { id: 'sat-results', className: 'panel', hidden: true },
         el('div', { className: 'header' }, el('span', { className: 'brand' }, icon('brand'), 'SAT', time), live, sideButton, closeButton),
         summary,
+        hint,
         promptBox,
         fixBox,
+        agentBox,
         el('div', { className: 'tabs' }, issuesTab, structureTab),
         issuesView,
         structureView,
@@ -183,6 +243,12 @@ export function createSATUI(onToggle: () => void, onRerun: () => void, fixAction
     let noticeTimer: ReturnType<typeof setTimeout> | undefined;
     let fixState: FixView['state'] | undefined;
     const expanded = new Set<string>();
+    /** Id of each issue shown (see `issueIds`): the agent's queue knows the issues by it. */
+    let ids = new Map<Issue, string>();
+    /** The issues sent to the agent, by id. */
+    let sent = new Map<string, QueuedIssue>();
+    /** "Send to agent" buttons and states of the issues on screen, by id. */
+    let agentControls = new Map<string, { toggle: HTMLButtonElement; status: HTMLElement }>();
 
     function announce(text: string, { keep = false, visible = true } = {}) {
         clearTimeout(noticeTimer);
@@ -206,11 +272,58 @@ export function createSATUI(onToggle: () => void, onRerun: () => void, fixAction
         }
     }
 
-    /** Copy (and, with AI, fix) buttons for one issue or all the issues of a rule. */
-    function issueActions(list: Issue[]): HTMLButtonElement[] {
-        const actions = [iconButton('ghost', 'copy', 'Copy fix prompt', () => void copyPrompt(list))];
-        if (fixActions) actions.push(iconButton('ghost', 'fix', 'Fix with AI', () => fixActions.fix(list)));
+    /** Adds the issues to the agent's queue, or removes them (`send` false). */
+    async function sendToAgent(list: Issue[], send: boolean) {
+        const url = location.href;
+        const change = send
+            ? { add: list.map((issue) => ({ id: ids.get(issue)!, ...(issue.title && { title: issue.title }), message: issue.message, prompt: fixPrompt(issue, { url }) })) }
+            : { remove: list.map((issue) => ids.get(issue)!) };
+        const done = await agentActions!.change(change);
+        if (!done) announce('The dev server is not reachable: reload the page');
+        else announce(send ? `Sent to agent: ${plural(list.length, 'issue')}` : 'Removed from the agent queue');
+    }
+
+    /** "Send to agent" (toggle) for one issue, then the shortcut for Claude Code, then the prompt to copy. */
+    function issueActions(issue: Issue): HTMLButtonElement[] {
+        const actions: HTMLButtonElement[] = [];
+        if (agentActions) {
+            const toggle = iconButton('ghost send', 'send', 'Send to agent', () => void sendToAgent([issue], toggle.getAttribute('aria-pressed') !== 'true'));
+            actions.push(toggle);
+        }
+        if (fixActions) actions.push(iconButton('ghost', 'fix', 'Fix with Claude Code', () => fixActions.fix([issue])));
+        actions.push(iconButton('ghost', 'copy', 'Copy fix prompt', () => void copyPrompt([issue])));
         return actions;
+    }
+
+    /** The state of each issue on screen that was sent, and its button pressed while the agent has it. */
+    function updateAgentControls() {
+        agentControls.forEach(({ toggle, status }, id) => {
+            const issue = sent.get(id);
+            toggle.setAttribute('aria-pressed', String(isOpen(issue)));
+            status.replaceChildren(...(issue ? [agentStatus(issue.state)] : []));
+        });
+    }
+
+    function showAgent(list: QueuedIssue[]) {
+        const before = sent;
+        sent = new Map(list.map((issue) => [issue.id, issue]));
+        updateAgentControls();
+
+        agentBox.hidden = list.length === 0;
+        const done = list.filter((issue) => !isOpen(issue));
+        const clear = button('link', () => {
+            void agentActions?.change({ remove: done.map((issue) => issue.id) });
+            closeButton.focus();
+        }, 'Clear done');
+        clear.hidden = done.length === 0;
+        agentBox.replaceChildren(
+            el('div', { className: 'box-head' }, el('p', {}, el('strong', { textContent: 'Sent to agent' }), ` · ${list.length}`), clear),
+            el('ul', { className: 'agent-list' }, ...list.map((issue) => el('li', {}, agentStatus(issue.state), el('span', { textContent: issue.title ?? issue.message })))),
+        );
+
+        // Only what the agent did: sending is announced by the button.
+        const changed = list.filter((issue) => before.has(issue.id) && before.get(issue.id)!.state !== issue.state);
+        if (changed.length) announce(changed.map((issue) => `${AGENT_STATUS[issue.state]}: ${issue.title ?? issue.message}`).join('. '), { visible: false });
     }
 
     function showFix(view: FixView | null) {
@@ -269,7 +382,13 @@ export function createSATUI(onToggle: () => void, onRerun: () => void, fixAction
         const element = issue.element;
         const content = element ? button('item', () => overlay.reveal(element)) : el('div', { className: 'item' });
         content.append(severityIcon(issue.severity), ' ', el('span', { textContent: issue.message }));
-        return el('li', { className: 'row' }, content, ...issueActions([issue]));
+        const actions = issueActions(issue);
+        if (agentActions) {
+            const status = el('span', { className: 'agent-state' });
+            content.append(status);
+            agentControls.set(ids.get(issue)!, { toggle: actions[0], status });
+        }
+        return el('li', { className: 'row' }, content, ...actions);
     }
 
     /** One rule: readable title, worst severity, count, WCAG criteria or source, docs link, the first issues. */
@@ -291,18 +410,24 @@ export function createSATUI(onToggle: () => void, onRerun: () => void, fixAction
             docs.setAttribute('aria-label', `Why and how to fix: ${title} (opens in a new tab)`);
             actions.append(docs);
         }
+        if (agentActions) {
+            const sendAll = button('link', () => void sendToAgent(list, true), icon('send'), 'Send all to agent');
+            sendAll.setAttribute('aria-label', `Send all to agent: ${title}`);
+            actions.append(sendAll);
+        }
+        if (fixActions) {
+            const fixAll = button('link', () => fixActions.fix(list), icon('fix'), 'Fix all with Claude Code');
+            fixAll.setAttribute('aria-label', `Fix all with Claude Code: ${title}`);
+            actions.append(fixAll);
+        }
         const copyAll = button('link', () => void copyPrompt(list), icon('copy'), 'Copy prompt for all');
         copyAll.setAttribute('aria-label', `Copy prompt for all: ${title}`);
         actions.append(copyAll);
-        if (fixActions) {
-            const fixAll = button('link', () => fixActions.fix(list), icon('fix'), 'Fix all with AI');
-            fixAll.setAttribute('aria-label', `Fix all with AI: ${title}`);
-            actions.append(fixAll);
-        }
         const card = el('div', { className: 'rule' }, head, actions);
 
         const all = expanded.has(ruleId);
         card.append(el('ul', {}, ...(all ? list : list.slice(0, FIRST_ISSUES)).map(issueItem)));
+        updateAgentControls();
         if (!all && list.length > FIRST_ISSUES) {
             card.append(button('more', () => {
                 expanded.add(ruleId);
@@ -315,6 +440,7 @@ export function createSATUI(onToggle: () => void, onRerun: () => void, fixAction
     function renderIssues() {
         const visible = issues.filter((issue) => shown.get(issue.severity) && shown.get(issue.category));
         overlay.show(visible);
+        agentControls = new Map();
 
         const sections = CATEGORIES.flatMap(([category, label]) => {
             const byRule = new Map<string, Issue[]>();
@@ -392,6 +518,8 @@ export function createSATUI(onToggle: () => void, onRerun: () => void, fixAction
 
         showResults(newIssues, outline, duration) {
             issues = newIssues;
+            const list = issueIds(issues);
+            ids = new Map(issues.map((issue, index) => [issue, list[index]]));
             expanded.clear();
             const errors = issues.filter((issue) => issue.severity === 'error').length;
             const warnings = issues.length - errors;
@@ -408,5 +536,6 @@ export function createSATUI(onToggle: () => void, onRerun: () => void, fixAction
 
         clearHighlights: () => overlay.clear(),
         showFix,
+        showAgent,
     };
 }

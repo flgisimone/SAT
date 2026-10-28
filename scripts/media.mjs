@@ -19,12 +19,13 @@ const OPTIONS = JSON.parse(readFileSync(new URL('examples/page/expected.json', R
 const MAX_GIF = 5 * 1024 * 1024;
 const { video: KEEP_VIDEO } = parseArgs({ options: { video: { type: 'string' } } }).values;
 
-// The page as an app in development would have it: SAT imported, not started yet.
+// The page as an app in development would have it: SAT imported, not started yet, with "Send to agent" as with `mcp: true`.
 // Its content moves to the right, so the panel (on the left) doesn't cover it.
+const MCP = `mcp: { url: '/__sat/results', queue: '/__sat/queue', token: 'media', status: (show) => (window.satStatus = show) }`;
 const PAGE = readFileSync(new URL('examples/page/index.html', ROOT), 'utf8')
     .replace('</head>', '<style>body { margin-right: 3rem }</style>\n</head>')
     .replace('</body>',
-    `<script type="module">import { satChecker } from '/sat-controller.js'; satChecker(${JSON.stringify({ enabled: true, ...OPTIONS })});</script>\n</body>`);
+    `<script type="module">import { satChecker } from '/sat-controller.js'; satChecker({ ...${JSON.stringify({ enabled: true, ...OPTIONS })}, ${MCP} });</script>\n</body>`);
 
 // The video has no mouse pointer: a dot follows the mouse so the clicks can be seen. Only in the recording.
 const POINTER = `addEventListener('DOMContentLoaded', () => {
@@ -39,6 +40,13 @@ async function open(browser, options) {
     await context.route(`${ORIGIN}/**`, (route) => {
         const path = new URL(route.request().url()).pathname;
         if (path === '/') return route.fulfill({ contentType: 'text/html; charset=utf-8', body: PAGE });
+        // As the dev server does: the queue answers, then the page hears that its issues are queued.
+        if (path === '/__sat/queue') {
+            const { add = [] } = route.request().postDataJSON();
+            const issues = add.map((issue) => ({ ...issue, state: 'queued' }));
+            return route.fulfill({ status: 204 }).then(() => page.evaluate((issues) => window.satStatus({ page: '/', issues }), issues));
+        }
+        if (path.startsWith('/__sat/')) return route.fulfill({ status: 204 });
         const file = new URL(`.${path}`, DIST);
         if (!existsSync(file)) return route.fulfill({ status: 404, body: '' });
         return route.fulfill({ contentType: 'text/javascript', body: readFileSync(file) });
@@ -61,11 +69,14 @@ async function click(page, locator, pause = 1200) {
 /** The issue of a rule in the panel, by the rule's title. */
 const issue = (page, title) => page.locator('.rule', { hasText: title }).locator('.item').first();
 
-/** SAT on, panel open, the image-alt issue clicked: its box flashing. */
+/** SAT on, panel open, the image-alt issue sent to the agent and clicked: its box flashing. */
 async function showPanel(page, pause) {
     await click(page, page.locator('#sat-run-button'), pause);
     await page.locator('.results').getByText('5 errors').waitFor();
     await click(page, page.locator('.results'), pause);
+    const rule = page.locator('.rule', { hasText: 'Images have alternative text' });
+    await click(page, rule.getByRole('button', { name: 'Send to agent', exact: true }), pause);
+    await rule.locator('.agent-status').waitFor();
     await click(page, issue(page, 'Images have alternative text'), pause);
 }
 

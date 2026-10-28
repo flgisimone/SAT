@@ -17,8 +17,22 @@ SAT adds a panel to the pages of your Vite dev server: WCAG, WAI-ARIA and SEO is
 With Vite (Svelte, Solid, Preact, Vue, React, vanilla; for SvelteKit and other setups see [Other frameworks](#other-frameworks)):
 
 ```bash
-npm install -D seo-accessibility-tool axe-core
+npm install -D seo-accessibility-tool axe-core playwright
+npx playwright install chromium
+npx sat-check init     # sat({ mcp: true }) in vite.config, the sat server in .mcp.json and your agents' configs, AGENTS.md
+npm run dev
 ```
+
+`init` prepares the project for your coding agent; `--claude` adds a skill and a hook for Claude Code ([below](#set-up-your-agent)). `axe-core` is optional: when it is installed, the plugin runs its rules too ([below](#axe-core-engine)). Playwright is optional too: it lets the agent check routes with no browser window.
+
+Then the cycle:
+
+1. **The agent checks its own work.** Ask it: *"Check / with SAT and fix the issues."* It opens the route in headless Chromium with `sat_check`, reads the rule with `sat_rule`, edits the code and checks again: the answer starts with what it fixed, what is new and what remains. With `--claude`, a hook checks after every UI edit without being asked.
+2. **You send what you see.** Open the page: press play in the SAT dock, and boxes appear on the elements with issues (red for errors, amber for warnings); the counts button opens the panel. **Send to agent** on an issue, or on a rule, puts it in the agent's queue: the agent gets it first from `sat_issues`, and the panel shows it *Queued*, *Taken by the agent*, *Fixed*, then *Verified* when the agent checked again.
+
+SAT is only in `vite dev`: `vite build` doesn't include it, and your app's code doesn't import it. The [examples](examples/) are small projects on a page with known issues; to start from one: `npx degit flgisimone/SAT/examples/vite-vanilla my-site`.
+
+By hand, without `init`:
 
 ```ts
 // vite.config.ts
@@ -31,17 +45,9 @@ export default defineConfig({
 });
 ```
 
-Run `npm run dev` and open the page. You see the SAT dock in a corner: press play, and boxes appear on the elements with issues (red for errors, amber for warnings); the counts button opens the panel with the issues by rule. SAT is only in `vite dev`: `vite build` doesn't include it, and your app's code doesn't import it.
-
-Then connect your agent, once (Claude Code here, the others [below](#use-it-with-your-ai-agent)):
-
 ```bash
-claude mcp add --transport http sat http://localhost:5173/__sat/mcp
+claude mcp add --transport http sat http://localhost:5173/__sat/mcp   # Claude Code; the other agents below
 ```
-
-and ask it: *"Check / with SAT and fix the issues."* It checks the route with `sat_check`, edits the code and checks again: the answer starts with what it fixed, what is new and what remains. `sat_check` opens the page in headless Chromium with Playwright: `npm install -D playwright && npx playwright install chromium`. Without it, the agent works on the pages you open in the browser (`sat_issues`, `sat_recheck`).
-
-`axe-core` is optional: when it is installed, the plugin runs its rules too ([below](#axe-core-engine)). The [examples](examples/) are small projects on a page with known issues; to start from one: `npx degit flgisimone/SAT/examples/vite-vanilla my-site`.
 
 ## Use it with your AI agent
 
@@ -73,7 +79,7 @@ With `--claude`, a hook runs `sat-check hook` after each edit of a `.tsx`, `.jsx
 **Tools.**
 
 - `sat_check` (`url`, plus `viewport`, `colorScheme`, `waitFor`, `screenshots` optional): opens a route of the dev server in headless Chromium, with no browser window, and returns its issues. Needs Playwright (`npm install -D playwright && npx playwright install chromium`). With `screenshots: true` the agent also gets a picture of the element for contrast, target size and hidden headings, up to 5.
-- `sat_issues` (`url` optional): the pages open in the browser, with your login and data, and their issues.
+- `sat_issues` (`url`, `requested` optional): the pages open in the browser, with your login and data, and their issues; the ones you sent from the panel come first, with `requested: true`.
 - `sat_recheck` (`url` optional): runs the checks again on the open pages and returns what is left, in 1 to 11 seconds. It turns SAT on in the page if it was off.
 - `sat_rule` (`id`): the page of a rule, e.g. `image-alt`: what it checks, how to fix it, the patterns that pass. The agent reads it before writing or fixing the element. The same pages are MCP resources, `sat://rules/<id>`.
 
@@ -87,9 +93,13 @@ Each answer has a prompt to fix the issues in the source (rule, severity, WCAG c
 
 **Safety.** The endpoint answers only connections from this computer, with a `localhost` host name (against DNS rebinding) and no foreign `Origin`. `sat_check` opens only the dev server's own pages, never another host. The server changes no files: the agent edits them with its own tools and permissions.
 
-## Fix with AI (Claude Code, one click)
+## From the panel to the agent
 
-1. **Copy fix prompt**, everywhere: the button on an issue, or **Copy prompt for all** on a rule, copies a prompt for your coding agent, for the agents and setups without the MCP server. It has the rule, its source, the page URL and, for each issue, the message, the selector, the element's HTML and, with Vue, Svelte and React in development, the component file (and line, when known). It asks for the smallest fix in the source, and quotes the page as data, not instructions. The same prompt comes from the API:
+Each issue in the panel has up to three actions, and each rule the same for all its issues:
+
+1. **Send to agent** (Vite plugin with `mcp: true`): puts the issue in the agent's queue, for any agent connected to the MCP server. The agent gets the issues you sent first, marked `requested`, the next time it calls `sat_issues` (or only them, with `requested: true`); tell it *"Fix the issues I sent from SAT"*. The issue shows its state next to it, and the panel lists what you sent: *Queued*, *Taken by the agent* (`sat_issues` returned it), *Fixed* (gone from the page), *Verified* (gone after the agent's `sat_check` or `sat_recheck`). Press the button again to take the issue back; **Clear done** removes the fixed ones from the list. The queue lives in the dev server's memory.
+2. **Fix with Claude Code** (Vite plugin with `ai: true`): runs [Claude Code](https://code.claude.com) (`claude -p`) in your project, shows its progress and the files it changed, then checks the page again: **Fixed** or **Still present**. Requires Claude Code installed and signed in; SAT handles no API keys.
+3. **Copy fix prompt**, everywhere: copies a prompt for any coding agent or chat. It has the rule, its source, the page URL and, for each issue, the message, the selector, the element's HTML and, with Vue, Svelte and React in development, the component file (and line, when known). It asks for the smallest fix in the source, and quotes the page as data, not instructions. The same prompt comes from the API:
 
    ```ts
    import { fixPrompt, seoAccessibilityTool } from "seo-accessibility-tool";
@@ -98,11 +108,11 @@ Each answer has a prompt to fix the issues in the source (rule, severity, WCAG c
    const prompt = fixPrompt(issues.filter((issue) => issue.ruleId === "image-alt"), { url: location.href });
    ```
 
-2. **Fix with AI** (optional, Vite plugin only): with `sat({ ai: true })` every issue gets a **Fix with AI** button that runs [Claude Code](https://code.claude.com) (`claude -p`) in your project, shows its progress and the files it changed, then checks the page again: **Fixed** or **Still present**. Requires Claude Code installed and signed in; SAT handles no API keys.
+With the plugin but neither `mcp` nor `ai`, the panel suggests `sat({ mcp: true })` once.
 
-**What goes to the model.** SAT sends nothing anywhere. With Fix with AI on, Claude Code sends the prompt (which quotes the page) and the files it reads to the model, as when you use it directly.
+**What goes to the model.** SAT sends nothing anywhere. With Send to agent, your agent gets the prompt of the issue (which quotes the page) when it calls `sat_issues`; with Fix with Claude Code, Claude Code sends the prompt and the files it reads to the model, as when you use it directly.
 
-**Safety.** The dev server answers `POST /__sat/fix` only for this computer, its own pages and a token created at every start. Claude Code gets `Read`, `Edit`, `Grep` and `Glob` only: no shell, no web, no MCP servers. SAT keeps no copies of your files: it warns about uncommitted changes, so commit first and review with `git diff`.
+**Safety.** The dev server answers `POST /__sat/queue` and `POST /__sat/fix` only for this computer, its own pages and a token created at every start. Claude Code gets `Read`, `Edit`, `Grep` and `Glob` only: no shell, no web, no MCP servers. SAT keeps no copies of your files: Fix with Claude Code warns about uncommitted changes, so commit first and review with `git diff`.
 
 ---
 
@@ -114,7 +124,7 @@ Each answer has a prompt to fix the issues in the source (rule, severity, WCAG c
 | SvelteKit, Angular | [`satChecker`](#svelte-and-angular) in the root layout or the entry point |
 | Next.js, other bundlers | [`satChecker`](#without-vite) in the entry point |
 
-The MCP server, Fix with AI and the automatic axe-core are features of the Vite plugin; with the others, **Copy fix prompt** gives your agent the same prompt.
+The MCP server, Send to agent, Fix with Claude Code and the automatic axe-core are features of the Vite plugin; with the others, **Copy fix prompt** gives your agent the same prompt.
 
 ## Vite plugin
 
@@ -130,8 +140,8 @@ export default defineConfig({
 
 It takes the options that fit in JSON (`rules`, `wcagLevel`, `allowedLinkTexts`, `observeDom`), and:
 
-- `mcp: true` for the [MCP server](#use-it-with-your-ai-agent);
-- `ai: true` for [Fix with AI](#fix-with-ai-claude-code-one-click);
+- `mcp: true` for the [MCP server](#use-it-with-your-ai-agent) and [Send to agent](#from-the-panel-to-the-agent);
+- `ai: true` for [Fix with Claude Code](#from-the-panel-to-the-agent);
 - `axe`: [axe-core](#axe-core-engine) runs when the package is installed in the project; `axe: false` turns it off.
 
 `vite` is an optional peer dependency (5 or later).
@@ -182,12 +192,12 @@ In a React app, call it once in the entry point (or in a `useEffect` of the root
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/panel-dark.png">
-  <img src="docs/images/panel-light.png" alt="The SAT panel next to a page: counters, issues by rule with WCAG criteria, and a box on an image without alt text">
+  <img src="docs/images/panel-light.png" alt="The SAT panel next to a page: counters, the issue of an image without alt text sent to the agent and queued, issues by rule with WCAG criteria, and a box on the image">
 </picture>
 
 - **Dock**: play runs the checks and becomes stop; the arrow runs them again; the counts button opens the panel. SAT stays on across reloads until you stop it.
 - **Summary**: errors, warnings, accessibility and SEO counters, each a toggle that filters the list and the boxes.
-- **Issues**: by category, then by rule, errors first. Each rule has its title, WCAG criteria (or its source, such as Google) and "Why and how to fix". Click an issue to scroll to the element, focus it and flash its box.
+- **Issues**: by category, then by rule, errors first. Each rule has its title, WCAG criteria (or its source, such as Google) and "Why and how to fix". Click an issue to scroll to the element, focus it and flash its box. Its actions: [Send to agent, Fix with Claude Code, Copy fix prompt](#from-the-panel-to-the-agent).
 - **Structure**: the H1–H6 tree of the page, skipped levels marked.
 - **Boxes** over the page: red for errors, amber dashed for warnings; point at one for its issues. They are drawn on SAT's own layer: your page's elements, styles and attributes are never changed, and the panel's Shadow DOM keeps its CSS and yours apart.
 - **Single-page apps**: a route change (`pushState`, `replaceState`, back/forward) runs the checks again; `observeDom` reruns them on any DOM change.
@@ -280,7 +290,7 @@ satChecker({ engines: [axe()] });
 
 ## Guides
 
-- [AI agents](docs/guides/ai-agents.md): the MCP server, each agent's configuration, what the agent gets, Fix with AI.
+- [AI agents](docs/guides/ai-agents.md): the MCP server, each agent's configuration, what the agent gets, Send to agent, Fix with Claude Code.
 - [Configuration](docs/guides/configuration.md): where the options go, severity per rule, WCAG level, axe-core, one config for the panel and the CLI.
 - [Single-page apps](docs/guides/spa.md): route changes, content loaded later, what SAT doesn't see.
 - [SAT in CI](docs/guides/ci.md): GitHub Actions and GitLab CI, limits, reports, a project with many issues.
@@ -393,7 +403,7 @@ More in the [CI guide](docs/guides/ci.md): GitLab CI, a baseline for a project w
 |---|---|
 | [axe-core engine](#axe-core-engine) | `npm install -D axe-core` (4.10 or later); then on by itself in the Vite plugin; adds about 550 KB and makes a run slower |
 | [MCP server](#use-it-with-your-ai-agent) | The Vite plugin with `mcp: true` and an agent that speaks MCP over HTTP; the agent sends the issues, which quote the page, to its model. `sat_check` also needs `playwright` (or `@playwright/test`) and its Chromium |
-| [Fix with AI](#fix-with-ai-claude-code-one-click) | The Vite plugin with `ai: true`, [Claude Code](https://code.claude.com) installed and signed in; Claude Code sends the prompt, which quotes the page, to the model |
+| [Fix with Claude Code](#from-the-panel-to-the-agent) | The Vite plugin with `ai: true`, [Claude Code](https://code.claude.com) installed and signed in; Claude Code sends the prompt, which quotes the page, to the model |
 | [Playwright helper](#playwright) and [CLI](#cli-and-ci) | `@playwright/test` and Chromium (`npx playwright install chromium`), Node 22 or later |
 
 ## Contributing

@@ -7,29 +7,35 @@ import type { SATOptions } from '../sat/satOptions';
 import { fixMiddleware } from './fixServer';
 import { headlessChecker } from './headlessCheck';
 import { mcpMiddleware, resultsMiddleware, resultsStore } from './mcpServer';
+import { agentQueue, queueMiddleware } from './queueServer';
 
 /**
  * The SAT options that fit in JSON, plus:
  * - `axe`: runs axe-core too; on by default when `axe-core` is installed in the project, `false` turns it off;
  * - `ai: true` for "Fix with AI", which runs Claude Code (`claude -p`) in the project;
  * - `mcp: true` for the MCP server at `/__sat/mcp`, which gives the issues to any AI agent: of the open pages,
- *   and of any route checked in headless Chromium when Playwright is installed (`sat_check`).
+ *   and of any route checked in headless Chromium when Playwright is installed (`sat_check`); the panel gets "Send to agent".
  */
-export type SATViteOptions = Omit<Partial<SATOptions>, 'engines' | 'enabled' | 'aiFix' | 'mcp'> & { axe?: boolean; ai?: boolean; mcp?: boolean };
+export type SATViteOptions = Omit<Partial<SATOptions>, 'engines' | 'enabled' | 'aiFix' | 'mcp' | 'suggestMcp'> & { axe?: boolean; ai?: boolean; mcp?: boolean };
 
 const MODULE_ID = 'virtual:seo-accessibility-tool';
 const RESOLVED_ID = `\0${MODULE_ID}`;
 const FIX_PATH = '/__sat/fix';
 const RESULTS_PATH = '/__sat/results';
 const MCP_PATH = '/__sat/mcp';
+const QUEUE_PATH = '/__sat/queue';
 const LOOPBACK_HOSTS = ['localhost', '127.0.0.1', '[::1]'];
 
 /** The module the dev server adds to every page: it starts the panel with the plugin's options. */
 function startModule({ axe, ai, mcp, ...options }: SATViteOptions, token: string): string {
     const aiFix = ai ? `, aiFix: ${JSON.stringify({ url: FIX_PATH, token })}` : '';
-    // `sat_recheck` reaches the pages as the custom HMR event `sat:run`.
-    const results = mcp ? `, mcp: { ...${JSON.stringify({ url: RESULTS_PATH, token })}, listen: (run) => import.meta.hot?.on('sat:run', run) }` : '';
-    const settings = `{ ...${JSON.stringify(options)}, enabled: true${axe ? ', engines: [axe()]' : ''}${aiFix}${results} }`;
+    // `sat_recheck` reaches the pages as the custom HMR event `sat:run`, the state of the issues sent to the agent as `sat:status`.
+    const results = mcp
+        ? `, mcp: { ...${JSON.stringify({ url: RESULTS_PATH, queue: QUEUE_PATH, token })}, listen: (run) => import.meta.hot?.on('sat:run', run), status: (show) => import.meta.hot?.on('sat:status', show) }`
+        : '';
+    // Without mcp and ai the panel suggests turning mcp on, once.
+    const hint = mcp || ai ? '' : ', suggestMcp: true';
+    const settings = `{ ...${JSON.stringify(options)}, enabled: true${axe ? ', engines: [axe()]' : ''}${aiFix}${results}${hint} }`;
     return [
         `import { satChecker } from 'seo-accessibility-tool/sat-controller';`,
         axe ? `import { axe } from 'seo-accessibility-tool/axe';` : '',
@@ -67,13 +73,15 @@ function serverPort(server: ViteDevServer): number | undefined {
 function addMCP(server: ViteDevServer, token: string, { axe, ai, mcp, observeDom, ...options }: SATViteOptions): void {
     const store = resultsStore();
     const origins = () => serverOrigins(server);
+    const queue = agentQueue((page, issues) => server.ws.send('sat:status', { page, issues }));
     const checker = headlessChecker({
         from: [join(server.config.root, 'package.json'), import.meta.url],
         options: { ...options, axe },
         block: (url) => url.pathname.endsWith(`/@id/${MODULE_ID}`),
     });
     server.httpServer?.once('close', () => void checker.close());
-    server.middlewares.use(RESULTS_PATH, resultsMiddleware(store, token, origins));
+    server.middlewares.use(RESULTS_PATH, resultsMiddleware(store, token, origins, (results) => queue.checked(results.url, results.issues.map((issue) => issue.id), false)));
+    server.middlewares.use(QUEUE_PATH, queueMiddleware(queue, token, origins));
     server.middlewares.use(MCP_PATH, mcpMiddleware({
         store,
         check: (url, args) => checker.check(url, args),
@@ -83,6 +91,7 @@ function addMCP(server: ViteDevServer, token: string, { axe, ai, mcp, observeDom
         },
         hosts: () => LOOPBACK_HOSTS.map((host) => `${host}:${serverPort(server)}`),
         origins,
+        queue,
     }));
 
     server.httpServer?.once('listening', () => {
@@ -98,7 +107,7 @@ function addMCP(server: ViteDevServer, token: string, { axe, ai, mcp, observeDom
  * Vite plugin: adds SAT to the pages of `vite dev` only. `vite build` and `vite preview`
  * don't include it, and the app's code doesn't import SAT.
  * With `ai: true` the dev server also answers `POST /__sat/fix` (see `fixMiddleware`),
- * with `mcp: true` `POST /__sat/mcp` (see `mcpMiddleware`).
+ * with `mcp: true` `POST /__sat/mcp` (see `mcpMiddleware`) and `POST /__sat/queue` for "Send to agent" (see `queueMiddleware`).
  */
 export function sat(options: SATViteOptions = {}): Plugin {
     // A new token for every dev server run: only the pages it serves know it.

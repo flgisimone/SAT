@@ -284,7 +284,7 @@ test('Fix with AI: a stream that ends without a result says the connection was l
     await openPage(page, html(UNNAMED, { ...only(['accessible-name']), aiFix: { url: '/__sat/fix', token: 't' } }), { '/__sat/fix': stream });
     await page.locator('#sat-run-button').click();
     await results(page).click();
-    await page.getByRole('button', { name: 'Fix with AI', exact: true }).click();
+    await page.getByRole('button', { name: 'Fix with Claude Code', exact: true }).click();
 
     await expect(page.locator('.fix-status')).toHaveText('Fix failed · Elements have an accessible name');
     await expect(page.locator('.fix-summary')).toHaveText('The connection to the dev server was lost.');
@@ -302,11 +302,24 @@ for (const colorScheme of ['light', 'dark'] as const) {
             { type: 'file', path: 'src/App.vue' },
             { type: 'end', ok: true, summary: 'Added the alt text.', files: ['src/App.vue'] },
         ].map((event) => JSON.stringify(event)).join('\n');
-        await openPage(page, html(`<main><h1>A</h1><h3>B</h3>${UNNAMED}<img src="data:,"><p style="color: #bbb">Low</p></main>`, { aiFix: { url: '/__sat/fix', token: 't' } }), { '/__sat/fix': fix });
+        // With "Send to agent" (a stub queue endpoint, the states pushed by the test) and the hint about mcp.
+        const agent = 'satChecker({ mcp: { url: "/__sat/results", queue: "/__sat/queue", token: "t", status: (show) => (window.satStatus = show) }, suggestMcp: true, ';
+        const page$ = html(`<main><h1>A</h1><h3>B</h3>${UNNAMED}<img src="data:,"><p style="color: #bbb">Low</p></main>`, { aiFix: { url: '/__sat/fix', token: 't' } }).replace('satChecker({', agent);
+        await openPage(page, page$, { '/__sat/fix': fix, '/__sat/queue': '', '/__sat/results': '' });
         await page.locator('#sat-run-button').click();
         await results(page).click();
-        await page.locator('.rule', { hasText: 'Images have alternative text' }).getByRole('button', { name: 'Fix with AI', exact: true }).click();
+        await page.locator('.rule', { hasText: 'Images have alternative text' }).getByRole('button', { name: 'Fix with Claude Code', exact: true }).click();
         await expect(page.locator('.fix-status')).toHaveText('Still present · Images have alternative text');
+
+        const queued = page.waitForRequest((request) => request.url().endsWith('/__sat/queue'));
+        await page.locator('.rule', { hasText: 'Images have alternative text' }).getByRole('button', { name: 'Send to agent', exact: true }).click();
+        const [added] = ((await queued).postDataJSON() as { add: Array<{ id: string; message: string; title: string; prompt: string }> }).add;
+        expect(added.prompt).toContain('## Images have alternative text (image-alt)');
+        await page.evaluate((issue) => {
+            const show = (window as unknown as { satStatus: (status: unknown) => void }).satStatus;
+            show({ page: '/', issues: [{ ...issue, state: 'taken' }, { ...issue, id: 'other', state: 'verified' }] });
+        }, added);
+        await expect(page.locator('.row .agent-status')).toHaveText('Taken by the agent');
         const panel = await page.locator('sat-panel').evaluate((host) => {
             const copy = document.createElement('div');
             copy.innerHTML = host.shadowRoot!.innerHTML;

@@ -5,7 +5,7 @@ Una bozza per community, ognuna con un'apertura e una domanda diverse: lo stesso
 ## Prima di pubblicare
 
 - **Le regole delle community si leggono il giorno stesso.** Il 25/10/2026 le pagine delle regole di Reddit non erano leggibili da qui: quello che è scritto sotto viene da fonti secondarie e va verificato sulla pagina linkata e nella sidebar. Se una regola vieta il post, non si pubblica.
-- **La 1.19.0 è su npm** e la demo funziona: https://flgisimone.github.io/SAT/.
+- **La 2.0.0 è su npm** e la demo funziona: https://flgisimone.github.io/SAT/. I post parlano della 2.0: chi installa trova le funzioni descritte.
 - **Un post alla volta**, a qualche giorno di distanza: i feedback del primo cambiano il secondo. Ordine proposto: GitHub Discussions (resta come riferimento), r/webdev, r/javascript, r/accessibility; Show HN dopo.
 - **GIF**: `docs/images/sat.gif` (sotto i 5 MB), caricata come immagine del post dove la community lo consente; altrimenti il link alla demo.
 - **Ogni post ha i limiti** (cosa SAT non fa, F13-05) e **una domanda precisa**. I feedback vanno in [metriche.md](metriche.md), raggruppati per tema.
@@ -79,11 +79,19 @@ Una bozza per community, ognuna con un'apertura e una domanda diverse: lo stesso
 
 **Regole**: discussione nel repository, categoria *Announcements* (solo il maintainer può aprirle) e una seconda in *Ideas* per le richieste; le categorie si configurano dalle impostazioni ([documentazione di GitHub](https://docs.github.com/en/discussions/managing-discussions-for-your-community/managing-categories-for-discussions)). Da fissare in alto (*Pin discussion*). Qui si può essere più diretti: chi la legge è già arrivato al repository.
 
-**Titolo**: SAT 1.19.0: your AI agent sees the page. What's new since 1.6.0, and what should come next?
+**Titolo**: SAT 2.0: your AI agent checks its own work. What's new, and what should come next?
 
 **Testo**:
 
-> 1.19.0 is the first release on npm since 1.6.0, and it collects everything from 1.7 to 1.18 ([changelog](https://github.com/flgisimone/SAT/blob/develop/CHANGELOG.md)):
+> 2.0 makes SAT one thing: the accessibility and SEO panel in `vite dev` that gives the issues to your AI agent ([changelog](https://github.com/flgisimone/SAT/blob/develop/CHANGELOG.md)):
+>
+> - `npx sat-check init` prepares the project: `AGENTS.md`, the MCP server in your agents' configs, `sat({ mcp: true })`; `--claude` adds a skill and a hook that checks after each UI edit;
+> - `sat_check`: the agent checks any route in headless Chromium, and the answer starts with what it fixed, what is new and what remains; `sat_rule` gives it the page of each rule before it writes or fixes;
+> - **Send to agent** in the panel: the issues you see go to the agent first, and the panel shows them queued, taken, fixed and verified;
+> - file and line of the component with React 18 and 19, as with Vue and Svelte;
+> - a baseline for CI, so pull requests (an agent's too) can't add new issues.
+>
+> 2.0 removes the options deprecated in 1.x, the React and Vue wrappers, the browser extension and the crawler: the [upgrade table](https://github.com/flgisimone/SAT/blob/develop/CHANGELOG.md#upgrading-from-1x) has each replacement. Coming from 1.6.0, 1.19.0 collected everything from 1.7 to 1.18:
 >
 > - an MCP server in the Vite plugin (`sat({ mcp: true })`): Claude Code, Cursor, Copilot, Codex, Gemini CLI, Windsurf and Zed read the issues of the open page and check again after the fix ([AI agents guide](https://github.com/flgisimone/SAT/blob/develop/docs/guides/ai-agents.md));
 > - axe-core runs by itself in the Vite plugin when it's installed;
@@ -93,7 +101,7 @@ Una bozza per community, ognuna con un'apertura e una domanda diverse: lo stesso
 > - Copy fix prompt for coding agents, and opt-in Fix with AI with Claude Code from the Vite plugin;
 > - guides for [AI agents](https://github.com/flgisimone/SAT/blob/develop/docs/guides/ai-agents.md), [CI](https://github.com/flgisimone/SAT/blob/develop/docs/guides/ci.md), [configuration](https://github.com/flgisimone/SAT/blob/develop/docs/guides/configuration.md), [single-page apps](https://github.com/flgisimone/SAT/blob/develop/docs/guides/spa.md) and [troubleshooting](https://github.com/flgisimone/SAT/blob/develop/docs/guides/troubleshooting.md), and a template: `npx degit flgisimone/SAT/examples/vite-vanilla my-site`.
 >
-> Upgrading from 1.6.0 changes what SAT reports: see [Upgrading from 1.6.0](https://github.com/flgisimone/SAT/blob/develop/CHANGELOG.md#upgrading-from-160).
+> Upgrading from 1.6.0 also changes what SAT reports: see [Upgrading from 1.6.0](https://github.com/flgisimone/SAT/blob/develop/CHANGELOG.md#upgrading-from-160).
 >
 > What SAT doesn't do is in the [README](https://github.com/flgisimone/SAT#what-sat-does-not-do): it doesn't certify conformance, and it doesn't see iframes, shadow roots or canvas.
 >
@@ -101,7 +109,7 @@ Una bozza per community, ognuna con un'apertura e una domanda diverse: lo stesso
 
 ## Show HN — dopo
 
-**Quando**: dopo i primi feedback esterni (almeno qualche issue o discussione di persone che l'hanno provato) e con la 1.19.0, o una sua correzione, stabile da qualche settimana (F16 §1).
+**Quando**: dopo i primi feedback esterni (almeno qualche issue o discussione di persone che l'hanno provato) e con la 2.0.0, o una sua correzione, stabile da qualche settimana (F16 §1).
 
 **Regole**: https://news.ycombinator.com/showhn.html e https://news.ycombinator.com/newsguidelines.html, lette il 25/10/2026. Show HN è per qualcosa che si può provare senza registrarsi: la demo lo è. Il titolo comincia con «Show HN:»; niente richieste di voti o commenti ad amici; l'autore resta a rispondere. Una versione minore di solito non basta: si presenta il progetto, non la release.
 
