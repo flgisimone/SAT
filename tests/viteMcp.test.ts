@@ -6,7 +6,8 @@ import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createServer } from 'vite';
 import { CheckError, loadChromium, PLAYWRIGHT_MISSING, type CheckResult } from '../src/integrations/headlessCheck';
-import { mcpMiddleware, resultsStore } from '../src/integrations/mcpServer';
+import { mcpMiddleware, promptText, resultsStore, rulePage, ruleIds } from '../src/integrations/mcpServer';
+import { rules } from '../src/core/rules';
 import { sat, type SATViteOptions } from '../src/integrations/vite';
 import type { PageResults } from '../src/sat/mcpResults';
 
@@ -115,9 +116,9 @@ describe('MCP endpoint, versions up to 2025-11-25 (initialize)', () => {
         expect((await rpc('ping')).json.result).toEqual({});
     });
 
-    it('lists the three tools', async () => {
+    it('lists the four tools', async () => {
         const { json } = await rpc('tools/list');
-        expect((json.result!.tools as Array<{ name: string }>).map((tool) => tool.name)).toEqual(['sat_issues', 'sat_recheck', 'sat_check']);
+        expect((json.result!.tools as Array<{ name: string }>).map((tool) => tool.name)).toEqual(['sat_issues', 'sat_recheck', 'sat_check', 'sat_rule']);
         expect(json.result).not.toHaveProperty('resultType');
     });
 
@@ -159,12 +160,55 @@ describe('MCP endpoint, versions up to 2025-11-25 (initialize)', () => {
     });
 
     it('unknown methods and tools are JSON-RPC errors', async () => {
-        expect((await rpc('resources/list')).json.error).toMatchObject({ code: -32601 });
+        expect((await rpc('completion/complete')).json.error).toMatchObject({ code: -32601 });
         expect((await rpc('tools/call', { name: 'sat_delete' })).json.error).toMatchObject({ code: -32602 });
         expect((await call('/__sat/mcp', { body: [{ jsonrpc: '2.0', id: 1, method: 'ping' }] })).json.error).toMatchObject({ code: -32600 });
         const broken = await call('/__sat/mcp', { body: '{"jsonrpc":' });
         expect(broken.status).toBe(400);
         expect(broken.json.error).toMatchObject({ code: -32700 });
+    });
+});
+
+describe('rules and prompts', () => {
+    it('sat_rule returns the page of a rule, and the list of rules for an unknown id', async () => {
+        const known = await rpc('tools/call', { name: 'sat_rule', arguments: { id: 'image-alt' } });
+        expect(known.json.result!.content![0].text).toContain('# `image-alt`');
+        expect(known.json.result).not.toHaveProperty('isError');
+
+        const unknown = await rpc('tools/call', { name: 'sat_rule', arguments: { id: '../package' } });
+        expect(unknown.json.result).toMatchObject({ isError: true });
+        expect(unknown.json.result!.content![0].text).toContain('SAT has no rule "../package". Rules: accessible-name,');
+    });
+
+    it('lists the rule pages as resources and reads them', async () => {
+        const { json } = await rpc('resources/list');
+        const resources = json.result!.resources as Array<{ uri: string; mimeType: string }>;
+        expect(resources).toContainEqual(expect.objectContaining({ uri: 'sat://rules/color-contrast', mimeType: 'text/markdown' }));
+        expect(resources).toHaveLength(ruleIds().length);
+
+        const read = await rpc('resources/read', { uri: 'sat://rules/color-contrast' });
+        expect(read.json.result!.contents).toEqual([{ uri: 'sat://rules/color-contrast', mimeType: 'text/markdown', text: rulePage('color-contrast') }]);
+        expect((await rpc('resources/read', { uri: 'sat://rules/nope' })).json.error).toMatchObject({ code: -32002 });
+    });
+
+    it('every rule of the registry has its page', () => {
+        expect(ruleIds()).toEqual(rules.map((rule) => rule.id).sort());
+    });
+
+    it('lists and gets the prompts sat-fix and sat-audit', async () => {
+        const list = await rpc('prompts/list');
+        expect((list.json.result!.prompts as Array<{ name: string }>).map((prompt) => prompt.name)).toEqual(['sat-fix', 'sat-audit']);
+
+        const fix = await rpc('prompts/get', { name: 'sat-fix', arguments: { url: '/cart' } });
+        const [message] = fix.json.result!.messages as Array<{ role: string; content: { type: string; text: string } }>;
+        expect(message.role).toBe('user');
+        expect(message.content.text).toContain('Call sat_check with url "/cart"');
+        expect(message.content.text).toContain('sat_rule');
+
+        const audit = await rpc('prompts/get', { name: 'sat-audit', arguments: { routes: '/ /cart' } });
+        expect((audit.json.result!.messages as Array<{ content: { text: string } }>)[0].content.text).toContain('one call each: /, /cart. Change no files.');
+        expect(promptText('sat-audit')).toContain('one call each: /.');
+        expect((await rpc('prompts/get', { name: 'sat-delete' })).json.error).toMatchObject({ code: -32602 });
     });
 });
 
@@ -195,7 +239,7 @@ describe('MCP endpoint, 2026-07-28 (stateless)', () => {
         expect(version.status).toBe(400);
         expect(version.json.error).toMatchObject({ code: -32022, data: { supported: expect.arrayContaining(['2026-07-28']), requested: '1900-01-01' } });
 
-        const unknown = await modern('resources/list');
+        const unknown = await modern('completion/complete');
         expect(unknown.status).toBe(404);
         expect(unknown.json.error).toMatchObject({ code: -32601 });
     });

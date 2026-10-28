@@ -59,11 +59,25 @@ With `sat({ mcp: true })` the dev server is an [MCP](https://modelcontextprotoco
 
 Configurations from each agent's documentation, October 2026; tried with Claude Code. Use your dev server's port if it isn't 5173. The [AI agents guide](docs/guides/ai-agents.md) has the details.
 
+### Set up your agent
+
+```bash
+npx sat-check init            # AGENTS.md, .mcp.json and the configs of the agents in the project, sat({ mcp: true })
+npx sat-check init --claude   # the same, plus a Claude Code skill and a hook
+```
+
+`init` writes the SAT section of `AGENTS.md` (when to call `sat_check`, how to read the issues, what not to do), points `CLAUDE.md` to it, adds the `sat` server to `.mcp.json` and to `.cursor/mcp.json`, `.vscode/mcp.json` and `.gemini/settings.json` when those folders exist, and adds `sat({ mcp: true })` to a simple `vite.config`. It touches only the SAT section and the `sat` key, so running it again changes nothing; `--dry-run` shows what it would do, `--port` sets the dev server's port.
+
+With `--claude`, a hook runs `sat-check hook` after each edit of a `.tsx`, `.jsx`, `.vue`, `.svelte`, `.html` or `.css` file: it checks `/` (or the routes you give to `init`, e.g. `npx sat-check init --claude / /cart`) through the dev server and tells Claude Code the issues the edit added, without being asked. With the dev server off it does nothing.
+
 **Tools.**
 
 - `sat_check` (`url`, plus `viewport`, `colorScheme`, `waitFor`, `screenshots` optional): opens a route of the dev server in headless Chromium, with no browser window, and returns its issues. Needs Playwright (`npm install -D playwright && npx playwright install chromium`). With `screenshots: true` the agent also gets a picture of the element for contrast, target size and hidden headings, up to 5.
 - `sat_issues` (`url` optional): the pages open in the browser, with your login and data, and their issues.
 - `sat_recheck` (`url` optional): runs the checks again on the open pages and returns what is left, in 1 to 11 seconds. It turns SAT on in the page if it was off.
+- `sat_rule` (`id`): the page of a rule, e.g. `image-alt`: what it checks, how to fix it, the patterns that pass. The agent reads it before writing or fixing the element. The same pages are MCP resources, `sat://rules/<id>`.
+
+**Prompts.** `sat-fix` (check a route, fix, check again) and `sat-audit` (check routes and summarize, no edits); in Claude Code they are `/mcp__sat__sat-fix /cart` and `/mcp__sat__sat-audit / /cart`.
 
 Each answer has a prompt to fix the issues in the source (rule, severity, WCAG criterion or source, selector, the element's HTML, the component file and line with Vue, Svelte and React, documentation link) and a structured list. Every issue has an `id` that stays the same between checks, and `sat_check` and `sat_recheck` start with what changed since the agent last looked at the page: *"/cart: 2 fixed (…), 1 new (…), 3 remaining."*
 
@@ -329,6 +343,8 @@ npx sat-check http://localhost:5173/ http://localhost:5173/pricing
 | `--config <file>` | — | JSON with SAT options, e.g. `{ "rules": { "link-text": "warning" } }` |
 | `--axe` | off | Runs axe-core too (install `axe-core`) |
 | `--wcag-level <level>` | `AA` | `AAA` adds the AAA criteria as warnings |
+| `--baseline <file>` | — | The issues in this file pass: the limits count only the new ones, and the report says which were fixed |
+| `--update-baseline` | — | Writes the issues found to the `--baseline` file |
 
 Exit codes: 0 within the limits, 1 above them, 2 for a wrong command or a run that couldn't start.
 
@@ -355,7 +371,7 @@ jobs:
         with: { name: sat-report, path: sat-report.html }
 ```
 
-More in the [CI guide](docs/guides/ci.md): GitLab CI, starting on a project with many issues, the reports.
+More in the [CI guide](docs/guides/ci.md): GitLab CI, a baseline for a project with many issues, so that pull requests (an agent's too) can't add new ones, the reports.
 
 ---
 

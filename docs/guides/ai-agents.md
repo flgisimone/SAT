@@ -10,6 +10,14 @@ SAT finds accessibility and SEO issues on the page in `vite dev`; your coding ag
 
 ## The MCP server
 
+### In one command
+
+```bash
+npx sat-check init --claude
+```
+
+does steps 1 and 2 and tells the agent how to use SAT: see [Set up the project](#set-up-the-project-sat-check-init). Leave out `--claude` if you don't use Claude Code. The steps by hand:
+
 ### 1. Turn it on
 
 ```ts
@@ -113,6 +121,7 @@ For example:
 | `sat_check` | `url`: a path or an address of the dev server, e.g. `/cart`; `viewport` (`{ "width": 375, "height": 667 }`), `colorScheme` (`"light"`, `"dark"`), `waitFor` (a CSS selector to wait for), `screenshots` (`true`), all optional | The route checked in headless Chromium, with what changed since the last check |
 | `sat_issues` | `url` (optional): an address or a path | The last results of each page open in the browser |
 | `sat_recheck` | `url` (optional) | The open pages check again; the results that come back, with what changed |
+| `sat_rule` | `id`: a rule, e.g. `image-alt` (the `ruleId` of an issue) | The rule's page: what it checks, why, how to fix it, the patterns that pass |
 
 For each page the agent gets:
 
@@ -130,6 +139,60 @@ The `id` of an issue is its rule and selector, e.g. `image-alt [id="photo"]`, wi
 ### File and line with React
 
 With React in development (`@vitejs/plugin-react` or `@vitejs/plugin-react-swc`), SAT finds the JSX that rendered the element: React 19 keeps the stack of each element's creation, and SAT maps it to the line of the source with the module's source map, which it reads once from the dev server. React 18 has the position on the element already. Nothing is added to your code or to the page, and production builds have none of it.
+
+### Rules and prompts
+
+The server's instructions tell the agent to read a rule with `sat_rule` before fixing its issues or writing an element it covers (an image, a form field, a dialog), and to fix the source, never the page in the DOM. The rule pages are also MCP resources, `sat://rules/<id>`, for agents that let you attach them: `@sat:sat://rules/image-alt` in Claude Code, **Add Context → MCP Resources** in VS Code, `@sat://rules/image-alt` in Gemini CLI.
+
+Two prompts, which the agents that support MCP prompts show as commands:
+
+| Prompt | Arguments | Asks the agent to |
+|---|---|---|
+| `sat-fix` | `url`, `/` by default | Check the route with `sat_check`, read the rules, fix the issues in the source, check again until nothing new appears |
+| `sat-audit` | `routes`: paths separated by spaces, `/` by default | Check each route and summarize the issues by rule and component, without editing |
+
+In Claude Code: `/mcp__sat__sat-fix /cart`, `/mcp__sat__sat-audit / /cart`; in VS Code `/sat.sat-fix`; in Gemini CLI `/sat-fix --url=/cart`.
+
+### Set up the project: `sat-check init`
+
+Run it in the project's folder:
+
+```bash
+npx sat-check init                     # every agent
+npx sat-check init --claude / /cart    # plus the Claude Code skill and hook, checking / and /cart
+npx sat-check init --dry-run           # shows the changes, writes nothing
+```
+
+| File | What `init` does |
+|---|---|
+| `AGENTS.md` | Adds or updates the SAT section, between `<!-- sat:start -->` and `<!-- sat:end -->`: call `sat_check` after a UI change, read the rule with `sat_rule`, fix in the component file, don't patch the DOM or turn rules off |
+| `CLAUDE.md` | If it exists and doesn't import `@AGENTS.md`, adds a SAT section that does |
+| `.mcp.json` | The `sat` server for Claude Code (VS Code reads this file too) |
+| `.cursor/mcp.json`, `.vscode/mcp.json`, `.gemini/settings.json` | The `sat` server, when the project has the folder |
+| `vite.config.*` | `sat({ mcp: true })` when the file has one-line imports and one `plugins: [`; otherwise it prints the line to add |
+| `.claude/skills/sat/SKILL.md` | With `--claude`: a skill on SAT's workflow and the common fixes |
+| `.claude/settings.json` | With `--claude`: the hook below |
+
+It changes only the SAT section of a Markdown file and the `sat` key of a JSON file, so running it again gives the same files. A JSON file with comments is left alone, with the key to add printed instead. Codex CLI (`.codex/config.toml`), Windsurf and Zed keep their configuration outside the project or in TOML: `init` prints what to add. `--port` sets the dev server's port, 5173 by default.
+
+### The Claude Code hook
+
+With `--claude`, `.claude/settings.json` gets a `PostToolUse` hook on `Edit` and `Write`:
+
+```json
+{ "matcher": "Edit|Write|MultiEdit", "hooks": [{ "type": "command", "command": "npx --no-install sat-check hook --port 5173 /", "timeout": 60 }] }
+```
+
+After an edit of a `.tsx`, `.jsx`, `.vue`, `.svelte`, `.html` or `.css` file, `sat-check hook` calls `sat_check` on each route of the command, through the dev server, and gives Claude Code the issues that weren't there at the previous check, as context next to the edit:
+
+```text
+SAT: your edit added 1 issue on /.
+- error image-alt: <img src="/logo.svg"> has no alt attribute. Describe the image, or use alt="" if it is decorative.
+```
+
+The first check of a route after `vite dev` starts has nothing to compare with: the hook lists its issues once, saying they may be older than the edit. With the dev server off, Playwright missing or another file type, the hook says nothing and exits with 0. Each check takes a second or more, after each UI edit: list only the routes the agent works on.
+
+Other agents have hooks too (Cursor's `postToolUse` and Gemini CLI's `AfterTool` can add context); for now `init` writes the hook for Claude Code only, and the others follow the SAT section of `AGENTS.md`.
 
 ### What the agent sees, and what it doesn't
 

@@ -1,6 +1,6 @@
 // npm run smoke: packs SAT as npm would publish it (npm pack), installs the tarball in a copy of
 // each folder of examples/ and checks that the example works as its README says.
-// - the tarball has LICENSE, README.md, CHANGELOG.md and dist/ only, and every file package.json points to;
+// - the tarball has LICENSE, README.md, CHANGELOG.md, dist/ and every page of docs/rules/ only, and every file package.json points to;
 // - no optional peer dependency gets installed where the example doesn't ask for it;
 // - examples with a "dev" script: `vite build` works, and in `vite dev` the panel shows the counts of expected.json (panelWithAxe with axe-core);
 // - examples with a "check" script: `npm run check` exits with 1 and its JSON report has exactly the issues of expected.json;
@@ -35,9 +35,11 @@ function compareIssues(issues) {
 
 function checkTarball(files) {
     const always = ['LICENSE', 'README.md', 'CHANGELOG.md'];
-    const unexpected = files.filter((file) => !file.startsWith('dist/') && file !== 'package.json' && !always.includes(file));
+    // The rule pages: the MCP server gives them to the agents (sat_rule).
+    const rulePages = readdirSync(join(ROOT, 'docs/rules')).map((file) => `docs/rules/${file}`);
+    const unexpected = files.filter((file) => !file.startsWith('dist/') && !rulePages.includes(file) && file !== 'package.json' && !always.includes(file));
     const targets = [pkg.main, pkg.types, ...Object.values(pkg.bin), ...Object.values(pkg.exports).flatMap(Object.values)];
-    const missing = [...new Set([...always, ...targets.map((target) => target.replace(/^\.\//, ''))])].filter((file) => !files.includes(file));
+    const missing = [...new Set([...always, ...rulePages, ...targets.map((target) => target.replace(/^\.\//, ''))])].filter((file) => !files.includes(file));
     if (unexpected.length) throw new Error(`tarball: files that shouldn't be published: ${unexpected.join(', ')}`);
     if (missing.length) throw new Error(`tarball: missing ${missing.join(', ')}`);
 }
