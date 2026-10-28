@@ -1,12 +1,15 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { JSDOM } from 'jsdom';
-import { seoAccessibilityTool, type RuleId, type SATOptions } from '../src/core/seoAccessibilityTool';
+import { seoAccessibilityTool, type RuleId, type SATOptions, type SATResult, type Severity } from '../src/core/seoAccessibilityTool';
 import { rules } from '../src/core/rules';
 import { blend, isLargeText, parseColor } from '../src/core/rules/a11y/color-contrast';
-import { collectInternalLinks } from '../src/core/rules/seo/link-broken';
 import { headingOutline } from '../src/core/rules/headings';
 import { GOOGLE_TYPES, NESTED_TYPES } from '../src/core/rules/seo/google-structured-data';
 import googleExamples from './google-structured-data.json';
+
+const messagesOf = (r: SATResult, severity: Severity) => r.issues.filter((issue) => issue.severity === severity).map((issue) => issue.message);
+const errorsOf = (r: SATResult) => messagesOf(r, 'error');
+const warningsOf = (r: SATResult) => messagesOf(r, 'warning');
 
 function render(html: string) {
     document.body.innerHTML = html;
@@ -119,13 +122,13 @@ describe('accessible names', () => {
         `);
         const r = await runOnly(['form-label', 'accessible-name']);
         expect(r.errors).toBe(1);
-        expect(r.errorMessages[0]).toContain('placeholder');
+        expect(errorsOf(r)[0]).toContain('placeholder');
     });
 
     it('does not throw on ids with quotes', async () => {
         render('<input id=\'a"b\'>');
         const r = await runOnly(['form-label']);
-        expect(r.errorMessages.join()).not.toContain('internal error');
+        expect(errorsOf(r).join()).not.toContain('internal error');
     });
 });
 
@@ -138,8 +141,8 @@ describe('hidden elements', () => {
             <div aria-hidden="true"><button></button></div>
             <a href="#" style="opacity:0">still in the tree</a>`);
         const r = await runOnly(['link-href', 'accessible-name', 'form-label']);
-        expect(r.errorMessages).toHaveLength(1);
-        expect(r.errorMessages[0]).toContain('still in the tree');
+        expect(errorsOf(r)).toHaveLength(1);
+        expect(errorsOf(r)[0]).toContain('still in the tree');
     });
 });
 
@@ -206,21 +209,8 @@ describe('links', () => {
         expect((await runOnly(['link-text'], { allowedLinkTexts: ['Read more'] })).warnings).toBe(1);
     });
 
-    it('collects same-origin links once, skipping external, protocol-relative and logout URLs', () => {
-        render(`
-            <a href="/a">1</a><a href="/a#x">2</a>
-            <a href="//cdn.example.com/x">3</a>
-            <a href="https://other.example.com/">4</a>
-            <a href="/logout">5</a>
-            <a href="mailto:a@b.c">6</a>
-        `);
-        const links = collectInternalLinks();
-        expect(links.size).toBe(1);
-        expect([...links.values()][0]).toHaveLength(2);
-    });
-
-    it('link-target-blank, link-text and link-broken are off by default', () => {
-        expect(rules.filter((rule) => rule.defaultOff).map((rule) => rule.id)).toEqual(['link-target-blank', 'link-text', 'link-broken']);
+    it('link-target-blank and link-text are off by default', () => {
+        expect(rules.filter((rule) => rule.defaultOff).map((rule) => rule.id)).toEqual(['link-target-blank', 'link-text']);
     });
 });
 
@@ -271,7 +261,7 @@ describe('SEO meta: duplicates', () => {
         document.head.innerHTML += '<title>Again</title><meta name="description" content="A"><meta name="description" content="B">';
         render('<svg><title>Icon</title></svg>');
         const r = await runOnly(['seo-meta']);
-        expect(r.errorMessages).toEqual([
+        expect(errorsOf(r)).toEqual([
             '2 <title> elements found; keep only one.',
             '2 <meta name="description"> found; keep only one.',
         ]);
@@ -295,7 +285,7 @@ describe('SEO: indexing and sharing', () => {
     it('a complete head has no issues', async () => {
         document.head.innerHTML = COMPLETE_HEAD;
         const r = await runOnly(INDEXING);
-        expect([...r.errorMessages, ...r.warningMessages]).toEqual([]);
+        expect([...errorsOf(r), ...warningsOf(r)]).toEqual([]);
     });
 
     it.each([
@@ -306,7 +296,7 @@ describe('SEO: indexing and sharing', () => {
     ])('canonical: %s', async (_, head, severity, message) => {
         document.head.innerHTML = head;
         const r = await runOnly(['canonical']);
-        const messages = severity === 'error' ? r.errorMessages : r.warningMessages;
+        const messages = severity === 'error' ? errorsOf(r) : warningsOf(r);
         expect(r.errors + r.warnings).toBe(1);
         expect(messages[0]).toMatch(message);
     });
@@ -321,7 +311,7 @@ describe('SEO: indexing and sharing', () => {
     it('social: lists the missing Open Graph properties, relative URLs and the Twitter card', async () => {
         document.head.innerHTML = '<meta property="og:title" content="Home"><meta property="og:image" content="/a.png">';
         const r = await runOnly(['social-meta']);
-        expect(r.warningMessages).toEqual([
+        expect(warningsOf(r)).toEqual([
             'Missing Open Graph <meta property="og:type">, <meta property="og:url">: link previews may be incomplete.',
             '<meta property="og:image" content="/a.png"> must be an absolute URL (https://…).',
             'Missing <meta name="twitter:card"> (e.g. "summary_large_image"): X shows no card without it.',
@@ -337,10 +327,10 @@ describe('SEO: indexing and sharing', () => {
             <link rel="alternate" hreflang="es-419" href="https://example.com/es/">
             <link rel="alternate" hreflang="zh-Hant-TW" href="https://example.com/tw/">`;
         const r = await runOnly(['hreflang']);
-        expect(r.errorMessages).toHaveLength(3);
-        expect(r.errorMessages[0]).toContain('"english" is not a language code');
-        expect(r.errorMessages[1]).toContain('relative URL "/it/"');
-        expect(r.errorMessages[2]).toContain('points to both');
+        expect(errorsOf(r)).toHaveLength(3);
+        expect(errorsOf(r)[0]).toContain('"english" is not a language code');
+        expect(errorsOf(r)[1]).toContain('relative URL "/it/"');
+        expect(errorsOf(r)[2]).toContain('points to both');
     });
 });
 
@@ -349,14 +339,14 @@ describe('SEO: contents', () => {
         render('<script type="application/ld+json">{"@type": "Organization",}</script>');
         const r = await runOnly(['structured-data']);
         expect(r.errors).toBe(1);
-        expect(r.errorMessages[0]).toMatch(/Invalid JSON-LD .*position 25/);
+        expect(errorsOf(r)[0]).toMatch(/Invalid JSON-LD .*position 25/);
     });
 
     it('JSON-LD items without @type are an error', async () => {
         render('<script type="application/ld+json">[{"@type":"Person"},{"name":"x"}]</script><script type="application/ld+json">{"@graph":[{"name":"y"}]}</script>');
         const r = await runOnly(['structured-data']);
-        expect(r.errorMessages).toHaveLength(2);
-        expect(r.errorMessages[0]).toContain('1 item(s) without "@type"');
+        expect(errorsOf(r)).toHaveLength(2);
+        expect(errorsOf(r)[0]).toContain('1 item(s) without "@type"');
     });
 });
 
@@ -377,7 +367,7 @@ describe('structured-data: properties Google requires', () => {
     it.each(Object.entries(googleExamples.examples))('Google examples are valid: %s', async (_, examples) => {
         render(jsonLd(...examples));
         const r = await runOnly(['structured-data']);
-        expect(r.errorMessages).toEqual([]);
+        expect(errorsOf(r)).toEqual([]);
     });
 
     it('removing a required property from a Google example is an error that names it', async () => {
@@ -388,7 +378,7 @@ describe('structured-data: properties Google requires', () => {
                 const [property] = path.split('.');
                 render(jsonLd({ ...item, [property]: undefined }));
                 const r = await runOnly(['structured-data']);
-                expect(r.errorMessages, `${item['@type']} without ${property}`).toEqual([expect.stringContaining(`Missing ${item['@type']} > ${path.split('.').join(' > ')}`)]);
+                expect(errorsOf(r), `${item['@type']} without ${property}`).toEqual([expect.stringContaining(`Missing ${item['@type']} > ${path.split('.').join(' > ')}`)]);
                 removed++;
             }
         }
@@ -408,9 +398,9 @@ describe('structured-data: properties Google requires', () => {
     ])('reports a missing required property: %s', async (_, item, message) => {
         render(jsonLd(item));
         const r = await runOnly(['structured-data']);
-        expect(r.errorMessages).toHaveLength(1);
-        expect(r.errorMessages[0]).toContain(message);
-        expect(r.errorMessages[0]).toContain('https://developers.google.com/search/docs/appearance/structured-data/');
+        expect(errorsOf(r)).toHaveLength(1);
+        expect(errorsOf(r)[0]).toContain(message);
+        expect(errorsOf(r)[0]).toContain('https://developers.google.com/search/docs/appearance/structured-data/');
     });
 
     it('breadcrumbs: every item but the last needs item; name may come from item', async () => {
@@ -423,7 +413,7 @@ describe('structured-data: properties Google requires', () => {
             ],
         }));
         const r = await runOnly(['structured-data']);
-        expect(r.errorMessages).toEqual([expect.stringContaining('Missing BreadcrumbList > itemListElement[1] > item')]);
+        expect(errorsOf(r)).toEqual([expect.stringContaining('Missing BreadcrumbList > itemListElement[1] > item')]);
     });
 
     it('nodes with the same @id are merged across @graph and blocks', async () => {
@@ -432,7 +422,7 @@ describe('structured-data: properties Google requires', () => {
             { '@type': 'Offer', '@id': '#o' },
         ));
         const r = await runOnly(['structured-data']);
-        expect(r.errorMessages).toEqual([expect.stringContaining('Missing Product > offers > price')]);
+        expect(errorsOf(r)).toEqual([expect.stringContaining('Missing Product > offers > price')]);
     });
 
     it('types Google requires nothing for, unknown types and Event offers are not checked', async () => {
@@ -441,7 +431,7 @@ describe('structured-data: properties Google requires', () => {
             { '@type': 'Event', name: 'A', startDate: '2026-11-01', location: { '@type': 'Place', address: 'B' }, offers: { '@type': 'Offer' } },
         ));
         const r = await runOnly(['structured-data']);
-        expect(r.errorMessages).toEqual([]);
+        expect(errorsOf(r)).toEqual([]);
     });
 });
 
@@ -457,7 +447,7 @@ describe('SEO: contents (mixed content)', () => {
         const secure = await runOnly(['mixed-content'], {}, new JSDOM(html, { url: 'https://example.com/' }).window.document);
         expect(secure.errors).toBe(2);
         expect(secure.warnings).toBe(1);
-        expect(secure.warningMessages[0]).toContain('http://example.com/b.png');
+        expect(warningsOf(secure)[0]).toContain('http://example.com/b.png');
 
         const plain = await runOnly(['mixed-content'], {}, new JSDOM(html, { url: 'http://example.com/' }).window.document);
         expect(plain.errors + plain.warnings).toBe(0);
@@ -487,7 +477,7 @@ describe('aria-attributes (ACT 5f99a7, 6a7281, 4e8ab6, 5c01ea, kb1m8s)', () => {
             <div role="slider" aria-valuenow="1" aria-valuemin="one">c</div>
             <button aria-sort="ascending">d</button>
             <span aria-label="Warning">!</span>`);
-        expect((await runOnly(['aria-attributes'])).errorMessages).toEqual([
+        expect(errorsOf(await runOnly(['aria-attributes']))).toEqual([
             'Unknown ARIA attribute aria-not-checked on <div> "a". Check the spelling.',
             'role="checkbox" requires aria-checked, missing on <div> "a".',
             'Invalid value aria-expanded="collapsed" on <div> "b": use one of true, false, undefined.',
@@ -535,7 +525,7 @@ describe('meta-viewport and meta-refresh (ACT b4f0c3, bc659a)', () => {
 
     it('reports a timed refresh; immediate redirects, invalid values and 20 hours or more are fine', async () => {
         document.head.innerHTML = '<meta http-equiv="refresh" content="30; URL=\'/next\'">';
-        expect((await runOnly(['meta-refresh'])).errorMessages[0]).toContain('after 30 s');
+        expect(errorsOf(await runOnly(['meta-refresh']))[0]).toContain('after 30 s');
         for (const content of ['0; URL=/next', '72001', '+5', 'foo; 30', '']) {
             document.head.innerHTML = `<meta http-equiv="refresh" content="${content}">`;
             expect((await runOnly(['meta-refresh'])).issues).toEqual([]);
@@ -626,9 +616,9 @@ describe('table-headers (ACT a25f45, d0f69e)', () => {
             <table><tr><th id="a">A</th></tr><tr><td id="self" headers="a self missing">1</td></tr></table>
             <table><tr><th>Rate</th><th>Value</th></tr><tr><td>15%</td></tr></table>`);
         const r = await runOnly(['table-headers']);
-        expect(r.errorMessages).toHaveLength(2);
-        expect(r.errorMessages[0]).toContain('"self", "missing"');
-        expect(r.errorMessages[1]).toContain('Value');
+        expect(errorsOf(r)).toHaveLength(2);
+        expect(errorsOf(r)[0]).toContain('"self", "missing"');
+        expect(errorsOf(r)[1]).toContain('Value');
     });
 });
 
@@ -647,18 +637,5 @@ describe('target-size outside the browser', () => {
     it('reports nothing without layout (jsdom)', async () => {
         render('<button>a</button><button>b</button>');
         expect((await runOnly(['target-size'])).issues).toEqual([]);
-    });
-});
-
-describe('Vue integration', () => {
-    it('starts immediately when called outside a component', async () => {
-        vi.resetModules();
-        const satChecker = vi.fn();
-        vi.doMock('../src/sat/satChecker', () => ({ satChecker }));
-        window.__SAT_INIT__ = false;
-        const { useSatChecker } = await import('../src/integrations/vue');
-        useSatChecker({ enableCheckH1: false });
-        expect(satChecker).toHaveBeenCalledWith({ enableCheckH1: false });
-        vi.doUnmock('../src/sat/satChecker');
     });
 });

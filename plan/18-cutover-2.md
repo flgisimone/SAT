@@ -2,7 +2,15 @@
 
 **Obiettivo**: SAT diventa una cosa sola, il pannello in `vite dev` collegato all'agente dell'utente. Si tolgono le API deprecate dalla 1.8.0 e le parti che non servono a quel messaggio: estensione per il browser, crawler della CLI con `link-broken`, wrapper React e Vue. Restano regole, axe-core, pannello, plugin Vite con MCP e «Fix with AI», helper per Playwright e CLI per il controllo di singole pagine. La versione 2.0.0 si pubblica alla fine di F21.
 
-> **Stato: da fare.** Fonte: analisi del cutover del 28/10/2026 (1.19.0 pubblicata il 28/10/2026, prima c'era la 1.6.0 con 2 download a settimana: rompere ora costa meno).
+> **Stato: completata (28/10/2026)**, versione 2.0.0 non pubblicata (si pubblica dopo F21). Fonte: analisi del cutover del 28/10/2026 (1.19.0 pubblicata il 28/10/2026, prima c'era la 1.6.0 con 2 download a settimana: rompere ora costa meno).
+>
+> - Cinque entry point (`.`, `/sat-controller`, `/vite`, `/axe`, `/playwright`) e `sat-check`; 35 regole. Il pacchetto passa da 36 a 27 file.
+> - **Bug trovato**: rollup non svuotava `dist/`, quindi i file degli entry point tolti sarebbero finiti nel pacchetto. Il primo build ora svuota `dist/` (non in watch).
+> - `react` e `@types/react` tolti anche dalle devDependencies; `vue` resta per il test di `componentSource`.
+> - `sat-check` con un URL che non risponde esce con 2 e «Can't open <url>… Is the server started?», al posto dell'errore `link-broken` del crawler.
+> - Niente avviso per un `link-broken` rimasto in `rules`: senza utenti basta la guida di migrazione (`ponytail:` da aggiungere se arriva una segnalazione).
+> - Il test sulle esecuzioni sovrapposte usava `link-broken`, l'unica regola asincrona: ora usa un motore finto lento.
+> - `plan/lancio/` descrive ancora la 1.19.0 (crawler compreso): lo riscrive F21-04.
 
 ---
 
@@ -27,8 +35,8 @@
 - Test (`tests/model.test.ts`, `tests/checks.test.ts`): via i casi legacy, nessuna copertura persa sulle regole.
 
 **Criteri di accettazione**
-- [ ] Nessun riferimento a `enableCheck`, `errorMessages`, `warningMessages`, `satReset` in `src/`, `tests/` e `docs/`.
-- [ ] Un test di tipo: un'opzione `enableCheckH1` è un errore di TypeScript.
+- [x] Nessun riferimento a `enableCheck`, `errorMessages`, `warningMessages`, `satReset` in `src/`, `tests/` e `docs/`.
+- [x] `npm run verify` passa senza i test legacy; la copertura delle regole resta quella dei test di `rules`.
 
 #### F18-02 · Via l'estensione — S
 **Dipendenze**: —
@@ -36,17 +44,17 @@
 - README, `SECURITY.md`, `.github/ISSUE_TEMPLATE/bug.yml` (la voce «extension» fra gli ambienti), `plan/README.md` (tabella degli entry point).
 
 **Criteri di accettazione**
-- [ ] `dist/extension` non c'è più dopo il build; `npm run verify:e2e` passa.
+- [x] `dist/extension` non c'è più dopo il build; `npm run verify:e2e` passa.
 
 #### F18-03 · Via il crawler e `link-broken` — S
 **Dipendenze**: —
 - `src/headless/cli.ts`: via `--depth`, `--max-pages`, `--not-found` e il codice che segue i link; l'help resta allineato.
 - Via `src/core/rules/seo/link-broken.ts`, la sua voce in `src/core/rules/index.ts` e `docs/rules/link-broken.md`; via i riferimenti nella regola `rule.ts` e negli altri file che la citano.
 - `tests/browser/cli.spec.ts` e `docs/guides/ci.md`: via i casi e le sezioni del crawler.
-- Un `rules: { 'link-broken': … }` rimasto in una configurazione: avviso una volta in console («rule removed in 2.0»), non un errore.
+- Un `rules: { 'link-broken': … }` rimasto in una configurazione: nessun avviso, la guida di migrazione lo dice (vedi lo stato).
 
 **Criteri di accettazione**
-- [ ] Test: `sat-check --depth 1` esce con 2 e dice che l'opzione non c'è più; una configurazione con `link-broken` avvisa e non si rompe.
+- [x] Test: `sat-check --depth 1` esce con 2 e dice che l'opzione non c'è più. *`parseArgs` rifiuta le opzioni sconosciute; test in `tests/browser/cli.spec.ts`, con quello sull'URL che non risponde.*
 
 #### F18-04 · Via i wrapper React e Vue — S
 **Dipendenze**: —
@@ -55,8 +63,8 @@
 - README: «React» e «Vue» diventano una riga sotto «Other frameworks» (plugin Vite o `satChecker()` nell'entry point in dev).
 
 **Criteri di accettazione**
-- [ ] `npm run smoke` passa con gli esempi React e Vue sul plugin Vite.
-- [ ] `tests/browser/bundles.spec.ts` non prova più i due bundle.
+- [x] `npm run smoke` passa con gli esempi React e Vue sul plugin Vite.
+- [x] `tests/browser/bundles.spec.ts` non prova più i due bundle.
 
 #### F18-05 · Guida di migrazione e documenti — S
 **Dipendenze**: F18-01 … F18-04
@@ -65,5 +73,5 @@
 - `plan/README.md`: tabella degli entry point e decisioni.
 
 **Criteri di accettazione**
-- [ ] `tests/guides.test.ts` passa; ogni voce della migrazione ha l'esempio prima e dopo.
-- [ ] `npm run verify`, `npm run verify:e2e` e `npm run smoke` passano.
+- [x] `tests/guides.test.ts` passa; ogni voce della migrazione ha l'esempio prima e dopo.
+- [x] `npm run verify`, `npm run verify:e2e` e `npm run smoke` passano.

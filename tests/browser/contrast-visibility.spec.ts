@@ -6,15 +6,15 @@ import { openPage } from './serve';
 // Runs the built bundle in a real browser, where layout, computed styles and canvas
 // are available (unlike jsdom).
 
-type Result = Omit<SATResult, 'issues'>;
+type Result = Omit<SATResult, 'issues'> & { errorTexts: string[] };
 
 async function run(page: Page, body: string, rule: RuleId, extra: object = {}): Promise<Result> {
     await openPage(page, `<!doctype html><html lang="en"><body>${body}</body></html>`);
     const only = { ...extra, rules: Object.fromEntries(rules.map((r) => [r.id, r.id === rule ? undefined : 'off'])) };
     return page.evaluate(async (options) => {
         const { seoAccessibilityTool } = await import('/index.js');
-        const { errors, warnings, errorMessages, warningMessages } = await seoAccessibilityTool(options);
-        return { errors, warnings, errorMessages, warningMessages };
+        const { errors, warnings, issues } = await seoAccessibilityTool(options);
+        return { errors, warnings, errorTexts: issues.filter((issue) => issue.severity === 'error').map((issue) => issue.message) };
     }, only);
 }
 
@@ -30,9 +30,9 @@ test.describe('contrast', () => {
     test('oklch colors (Tailwind v4) are parsed instead of crashing', async ({ page }) => {
         // oklch(0.85 0 0) is a light gray: about 1.6:1 on white
         const r = await run(page, '<p style="color:oklch(0.85 0 0)">Light gray</p>', contrast);
-        expect(r.errorMessages.join('\n')).not.toContain('internal error');
+        expect(r.errorTexts.join('\n')).not.toContain('internal error');
         expect(r.errors).toBe(1);
-        expect(r.errorMessages[0]).toMatch(/ratio 1\.[0-9]{2}/);
+        expect(r.errorTexts[0]).toMatch(/ratio 1\.[0-9]{2}/);
     });
 
     test('semi-transparent background is blended with the one below', async ({ page }) => {
@@ -94,7 +94,7 @@ test.describe('visibility', () => {
             'focus-management'
         );
         expect(r.errors).toBe(1);
-        expect(r.errorMessages[0]).toContain('Hidden');
+        expect(r.errorTexts[0]).toContain('Hidden');
     });
 });
 
@@ -103,8 +103,8 @@ test.describe('accessible names in the browser', () => {
         const r = await run(page, `
             <a href="/"><picture style="display:contents"><img src="logo.svg" alt="Home"></picture></a>
             <a href="/a" id="empty"><span style="display:none">Hidden</span></a>`, 'accessible-name');
-        expect(r.errorMessages).toHaveLength(1);
-        expect(r.errorMessages[0]).toContain('id="empty"');
+        expect(r.errorTexts).toHaveLength(1);
+        expect(r.errorTexts[0]).toContain('id="empty"');
     });
 });
 
@@ -116,7 +116,7 @@ test.describe('label-in-name in the browser', () => {
             <a href="/b" aria-label="Sign in" style="display:inline-block;height:18px;line-height:18px;overflow:hidden"><span style="display:block">Sign in</span><span style="display:block">Sign in</span></a>
             <a href="/d" aria-label="Sign in"><svg width="60" height="20"><defs><mask id="m"><text x="0" y="15">Sign in</text></mask></defs><rect width="60" height="20" mask="url(#m)"/></svg><span style="opacity:0">Sign in</span></a>
             <a href="/c" aria-label="Sign in" id="wrong">Log in</a>`, 'label-in-name');
-        expect(r.errorMessages).toHaveLength(1);
-        expect(r.errorMessages[0]).toContain('id="wrong"');
+        expect(r.errorTexts).toHaveLength(1);
+        expect(r.errorTexts[0]).toContain('id="wrong"');
     });
 });

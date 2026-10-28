@@ -93,11 +93,9 @@ The agent sees the pages open in the browser during this `vite dev` run: keep th
 
 | With | How |
 |---|---|
-| Vite | [Plugin](#vite-plugin), no import in the app |
-| React | [`useSATChecker`](#react) |
-| Vue 3 | [`useSatChecker`](#vue-3) |
+| Vite (React, Vue, Svelte, Solid, vanilla…) | [Plugin](#vite-plugin), no import in the app |
 | SvelteKit, Angular | [`satChecker`](#svelte-and-angular) in the root layout or the entry point |
-| Vanilla JS, other bundlers | [`satChecker`](#vanilla-js) |
+| Next.js, other bundlers | [`satChecker`](#without-vite) in the entry point |
 
 The MCP server, Fix with AI and the automatic axe-core are features of the Vite plugin; with the others, **Copy fix prompt** gives your agent the same prompt.
 
@@ -113,34 +111,13 @@ export default defineConfig({
 });
 ```
 
-It takes the options that fit in JSON (`rules`, `wcagLevel`, `allowedLinkTexts`, `observeDom`, the 1.x flags), and:
+It takes the options that fit in JSON (`rules`, `wcagLevel`, `allowedLinkTexts`, `observeDom`), and:
 
 - `mcp: true` for the [MCP server](#use-it-with-your-ai-agent);
 - `ai: true` for [Fix with AI](#fix-with-ai-claude-code-one-click);
 - `axe`: [axe-core](#axe-core-engine) runs when the package is installed in the project; `axe: false` turns it off.
 
 `vite` is an optional peer dependency (5 or later).
-
-## React
-
-```tsx
-import { useSATChecker } from "seo-accessibility-tool/react";
-
-function App() {
-  useSATChecker(); // starts SAT when the component mounts, in development
-  return <div>My App</div>;
-}
-```
-
-## Vue 3
-
-```vue
-<script setup lang="ts">
-import { useSatChecker } from "seo-accessibility-tool/vue";
-
-useSatChecker(); // in setup: SAT starts when the component is mounted, in development
-</script>
-```
 
 ## Svelte and Angular
 
@@ -171,14 +148,16 @@ import { AppComponent } from "./app/app.component";
 bootstrapApplication(AppComponent).then(() => satChecker({ enabled: isDevMode() }));
 ```
 
-## Vanilla JS
+## Without Vite
 
 ```ts
 import { satChecker } from "seo-accessibility-tool/sat-controller";
 
-satChecker(); // starts when process.env.NODE_ENV is "development" (Vite, webpack, Next…)
+satChecker(); // starts when process.env.NODE_ENV is "development" (webpack, Next…)
 satChecker({ enabled: true }); // or always, without a bundler
 ```
+
+In a React app, call it once in the entry point (or in a `useEffect` of the root component, for Next.js); in Vue, in `main.ts`.
 
 ---
 
@@ -202,7 +181,7 @@ satChecker({ enabled: true }); // or always, without a bundler
 Turn rules off or change their severity with `rules`, as in ESLint:
 
 ```ts
-useSATChecker({
+sat({
   rules: {
     "color-contrast": "warning", // every issue of the rule becomes a warning
     "landmarks": "off",
@@ -220,8 +199,6 @@ useSATChecker({
 | `enabled`          | Controller only: `true` starts SAT without a bundler, `false` never starts it                    | starts when `NODE_ENV === "development"` |
 | `observeDom`       | Controller only: while SAT is on, reruns the checks this many ms after the DOM stops changing    | off     |
 | `engines`          | Other checkers run with SAT's rules, e.g. `[axe()]` (see below)                                  | `[]`    |
-
-The 1.x options `enableCheck*` still work but are deprecated; `rules` takes precedence.
 
 ### Rules
 
@@ -264,7 +241,6 @@ Each rule follows an official source, cited on its page in [`docs/rules/`](docs/
 | `mixed-content`     | seo      | `http:` resources on an `https:` page: scripts, frames, styles (error), images and media (warning) | error |
 | `image-size`        | seo      | Visible `<img>` without `width` and `height` (layout shift)               | warning    |
 | `image-lazy-load`   | seo      | `loading="lazy"` on images visible when the page opens                    | warning    |
-| `link-broken`       | seo      | HEAD request to each internal link to find 4xx/5xx (skips logout-like URLs); `sat-check --depth` finds SPA 404s too | off |
 
 The panel links each rule to its page; each issue carries its URL in `help`, the rule's name in `title` and, for rules without a WCAG criterion, its source in `source`.
 
@@ -272,13 +248,13 @@ The panel links each rule to its page; each issue carries its URL in `help`, the
 
 [axe-core](https://github.com/dequelabs/axe-core) adds about 90 accessibility rules. With the Vite plugin it runs as soon as it is installed (`npm install -D axe-core`), and Vite prints "SAT: axe-core found" when it starts; `sat({ axe: false })` turns it off.
 
-With React, Vue and `satChecker` you add it yourself, because without the plugin an import of a missing package breaks the page (the CLI and Playwright take `--axe` and `axe: true`):
+With `satChecker` you add it yourself, because without the plugin an import of a missing package breaks the page (the CLI and Playwright take `--axe` and `axe: true`):
 
 ```ts
 import { satChecker } from "seo-accessibility-tool/sat-controller";
 import { axe } from "seo-accessibility-tool/axe";
 
-satChecker({ engines: [axe()] }); // with React or Vue: useSATChecker({ engines: [axe()] })
+satChecker({ engines: [axe()] });
 ```
 
 - axe's violations appear as `axe/<rule>` with a link to Deque's page; critical and serious ones are errors, the others warnings.
@@ -289,8 +265,8 @@ satChecker({ engines: [axe()] }); // with React or Vue: useSATChecker({ engines:
 
 - [AI agents](docs/guides/ai-agents.md): the MCP server, each agent's configuration, what the agent gets, Fix with AI.
 - [Configuration](docs/guides/configuration.md): where the options go, severity per rule, WCAG level, axe-core, one config for the panel and the CLI.
-- [Single-page apps](docs/guides/spa.md): route changes, content loaded later, broken links, what SAT doesn't see.
-- [SAT in CI](docs/guides/ci.md): GitHub Actions and GitLab CI, limits, reports, the link crawler, a project with many issues.
+- [Single-page apps](docs/guides/spa.md): route changes, content loaded later, what SAT doesn't see.
+- [SAT in CI](docs/guides/ci.md): GitHub Actions and GitLab CI, limits, reports, a project with many issues.
 - [Troubleshooting](docs/guides/troubleshooting.md): the panel doesn't appear, the agent doesn't see SAT, `sat-check` doesn't run, false positives.
 
 ---
@@ -308,7 +284,7 @@ const { issues, summary } = await runSAT({ rules: { "link-text": "warning" } });
 // issues: [{ ruleId, severity, category, message, title?, wcag?, source?, selector?, help? }], summary: { errors, warnings }
 ```
 
-`runSAT(options?, document?)` returns plain data, ready for `JSON.stringify`. `seoAccessibilityTool(options)` returns the same issues with their DOM `element`. The page is never changed; `satReset` is deprecated and does nothing.
+`runSAT(options?, document?)` returns plain data, ready for `JSON.stringify`. `seoAccessibilityTool(options)` returns the same issues with their DOM `element`. The page is never changed.
 
 ### Playwright
 
@@ -329,7 +305,7 @@ test("report", async ({ page }) => {
 });
 ```
 
-- Both take the options that can cross into the page (`rules`, `wcagLevel`, `allowedLinkTexts`, the 1.x flags) and `axe: true` (install `axe-core`).
+- Both take the options that can cross into the page (`rules`, `wcagLevel`, `allowedLinkTexts`) and `axe: true` (install `axe-core`).
 - `expect` is Playwright's own, extended: use it in place of the one from `@playwright/test`, or merge it with yours through `mergeExpects`.
 - Pages with a strict Content Security Policy block the added script: create the context with `bypassCSP: true`.
 
@@ -350,13 +326,10 @@ npx sat-check http://localhost:5173/ http://localhost:5173/pricing
 | `--config <file>` | — | JSON with SAT options, e.g. `{ "rules": { "link-text": "warning" } }` |
 | `--axe` | off | Runs axe-core too (install `axe-core`) |
 | `--wcag-level <level>` | `AA` | `AAA` adds the AAA criteria as warnings |
-| `--depth <n>` | `0` | Follows same-origin links this many levels deep, checks those pages and reports broken links |
-| `--max-pages <n>` | `100` | Stops after this many pages |
-| `--not-found <text>` | — | A page showing this text is a broken link: the "not found" view of a single-page app |
 
 Exit codes: 0 within the limits, 1 above them, 2 for a wrong command or a run that couldn't start.
 
-**Broken links.** With `--depth` every link is opened in Chromium, so a single-page app resolves the route with its own router. A link is broken when the server answers 4xx/5xx, the navigation fails, or the page shows the `--not-found` text; logout, delete and similar URLs are never opened.
+`sat-check` checks the URLs you give it. To crawl a whole site and find broken links, use a crawler such as [unlighthouse](https://unlighthouse.dev) or [pa11y-ci](https://github.com/pa11y/pa11y-ci) with a sitemap.
 
 **GitHub Actions:**
 
@@ -373,24 +346,13 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run build && (npx vite preview --port 4173 &) && curl -s --retry 10 --retry-connrefused -o /dev/null http://localhost:4173/
-      - run: npx sat-check http://localhost:4173/ --depth 2 --not-found "Page not found" --max-warnings 20 --html sat-report.html
+      - run: npx sat-check http://localhost:4173/ http://localhost:4173/pricing --max-warnings 20 --html sat-report.html
       - uses: actions/upload-artifact@v7
         if: always()
         with: { name: sat-report, path: sat-report.html }
 ```
 
 More in the [CI guide](docs/guides/ci.md): GitLab CI, starting on a project with many issues, the reports.
-
-### Browser extension
-
-Checks any page, a public site included, without installing SAT in a project. Build it and load it unpacked in Chrome or Edge:
-
-```bash
-npm install && npm run build
-# chrome://extensions → Developer mode → Load unpacked → dist/extension
-```
-
-A click on the SAT button in the toolbar adds the panel to the open tab. The extension asks only for `activeTab` and `scripting`: it reads a tab only after its button is clicked there, and nothing leaves the browser. It works on pages with a strict Content Security Policy too.
 
 ---
 
@@ -399,7 +361,7 @@ A click on the SAT button in the toolbar adds the panel to the open tab. The ext
 - **It doesn't certify WCAG conformance.** Automated checks find a part of the WCAG failures. The rest needs a person: keyboard use, screen readers (NVDA, JAWS, VoiceOver), zoom and reflow, whether alt texts, labels and captions make sense. No errors in SAT means no errors SAT can detect.
 - **It doesn't guarantee a position on Google.** The SEO rules check technical requirements from Google Search Central (title, description, canonical, hreflang, structured data); they don't judge content, links from other sites or ranking.
 - **In the page it runs in development only.** The panel starts when `NODE_ENV` is `"development"` (or with `enabled: true`), and the Vite plugin adds it to `vite dev` only: SAT is not meant for production pages.
-- **Broken links are complete only in the CLI.** The in-page `link-broken` rule is off by default and sends HEAD requests, which can't see the 404 view of a single-page app; `sat-check --depth` opens every link in Chromium.
+- **It doesn't crawl a site or check links.** It checks the pages open in the dev server, or the URLs you give `sat-check`.
 - **What it doesn't see:**
   - the documents inside `<iframe>` elements, of any origin (SAT checks the frame's name, not its content), and the shadow roots of web components;
   - what is drawn in a `<canvas>`;
@@ -414,7 +376,6 @@ A click on the SAT button in the toolbar adds the panel to the open tab. The ext
 | [MCP server](#use-it-with-your-ai-agent) | The Vite plugin with `mcp: true` and an agent that speaks MCP over HTTP; the agent sends the issues, which quote the page, to its model |
 | [Fix with AI](#fix-with-ai-claude-code-one-click) | The Vite plugin with `ai: true`, [Claude Code](https://code.claude.com) installed and signed in; Claude Code sends the prompt, which quotes the page, to the model |
 | [Playwright helper](#playwright) and [CLI](#cli-and-ci) | `@playwright/test` and Chromium (`npx playwright install chromium`), Node 22 or later |
-| [Browser extension](#browser-extension) | Built from this repository and loaded unpacked in Chrome or Edge; it isn't on the Chrome Web Store |
 
 ## Contributing
 

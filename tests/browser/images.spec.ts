@@ -10,7 +10,7 @@ async function warnings(page: Page, body: string, rule: RuleId): Promise<string[
     const only = { rules: Object.fromEntries(rules.map((r) => [r.id, r.id === rule ? undefined : 'off'])) };
     return page.evaluate(async (options) => {
         const { seoAccessibilityTool } = await import('/index.js');
-        return (await seoAccessibilityTool(options)).warningMessages;
+        return (await seoAccessibilityTool(options)).issues.filter((issue) => issue.severity === 'warning').map((issue) => issue.message);
     }, only);
 }
 
@@ -55,7 +55,7 @@ test.describe('image-lazy-load', () => {
             document.body.innerHTML = html;
             document.getElementById('below')!.scrollIntoView();
             const { seoAccessibilityTool } = await import('/index.js');
-            return (await seoAccessibilityTool(options)).warningMessages;
+            return (await seoAccessibilityTool(options)).issues.filter((issue) => issue.severity === 'warning').map((issue) => issue.message);
         }, { html: body, options: only });
         expect(r).toHaveLength(0);
     });

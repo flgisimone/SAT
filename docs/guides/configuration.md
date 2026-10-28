@@ -7,21 +7,19 @@ The same options work in every integration: which rules run and how severe their
 | Integration | Options | What it takes |
 |---|---|---|
 | Vite plugin | `sat(options)` in `vite.config` | The options that fit in JSON, `axe`, `ai: true`, `mcp: true` |
-| React | `useSATChecker(options)` | All the options |
-| Vue 3 | `useSatChecker(options)` | All the options |
-| Svelte, Angular, vanilla JS | `satChecker(options)` | All the options |
+| Without Vite (SvelteKit, Angular, Next.js, vanilla JS) | `satChecker(options)` | All the options |
 | Playwright | `checkPage(page, options)`, `toHaveNoSATErrors(options)` | The options that fit in JSON, `axe: true` |
 | CLI | `sat-check --config sat.config.json`, plus `--axe` and `--wcag-level` | The options that fit in JSON, `axe: true` |
 | API | `runSAT(options)`, `seoAccessibilityTool(options)` | All the options except `enabled` and `observeDom` |
 
-SAT starts once per page, with the options of the first call: with the Vite plugin, a `useSATChecker()` in the app adds nothing.
+SAT starts once per page, with the options of the first call: with the Vite plugin, a `satChecker()` in the app adds nothing.
 
 ## Rules
 
 `rules` sets a severity for each rule, or turns it off, as in ESLint:
 
 ```ts
-useSATChecker({
+sat({
   rules: {
     "color-contrast": "warning", // every issue of the rule becomes a warning
     "landmarks": "off",
@@ -33,16 +31,14 @@ useSATChecker({
 - **`"error"` or `"warning"`** applies to every issue of the rule. Some rules report both: `landmarks` reports several `<main>` as an error and a missing `<main>` as a warning; with `"landmarks": "warning"` both are warnings.
 - **`"off"`** doesn't run the rule.
 - **Not set**: the rule runs with its own severities, which follow its source: errors for requirements (WCAG A and AA, the "must" of HTML and WAI-ARIA, Google's requirements), warnings for recommendations.
-- **Off by default**: `link-text`, `link-target-blank` and `link-broken`. A severity turns them on.
+- **Off by default**: `link-text` and `link-target-blank`. A severity turns them on.
 
 The rule ids, their defaults and what each one checks are in the [README](../../README.md#rules); each rule has its page in [docs/rules](../rules/).
-
-The 1.x options `enableCheck*` still work but are deprecated: `enableCheckImageAlt: false` is `rules: { "image-alt": "off" }`. When both are set, `rules` wins.
 
 ## WCAG level
 
 ```ts
-useSATChecker({ wcagLevel: "AAA" });
+sat({ wcagLevel: "AAA" });
 ```
 
 `"AA"` (the default) checks WCAG A and AA. `"AAA"` adds the AAA criteria as warnings: contrast below 7:1 for normal text (1.4.6). The CLI takes `--wcag-level AAA`.
@@ -52,7 +48,7 @@ useSATChecker({ wcagLevel: "AAA" });
 `link-text` reports vague link texts such as "click here" or "more" (off by default). `allowedLinkTexts` accepts some anyway, ignoring case:
 
 ```ts
-useSATChecker({
+sat({
   rules: { "link-text": "warning" },
   allowedLinkTexts: ["Read more", "Learn more"],
 });

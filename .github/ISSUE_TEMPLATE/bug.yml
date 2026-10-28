@@ -13,7 +13,7 @@ body:
     id: setup
     attributes:
       label: How you run SAT
-      description: Framework and entry point, e.g. React 19 with useSATChecker, Vite plugin, sat-check, browser extension. Browser and Node version if relevant.
+      description: Framework and entry point, e.g. React 19 with the Vite plugin, satChecker() without Vite, sat-check, the Playwright helper. Browser and Node version if relevant.
     validations:
       required: true
   - type: textarea

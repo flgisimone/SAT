@@ -133,24 +133,9 @@ Examples, made by `sat-check` on the page with known issues of [examples/page](.
 
 The JSON report is for your own tools: a comment on the pull request, a dashboard, a diff between two runs.
 
-## Checking every page: the crawler
+## Checking more pages
 
-```bash
-npx sat-check http://localhost:4173/ --depth 2 --not-found "Page not found"
-```
-
-| Option | Default | Meaning |
-|---|---|---|
-| `--depth <n>` | `0` | Follows same-origin links this many levels deep, checks those pages and reports broken links |
-| `--max-pages <n>` | `100` | Stops after this many pages |
-| `--not-found <text>` | — | A page showing this text is a broken link: the "not found" view of a single-page app |
-
-- Every link is opened in Chromium, so a single-page app resolves the route with its own router; the server must answer every route with the app (as `vite preview` does).
-- A link is broken when the server answers 4xx or 5xx, the navigation fails, or the page shows the `--not-found` text. It is reported as `link-broken` on the page that links to it, with the selector of the first link.
-- Links that look like logout, delete and similar actions are never opened.
-- `{ "rules": { "link-broken": "warning" } }` in the config file makes broken links warnings, `"off"` stops reporting them.
-
-More on single-page apps in [spa.md](spa.md).
+List every route to check: `sat-check` opens each one in Chromium, so a single-page app resolves it with its own router (the server must answer every route with the app, as `vite preview` does). SAT doesn't crawl a site or check links: for that, use [unlighthouse](https://unlighthouse.dev) or [pa11y-ci](https://github.com/pa11y/pa11y-ci) with a sitemap. More on single-page apps in [spa.md](spa.md).
 
 ## Options
 

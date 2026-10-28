@@ -253,8 +253,8 @@ return options.rules.imageAlt;
 GOOD:
 
 ```ts
-function isImageAltEnabled(options: Partial<SATOptions>): boolean {
-  return options.enableCheckImageAlt ?? satOptions.enableCheckImageAlt;
+function imageAltSetting(options: Partial<SATOptions>): RuleSetting | undefined {
+  return options.rules?.['image-alt'];
 }
 ```
 
@@ -307,16 +307,14 @@ src/
     satChecker.ts             in-page controller: button, run/stop, storage (entry: "./sat-controller")
     satDom.ts                 DOM helpers shared by every rule (queryTargets, describeElement)
     issue.ts                  Issue, Severity, Category, cssSelector
-    satOptions.ts             SATOptions, rule settings, 1.x options mapped to rules
-    satReset.ts               deprecated no-op (SAT no longer changes the page)
+    satOptions.ts             SATOptions, rule settings, Engine
     aiFix.ts                  "Fix with AI" in the page: calls the Vite plugin's endpoint, checks the result
   ui/                         panel in a shadow root (satUI.ts), boxes over the page (overlay.ts), styles (DOM built by hand, no framework)
-  integrations/               react.ts, vue.ts: thin wrappers around satChecker; vite.ts: Vite plugin that adds it to `vite dev` pages (entry: "./vite");
-                              fixServer.ts: the plugin's `POST /__sat/fix` endpoint, which runs Claude Code (Node only)
+  integrations/               vite.ts: Vite plugin that adds satChecker to `vite dev` pages (entry: "./vite");
+                              fixServer.ts: the plugin's `POST /__sat/fix` endpoint, which runs Claude Code; mcpServer.ts: `POST /__sat/mcp` (Node only)
   engines/                    axe.ts: other checkers as `Engine`s (entry: "./axe"), with their package as optional peer dependency
   headless/                   runs in Node with Playwright: playwright.ts (entry: "./playwright"), cli.ts (bin `sat-check`), report.ts;
                               inject.ts is the standalone script (dist/sat-inject.js) they add to the page under test
-  extension/                  browser extension (dist/extension): background.ts adds sat.ts, satChecker on, to the tab on a click
   types/                      global declarations
 tests/                        Vitest (jsdom) unit tests, setup
 tests/browser/                Playwright tests on the built bundle in Chromium
@@ -327,11 +325,10 @@ plan/                         backlog and phases (plan/README.md)
 
 - `core/` never imports from `ui/` or `integrations/`: it must run without the panel (tests, CI, future headless API).
 - Rules import only from `sat/satDom.ts`, `core/rules/` and type modules. They keep no module-level state: results go through `ctx.report`, so runs never mix.
-- Integrations stay thin: lifecycle wiring and options passthrough, no logic of their own. Logic shared by React and Vue lives in `sat/`.
+- Integrations stay thin: lifecycle wiring and options passthrough; logic that runs in the page lives in `sat/`.
 - Engines translate another checker's results into `Issue`s and list the SAT rules they replace; `core/` knows only the `Engine` interface, never the checker's package.
 - `headless/` runs SAT only inside the page, through `dist/sat-inject.js`: Node code never calls the rules directly and imports `core/` and `sat/` only for types and pure helpers.
-- The public API is what the seven entry points in `package.json` `exports`, the `sat-check` command and the browser extension expose. Anything else is internal and may change.
-- The browser extension asks only for `activeTab` and `scripting`: it reads a tab only when its button is clicked there, and sends nothing anywhere.
+- The public API is what the five entry points in `package.json` `exports` and the `sat-check` command expose. Anything else is internal and may change.
 - "Fix with AI" runs only from the Vite plugin with `ai: true`: the endpoint accepts loopback connections from the dev server's origins with the token of its run, and Claude Code gets only `Read`, `Edit`, `Grep` and `Glob`. Anything that widens this is a security-sensitive change (§9.4).
 
 ## 6. Writing Checks
@@ -373,8 +370,6 @@ SAT runs inside someone else's application.
 4. A row in the README rules table.
 5. Unit tests with passing and failing markup; browser tests if the rule depends on layout, computed colors or visibility.
 6. An entry in `CHANGELOG.md`.
-
-New rules get no `enableCheck*` option: those exist only for 1.x compatibility.
 
 ## 7. SAT User Interface
 
@@ -540,7 +535,7 @@ Consider other consumers of shared components, hooks, services, and types before
 
 ### 12.1 Build
 
-- Rollup builds the ESM entry points and `dist/cli.js` in one pass (`rollup.config.js`), with the shared code of `core/` and `sat/` in one chunk (`dist/chunks/seoAccessibilityTool.js`, `manualChunks`), and their declarations (`rollup.dts.config.cjs`). A second build makes `dist/sat-inject.js` (IIFE, axe-core read from `window.axe`), two more the browser extension in `dist/extension/` (IIFE scripts and `manifest.json` with the package's version). Keep `exports` in `package.json` and both configs in sync. Chunk names have no hash, so a new build overwrites the old files.
+- Rollup builds the ESM entry points and `dist/cli.js` in one pass (`rollup.config.js`), with the shared code of `core/` and `sat/` in one chunk (`dist/chunks/seoAccessibilityTool.js`, `manualChunks`), and their declarations (`rollup.dts.config.cjs`). A second build makes `dist/sat-inject.js` (IIFE, axe-core read from `window.axe`). Keep `exports` in `package.json` and both configs in sync. The first build empties `dist/` (except in watch mode), so files of removed entry points never reach the package.
 - Browser tests serve `dist/` from a fake origin (`tests/browser/serve.ts`) and import the entry points as an app does.
 - TypeScript in strict mode, `moduleResolution: "bundler"`, Node types only for `process.env.NODE_ENV`.
 

@@ -172,7 +172,7 @@ export function createSATUI(onToggle: () => void, onRerun: () => void, fixAction
     panel.setAttribute('aria-label', 'SAT results');
 
     const dock = el('div', { className: 'dock' }, runButton, rerunButton, resultsButton);
-    // A constructed sheet instead of <style>: a page's CSP `style-src` doesn't block it (e.g. under the browser extension).
+    // A constructed sheet instead of <style>: a page's CSP `style-src` doesn't block it.
     const sheet = new CSSStyleSheet();
     sheet.replaceSync(STYLES);
     root.adoptedStyleSheets = [sheet];
