@@ -126,7 +126,7 @@ To fix one rule at a time, lower its severity until its issues are fixed, in the
 
 | Option | Writes |
 |---|---|
-| `--json <file>` | `{ pages: [{ url, issues, summary }], summary }`: each issue with `ruleId`, `severity`, `category`, `message`, `title`, `wcag` or `source`, `selector`, `help` |
+| `--json <file>` | `{ pages: [{ url, issues, summary }], summary }`: each issue with `id` (rule and selector, the same between runs), `ruleId`, `severity`, `category`, `message`, `title`, `wcag` or `source`, `selector`, `help` |
 | `--html <file>` | A standalone HTML page: the totals, then a table for each page with severity, rule (linked to its page), message and selector |
 
 Examples, made by `sat-check` on the page with known issues of [examples/page](../../examples/page): [sat-report.json](reports/sat-report.json) and [sat-report.html](https://flgisimone.github.io/SAT/report.html) ([source](reports/sat-report.html)). `npm run media`, in the SAT repository, makes them again.

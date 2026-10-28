@@ -2,7 +2,7 @@
 
 **Accessibility and SEO issues on the page in `vite dev`, and your AI agent fixes them.**
 
-SAT adds a panel to the pages of your Vite dev server: WCAG, WAI-ARIA and SEO issues next to the elements, each with its source. Your coding agent (Claude Code, Cursor, Copilot, Codex, Gemini CLI, Windsurf, Zed) gets the same issues through SAT's MCP server, fixes them in your source code and checks the page again.
+SAT adds a panel to the pages of your Vite dev server: WCAG, WAI-ARIA and SEO issues next to the elements, each with its source. Your coding agent (Claude Code, Cursor, Copilot, Codex, Gemini CLI, Windsurf, Zed) gets the same issues through SAT's MCP server, fixes them in your source code and checks any route again on its own, in headless Chromium.
 
 [![npm](https://img.shields.io/npm/v/seo-accessibility-tool)](https://www.npmjs.com/package/seo-accessibility-tool)
 [![License: MIT](https://img.shields.io/github/license/flgisimone/SAT)](LICENSE)
@@ -39,7 +39,7 @@ Then connect your agent, once (Claude Code here, the others [below](#use-it-with
 claude mcp add --transport http sat http://localhost:5173/__sat/mcp
 ```
 
-and ask it: *"Fix the SAT issues on the page."* It reads them with `sat_issues`, edits the code and calls `sat_recheck` to see what is left.
+and ask it: *"Check / with SAT and fix the issues."* It checks the route with `sat_check`, edits the code and checks again: the answer starts with what it fixed, what is new and what remains. `sat_check` opens the page in headless Chromium with Playwright: `npm install -D playwright && npx playwright install chromium`. Without it, the agent works on the pages you open in the browser (`sat_issues`, `sat_recheck`).
 
 `axe-core` is optional: when it is installed, the plugin runs its rules too ([below](#axe-core-engine)). The [examples](examples/) are small projects on a page with known issues; to start from one: `npx degit flgisimone/SAT/examples/vite-vanilla my-site`.
 
@@ -61,18 +61,21 @@ Configurations from each agent's documentation, October 2026; tried with Claude 
 
 **Tools.**
 
-- `sat_issues` (`url` optional): the pages open in the browser with their issues, as a prompt to fix them in the source (rule, severity, WCAG criterion or source, selector, the element's HTML, the component file with Vue and Svelte, documentation link) and as a structured list.
+- `sat_check` (`url`, plus `viewport`, `colorScheme`, `waitFor`, `screenshots` optional): opens a route of the dev server in headless Chromium, with no browser window, and returns its issues. Needs Playwright (`npm install -D playwright && npx playwright install chromium`). With `screenshots: true` the agent also gets a picture of the element for contrast, target size and hidden headings, up to 5.
+- `sat_issues` (`url` optional): the pages open in the browser, with your login and data, and their issues.
 - `sat_recheck` (`url` optional): runs the checks again on the open pages and returns what is left, in 1 to 11 seconds. It turns SAT on in the page if it was off.
 
-The agent sees the pages open in the browser during this `vite dev` run: keep the page open while it works.
+Each answer has a prompt to fix the issues in the source (rule, severity, WCAG criterion or source, selector, the element's HTML, the component file and line with Vue, Svelte and React, documentation link) and a structured list. Every issue has an `id` that stays the same between checks, and `sat_check` and `sat_recheck` start with what changed since the agent last looked at the page: *"/cart: 2 fixed (…), 1 new (…), 3 remaining."*
+
+`sat_check` sees a route as a new visitor: no login, no data of yours. For pages behind a login, keep them open in the browser and let the agent use `sat_issues` and `sat_recheck`.
 
 **What goes to the model.** SAT sends nothing anywhere. With `mcp: true` your agent gets the issues and the quoted HTML of the elements and sends them to its model, as anything else it reads. The MCP server is off by default.
 
-**Safety.** The endpoint answers only connections from this computer, with a `localhost` host name (against DNS rebinding) and no foreign `Origin`. It only returns the results the pages sent and asks them to check again; it changes no files: the agent edits them with its own tools and permissions.
+**Safety.** The endpoint answers only connections from this computer, with a `localhost` host name (against DNS rebinding) and no foreign `Origin`. `sat_check` opens only the dev server's own pages, never another host. The server changes no files: the agent edits them with its own tools and permissions.
 
 ## Fix with AI (Claude Code, one click)
 
-1. **Copy fix prompt**, everywhere: the button on an issue, or **Copy prompt for all** on a rule, copies a prompt for your coding agent, for the agents and setups without the MCP server. It has the rule, its source, the page URL and, for each issue, the message, the selector, the element's HTML and, with Vue and Svelte in development, the component file. It asks for the smallest fix in the source, and quotes the page as data, not instructions. The same prompt comes from the API:
+1. **Copy fix prompt**, everywhere: the button on an issue, or **Copy prompt for all** on a rule, copies a prompt for your coding agent, for the agents and setups without the MCP server. It has the rule, its source, the page URL and, for each issue, the message, the selector, the element's HTML and, with Vue, Svelte and React in development, the component file (and line, when known). It asks for the smallest fix in the source, and quotes the page as data, not instructions. The same prompt comes from the API:
 
    ```ts
    import { fixPrompt, seoAccessibilityTool } from "seo-accessibility-tool";
@@ -361,7 +364,7 @@ More in the [CI guide](docs/guides/ci.md): GitLab CI, starting on a project with
 - **It doesn't certify WCAG conformance.** Automated checks find a part of the WCAG failures. The rest needs a person: keyboard use, screen readers (NVDA, JAWS, VoiceOver), zoom and reflow, whether alt texts, labels and captions make sense. No errors in SAT means no errors SAT can detect.
 - **It doesn't guarantee a position on Google.** The SEO rules check technical requirements from Google Search Central (title, description, canonical, hreflang, structured data); they don't judge content, links from other sites or ranking.
 - **In the page it runs in development only.** The panel starts when `NODE_ENV` is `"development"` (or with `enabled: true`), and the Vite plugin adds it to `vite dev` only: SAT is not meant for production pages.
-- **It doesn't crawl a site or check links.** It checks the pages open in the dev server, or the URLs you give `sat-check`.
+- **It doesn't crawl a site or check links.** It checks the pages open in the dev server, the routes your agent checks with `sat_check`, or the URLs you give `sat-check`.
 - **What it doesn't see:**
   - the documents inside `<iframe>` elements, of any origin (SAT checks the frame's name, not its content), and the shadow roots of web components;
   - what is drawn in a `<canvas>`;
@@ -373,7 +376,7 @@ More in the [CI guide](docs/guides/ci.md): GitLab CI, starting on a project with
 | Feature | Needs |
 |---|---|
 | [axe-core engine](#axe-core-engine) | `npm install -D axe-core` (4.10 or later); then on by itself in the Vite plugin; adds about 550 KB and makes a run slower |
-| [MCP server](#use-it-with-your-ai-agent) | The Vite plugin with `mcp: true` and an agent that speaks MCP over HTTP; the agent sends the issues, which quote the page, to its model |
+| [MCP server](#use-it-with-your-ai-agent) | The Vite plugin with `mcp: true` and an agent that speaks MCP over HTTP; the agent sends the issues, which quote the page, to its model. `sat_check` also needs `playwright` (or `@playwright/test`) and its Chromium |
 | [Fix with AI](#fix-with-ai-claude-code-one-click) | The Vite plugin with `ai: true`, [Claude Code](https://code.claude.com) installed and signed in; Claude Code sends the prompt, which quotes the page, to the model |
 | [Playwright helper](#playwright) and [CLI](#cli-and-ci) | `@playwright/test` and Chromium (`npx playwright install chromium`), Node 22 or later |
 

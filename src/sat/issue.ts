@@ -27,6 +27,20 @@ export function ruleHelp(ruleId: string): string {
     return `${RULE_DOCS}${ruleId}.md`;
 }
 
+/**
+ * Id of each issue that stays the same between runs: rule and selector, then ` #2`, ` #3`… for the
+ * repeats of the same pair, in the order of the run. Tells fixed, new and remaining issues apart.
+ */
+export function issueIds(issues: Array<Pick<Issue, 'ruleId' | 'selector'>>): string[] {
+    const seen = new Map<string, number>();
+    return issues.map(({ ruleId, selector }) => {
+        const key = selector ? `${ruleId} ${selector}` : ruleId;
+        const count = (seen.get(key) ?? 0) + 1;
+        seen.set(key, count);
+        return count === 1 ? key : `${key} #${count}`;
+    });
+}
+
 function idSelector(id: string): string {
     return `[id="${id.replace(/["\\]/g, '\\$&')}"]`;
 }

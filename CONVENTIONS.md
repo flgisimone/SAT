@@ -296,7 +296,8 @@ Keep check-specific types next to the check. Shared types (`SATOptions`, results
 src/
   core/
     seoAccessibilityTool.ts   runs the enabled rules, returns the issues (entry: ".")
-    fixPrompt.ts              the prompt that asks an AI agent to fix issues in the source (pure, exported)
+    fixPrompt.ts              the prompt that asks an AI agent to fix issues in the source (pure, exported); componentSource
+    reactSource.ts            file and line of the JSX that rendered an element (React 18 and 19 in development)
     rules/
       index.ts                the registry: every rule, in result order
       rule.ts                 Rule, RuleContext, RuleId
@@ -311,10 +312,12 @@ src/
     aiFix.ts                  "Fix with AI" in the page: calls the Vite plugin's endpoint, checks the result
   ui/                         panel in a shadow root (satUI.ts), boxes over the page (overlay.ts), styles (DOM built by hand, no framework)
   integrations/               vite.ts: Vite plugin that adds satChecker to `vite dev` pages (entry: "./vite");
-                              fixServer.ts: the plugin's `POST /__sat/fix` endpoint, which runs Claude Code; mcpServer.ts: `POST /__sat/mcp` (Node only)
+                              fixServer.ts: the plugin's `POST /__sat/fix` endpoint, which runs Claude Code; mcpServer.ts: `POST /__sat/mcp` (Node only);
+                              headlessCheck.ts: `sat_check`, the dev server's pages in headless Chromium, with the project's Playwright
   engines/                    axe.ts: other checkers as `Engine`s (entry: "./axe"), with their package as optional peer dependency
   headless/                   runs in Node with Playwright: playwright.ts (entry: "./playwright"), cli.ts (bin `sat-check`), report.ts;
-                              inject.ts is the standalone script (dist/sat-inject.js) they add to the page under test
+                              inject.ts is the standalone script (dist/sat-inject.js) they add to the page under test, with addSAT.ts
+                              (type imports of Playwright only, so the Vite plugin can use it without loading `@playwright/test`)
   types/                      global declarations
 tests/                        Vitest (jsdom) unit tests, setup
 tests/browser/                Playwright tests on the built bundle in Chromium
@@ -354,7 +357,7 @@ SAT runs inside someone else's application.
 
 - Select elements with `queryTargets(selector, ctx.document)` so SAT's own UI (`[data-sat-ignore]`) is excluded and the checked document is the one of the run.
 - Never change the page: no styles, attributes or nodes on host elements. Rules only report; the panel draws the boxes on its own layer (`ui/overlay.ts`). Moving focus to an element the user clicked in the panel is the only exception.
-- Checks are read-only otherwise: no network requests, no navigation, no storage writes. The broken-links check is the only one that makes requests; it is off by default and skips state-changing URLs.
+- Checks are read-only otherwise: no network requests, no navigation, no storage writes. The one request is outside the rules: with React 19 in development, `prepareReactSources` reads each component module once from the page's own origin (a `GET` the browser has cached) for the line of its JSX.
 - Do not print to the console from rules; results go through `ctx.report`.
 
 ### 6.4 Messages
@@ -392,7 +395,7 @@ Any change to defaults, severities or what a check reports is listed under **Beh
 
 ### 8.3 Dependencies and Activation
 
-- Runtime dependencies: none besides `tslib`. React, Vue, Vite, axe-core and `@playwright/test` are **optional** peer dependencies, imported only by their entry point (and `sat-check`).
+- Runtime dependencies: none besides `tslib`. Vite, axe-core and `@playwright/test` are **optional** peer dependencies, imported only by their entry point (and `sat-check`). The Vite plugin loads `playwright` or `@playwright/test` from the project only when an agent calls `sat_check`.
 - SAT is a development tool: the controller starts only when `process.env.NODE_ENV === "development"`, unless the `enabled` option says otherwise.
 - Publishing to npm is done by the maintainer, never by an agent.
 

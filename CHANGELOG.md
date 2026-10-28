@@ -17,6 +17,12 @@ SAT is one thing: the accessibility and SEO panel in `vite dev` that gives the i
 | `rules: { "link-broken": "error" }` | Remove it: the rule is gone, with the crawler |
 | The browser extension (`dist/extension`) | The Vite plugin in your project, or `sat-check <url>` for any page |
 
+### Added
+- **`sat_check`**, a tool of the MCP server: the agent checks any route of the dev server in headless Chromium, with no page open in the browser (`url`, and optional `viewport`, `colorScheme`, `waitFor`, `screenshots`). It needs `playwright` or `@playwright/test` in the project, and says how to install them when they are missing. It opens only the dev server's own origin.
+- **What changed since the last check**: every issue has an `id` (rule and selector) that stays the same between runs, in the MCP results, in `runSAT`, `checkPage` and the JSON report of `sat-check`. `sat_check` and `sat_recheck` start with the issues fixed, new and remaining, and return them as `changes`.
+- **Pictures of the elements**: with `screenshots: true`, `sat_check` adds a PNG of the element for the issues of `color-contrast`, `target-size` and `h1-visible`, up to 5.
+- **File and line with React** in development (React 18 and 19, `@vitejs/plugin-react` and `-swc`), in the fix prompt and in the MCP results, without changing the app's code: from the stack React keeps on each element and the module's source map.
+
 ### Removed
 - The `enableCheck*` options, the `errorMessages`/`warningMessages` result fields and `satReset`, deprecated since 1.8.0 and 1.9.0.
 - The `seo-accessibility-tool/react` and `seo-accessibility-tool/vue` entry points (`useSATChecker`, `useSatChecker`); `react` and `vue` are no longer peer dependencies.
@@ -25,7 +31,7 @@ SAT is one thing: the accessibility and SEO panel in `vite dev` that gives the i
 
 ### Changed
 - `sat-check` exits with 2 and "Can't open <url>" when a page doesn't answer, instead of reporting it as a `link-broken` error.
-- `examples/react` and `examples/vue` use the Vite plugin.
+- `examples/react` and `examples/vue` use the Vite plugin; in `examples/react` the photo without alt text is rendered by React.
 - The build empties `dist/` first, so files of removed entry points don't reach the package.
 
 ## 1.19.0 — 2026-10-25

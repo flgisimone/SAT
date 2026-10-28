@@ -1,10 +1,11 @@
 // @vitest-environment node
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { request, type IncomingMessage, type ServerResponse } from 'node:http';
+import { createServer as createHttpServer, request, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createServer } from 'vite';
+import { CheckError, loadChromium, PLAYWRIGHT_MISSING, type CheckResult } from '../src/integrations/headlessCheck';
 import { mcpMiddleware, resultsStore } from '../src/integrations/mcpServer';
 import { sat, type SATViteOptions } from '../src/integrations/vite';
 import type { PageResults } from '../src/sat/mcpResults';
@@ -67,8 +68,8 @@ const results = (url: string, issues: PageResults['issues']): PageResults => ({
 const send = (body: unknown, { token = app.token, origin = app.origin, port = app.port } = {}) =>
     call('/__sat/results', { body, port, headers: { 'x-sat-token': token, origin } });
 
-const IMG = { ruleId: 'image-alt', severity: 'error' as const, title: 'Images have alternative text', message: 'Image without alt', selector: 'img', help: 'https://example.test/image-alt' };
-const LINK = { ruleId: 'link-text', severity: 'warning' as const, message: 'Link text "click here"', selector: 'a', component: '/src/App.vue' };
+const IMG = { id: 'image-alt img', ruleId: 'image-alt', severity: 'error' as const, title: 'Images have alternative text', message: 'Image without alt', selector: 'img', help: 'https://example.test/image-alt' };
+const LINK = { id: 'link-text a', ruleId: 'link-text', severity: 'warning' as const, message: 'Link text "click here"', selector: 'a', component: '/src/App.vue' };
 
 beforeAll(async () => {
     app = await devServer({ mcp: true });
@@ -114,9 +115,9 @@ describe('MCP endpoint, versions up to 2025-11-25 (initialize)', () => {
         expect((await rpc('ping')).json.result).toEqual({});
     });
 
-    it('lists the two tools', async () => {
+    it('lists the three tools', async () => {
         const { json } = await rpc('tools/list');
-        expect((json.result!.tools as Array<{ name: string }>).map((tool) => tool.name)).toEqual(['sat_issues', 'sat_recheck']);
+        expect((json.result!.tools as Array<{ name: string }>).map((tool) => tool.name)).toEqual(['sat_issues', 'sat_recheck', 'sat_check']);
         expect(json.result).not.toHaveProperty('resultType');
     });
 
@@ -145,8 +146,13 @@ describe('MCP endpoint, versions up to 2025-11-25 (initialize)', () => {
         });
         try {
             const { json } = await rpc('tools/call', { name: 'sat_recheck', arguments: { url: '/cart' } });
-            expect(json.result!.content![0].text).toContain('0 errors, 1 warning.');
-            expect(json.result!.structuredContent).toEqual({ pages: [{ url: `${app.origin}/cart`, title: 'Shop', issues: [LINK] }] });
+            const text = json.result!.content![0].text;
+            // sat_issues gave the agent IMG and LINK on /cart: the answer starts with what changed.
+            expect(text.startsWith('/cart: 1 fixed (image-alt img), 0 new, 1 remaining.')).toBe(true);
+            expect(text).toContain('0 errors, 1 warning.');
+            expect(json.result!.structuredContent).toEqual({ pages: [{
+                url: `${app.origin}/cart`, title: 'Shop', issues: [LINK], changes: { fixed: ['image-alt img'], new: [], remaining: ['link-text a'] },
+            }] });
         } finally {
             page.close();
         }
@@ -211,11 +217,106 @@ describe('MCP endpoint security', () => {
     });
 
     it('refuses connections that are not from this computer', () => {
-        const middleware = mcpMiddleware({ store: resultsStore(), recheck: () => 0, hosts: () => ['localhost:5173'], origins: () => [] });
+        const middleware = mcpMiddleware({ store: resultsStore(), check: () => Promise.reject(new Error('unused')), recheck: () => 0, hosts: () => ['localhost:5173'], origins: () => [] });
         let status = 0;
         const req = { method: 'POST', socket: { remoteAddress: '192.168.1.20' }, headers: { host: 'localhost:5173' } } as unknown as IncomingMessage;
         const res = { writeHead: (code: number) => ((status = code), { end: () => undefined }) } as unknown as ServerResponse;
         void middleware(req, res);
         expect(status).toBe(403);
+    });
+});
+
+describe('sat_check', () => {
+    const toolCall = async (args: Record<string, unknown>, port = app.port) => {
+        const { json } = await call('/__sat/mcp', { port, body: { jsonrpc: '2.0', id: nextId++, method: 'tools/call', params: { name: 'sat_check', arguments: args } } });
+        return json.result as { isError?: boolean; content: Array<{ type: string; text?: string; data?: string }>; structuredContent?: { pages: Array<{ changes?: unknown }> } };
+    };
+
+    it('refuses other hosts and arguments that are not valid, before opening anything', async () => {
+        for (const url of ['http://example.com/', '//example.com/x', `http://localhost:${app.port + 1}/`, 'javascript:alert(1)']) {
+            const result = await toolCall({ url });
+            expect(result.isError, url).toBe(true);
+            expect(result.content[0].text).toContain('only the pages of this dev server');
+        }
+        const invalid: Array<[Record<string, unknown>, string]> = [
+            [{}, 'needs url'],
+            [{ url: '/', viewport: { width: 0, height: 10 } }, 'viewport'],
+            [{ url: '/', viewport: '800x600' }, 'viewport'],
+            [{ url: '/', colorScheme: 'blue' }, 'colorScheme'],
+            [{ url: '/', waitFor: 3 }, 'waitFor'],
+            [{ url: '/', screenshots: 'yes' }, 'screenshots'],
+        ];
+        for (const [args, says] of invalid) {
+            const result = await toolCall(args);
+            expect(result.isError, JSON.stringify(args)).toBe(true);
+            expect(result.content[0].text).toContain(says);
+        }
+    });
+
+    it('says how to install Playwright when the project has none', async () => {
+        const empty = mkdtempSync(join(tmpdir(), 'sat-no-playwright-'));
+        try {
+            await expect(loadChromium([join(empty, 'package.json')])).rejects.toThrow(PLAYWRIGHT_MISSING);
+        } finally {
+            rmSync(empty, { recursive: true, force: true });
+        }
+        expect(PLAYWRIGHT_MISSING).toContain('npm install -D playwright');
+    });
+
+    describe('with a fake browser', () => {
+        let server: Server;
+        let port = 0;
+        let next: () => Promise<CheckResult>;
+        const checked: Array<[string, unknown]> = [];
+        const page = (issues: PageResults['issues'], url = `http://localhost:${port}/cart`): CheckResult => ({ results: results(url, issues), images: [] });
+
+        beforeAll(async () => {
+            server = createHttpServer(mcpMiddleware({
+                store: resultsStore(),
+                check: (url, args) => (checked.push([url, args]), next()),
+                recheck: () => 0,
+                hosts: () => [`localhost:${port}`],
+                origins: () => [`http://localhost:${port}`],
+            }));
+            await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+            port = (server.address() as { port: number }).port;
+        });
+        afterAll(() => new Promise((resolve) => server.close(resolve)));
+
+        it('checks the address on the dev server and compares with the previous check of the page', async () => {
+            next = async () => page([IMG, LINK]);
+            const first = await toolCall({ url: '/cart', viewport: { width: 375, height: 667 }, colorScheme: 'dark' }, port);
+            expect(checked.at(-1)).toEqual([`http://localhost:${port}/cart`, { viewport: { width: 375, height: 667 }, colorScheme: 'dark' }]);
+            expect(first.content[0].text!.startsWith('# Shop')).toBe(true);
+            expect(first.structuredContent!.pages[0]).not.toHaveProperty('changes');
+
+            next = async () => page([LINK, IMG, { ...IMG, id: 'image-alt img #2' }]);
+            const second = await toolCall({ url: `http://localhost:${port}/cart` }, port);
+            expect(second.content[0].text!.startsWith('/cart: 0 fixed, 1 new (image-alt img #2), 2 remaining.')).toBe(true);
+            expect(second.structuredContent!.pages[0].changes).toEqual({ fixed: [], new: ['image-alt img #2'], remaining: ['link-text a', 'image-alt img'] });
+
+            next = async () => page([]);
+            const third = await toolCall({ url: '/cart' }, port);
+            expect(third.content[0].text!.startsWith('/cart: 3 fixed (link-text a; image-alt img; image-alt img #2), 0 new, 0 remaining.')).toBe(true);
+        });
+
+        it('a failure the agent can act on is a tool error with its text; a redirect is said', async () => {
+            next = () => Promise.reject(new CheckError('The page at /slow did not load within 15 seconds.'));
+            const failed = await toolCall({ url: '/slow' }, port);
+            expect(failed).toMatchObject({ isError: true, content: [{ text: 'The page at /slow did not load within 15 seconds.' }] });
+
+            next = async () => page([], `http://localhost:${port}/login`);
+            const redirected = await toolCall({ url: '/account' }, port);
+            expect(redirected.content.map((item) => item.text).join('\n')).toContain('/account redirected to /login');
+        });
+
+        it('images come after the text, each one named', async () => {
+            next = async () => ({ results: results(`http://localhost:${port}/contrast`, [IMG]), images: [{ issue: IMG, png: 'iVBORw0KGgo=' }] });
+            const { content } = await toolCall({ url: '/contrast', screenshots: true }, port);
+            expect(content.slice(1)).toEqual([
+                { type: 'text', text: 'Image 1: image-alt img (Image without alt)' },
+                { type: 'image', data: 'iVBORw0KGgo=', mimeType: 'image/png' },
+            ]);
+        });
     });
 });
