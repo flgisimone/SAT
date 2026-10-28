@@ -86,7 +86,7 @@ test.describe('Fix with AI (ai: true), with tests/fake-claude/claude in place of
 });
 
 test.describe('MCP server (mcp: true) on the page with known issues', () => {
-    const expected = JSON.parse(readFileSync(new URL('../../examples/page/expected.json', import.meta.url), 'utf8')) as { options: object };
+    const expected = JSON.parse(readFileSync(new URL('../../examples/page/expected.json', import.meta.url), 'utf8')) as { options: object; issues: Array<{ ruleId: string; severity: string }> };
     let app: string;
     let mcpServer: ViteDevServer;
     let id = 1;
@@ -127,5 +127,34 @@ test.describe('MCP server (mcp: true) on the page with known issues', () => {
         const left = await tool('sat_recheck');
         expect(severities(left)).toBe('error,error,error,error,warning,warning,warning');
         expect(left.map((issue) => issue.ruleId)).not.toContain('image-alt');
+    });
+
+    test('sat_check checks a route in headless Chromium with no page open; images only when asked', async () => {
+        const check = async (args: object) => {
+            const response = await fetch(`${mcpServer.resolvedUrls!.local[0]}__sat/mcp`, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ jsonrpc: '2.0', id: id++, method: 'tools/call', params: { name: 'sat_check', arguments: args } }),
+            });
+            return (await response.json() as { result: { isError?: boolean; content: Array<{ type: string; text?: string; data?: string }>; structuredContent: { pages: Array<{ issues: Array<{ id: string; ruleId: string; severity: string }> }> } } }).result;
+        };
+        // The fixture as it is in examples/page, without the fix of the test above.
+        writeFileSync(join(app, 'index.html'), readFileSync(new URL('../../examples/page/index.html', import.meta.url), 'utf8'));
+
+        const plain = await check({ url: '/' });
+        expect(plain.isError).toBeUndefined();
+        const issues = plain.structuredContent.pages[0].issues;
+        const rules = expected.issues.map((issue) => `${issue.ruleId}:${issue.severity}`).sort();
+        expect(issues.map((issue) => `${issue.ruleId}:${issue.severity}`).sort()).toEqual(rules);
+        expect(issues.find((issue) => issue.ruleId === 'image-alt')?.id).toBe('image-alt [id="photo"]');
+        expect(plain.content.filter((item) => item.type === 'image')).toEqual([]);
+
+        const withImages = await check({ url: '/', screenshots: true });
+        const text = withImages.content[0].text!;
+        expect(text.startsWith('/: 0 fixed, 0 new, 8 remaining.')).toBe(true);
+        const images = withImages.content.filter((item) => item.type === 'image');
+        expect(images).toHaveLength(1);
+        expect(withImages.content).toContainEqual({ type: 'text', text: expect.stringMatching(/^Image 1: color-contrast \[id="fine-print"\] /) });
+        expect(Buffer.from(images[0].data!, 'base64').subarray(1, 4).toString()).toBe('PNG');
     });
 });

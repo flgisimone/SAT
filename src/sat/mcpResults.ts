@@ -1,5 +1,5 @@
 import { componentSource, fixPrompt } from '../core/fixPrompt';
-import type { Issue, Severity } from './issue';
+import { issueIds, type Issue, type Severity } from './issue';
 
 /**
  * Where the Vite plugin (`mcp: true`) takes the results of the page, the token of this dev server run,
@@ -14,12 +14,14 @@ export interface MCPEndpoint {
 
 /** One issue as the agent gets it: the element itself stays in the page, its HTML is in the prompt. */
 export interface ReportedIssue {
+    /** Same issue, same id between runs: rule and selector (see `issueIds`). */
+    id: string;
     ruleId: string;
     severity: Severity;
     title?: string;
     message: string;
     selector?: string;
-    /** Source file of the component that renders the element (Vue, Svelte). */
+    /** Source file of the component that renders the element (Vue, Svelte, React), with the line when known. */
     component?: string;
     help?: string;
 }
@@ -35,13 +37,14 @@ export interface PageResults {
 
 export function pageResults(issues: Issue[]): PageResults {
     const url = location.href.split('#')[0];
+    const ids = issueIds(issues);
     return {
         url,
         title: document.title,
         prompt: issues.length ? fixPrompt(issues, { url }) : '',
-        issues: issues.map(({ ruleId, severity, title, message, selector, element, help }) => {
+        issues: issues.map(({ ruleId, severity, title, message, selector, element, help }, index) => {
             const component = element && componentSource(element);
-            return { ruleId, severity, title, message, selector, ...(component && { component }), help };
+            return { id: ids[index], ruleId, severity, title, message, selector, ...(component && { component }), help };
         }),
     };
 }

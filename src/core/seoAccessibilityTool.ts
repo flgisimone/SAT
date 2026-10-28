@@ -1,5 +1,6 @@
+import { prepareReactSources } from './reactSource';
 import { rules, type Rule, type Report } from './rules';
-import { cssSelector, ruleHelp, type Issue } from '../sat/issue';
+import { cssSelector, issueIds, ruleHelp, type Issue } from '../sat/issue';
 import type { RuleSetting, SATOptions } from '../sat/satOptions';
 
 export type { SATOptions, RuleSetting, Engine } from '../sat/satOptions';
@@ -78,12 +79,18 @@ export async function seoAccessibilityTool(customOptions: Partial<SATOptions> = 
         }
     }
 
+    // React 19 in development: the lines of the JSX for `componentSource`, before the prompt and the panel need them.
+    await prepareReactSources(issues.map((issue) => issue.element));
+
     const count = (severity: Issue['severity']) => issues.filter((issue) => issue.severity === severity).length;
     return { issues, errors: count('error'), warnings: count('warning') };
 }
 
 /** An issue without its `element`: what `runSAT` returns, ready for `JSON.stringify`. */
-export type IssueData = Omit<Issue, 'element'>;
+export type IssueData = Omit<Issue, 'element'> & {
+    /** Same issue, same id between runs: rule and selector (see `issueIds`). */
+    id: string;
+};
 
 export interface SATReport {
     issues: IssueData[];
@@ -96,7 +103,8 @@ export interface SATReport {
  */
 export async function runSAT(customOptions: Partial<SATOptions> = {}, doc: Document = document): Promise<SATReport> {
     const { issues, errors, warnings } = await seoAccessibilityTool(customOptions, doc);
+    const ids = issueIds(issues);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const data = issues.map(({ element, ...issue }) => issue);
+    const data = issues.map(({ element, ...issue }, index) => ({ id: ids[index], ...issue }));
     return { issues: data, summary: { errors, warnings } };
 }

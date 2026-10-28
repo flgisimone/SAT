@@ -164,11 +164,41 @@ Can't open http://localhost:4173/: page.goto: net::ERR_CONNECTION_REFUSED at htt
 
 **Fix.** Set `server: { strictPort: true }` (and `port` if you use another one) in `vite.config`: Vite stops with an error instead of changing port, and the URL stays the same.
 
+### "sat_check opens the page in headless Chromium with Playwright, which is not installed"
+
+**Why.** `sat_check` loads `playwright` or `@playwright/test` from the project, and neither is installed. Playwright is an optional peer dependency of SAT.
+
+**Fix.** `npm install -D playwright`, then `npx playwright install chromium`. No restart of `vite dev` is needed. Without Playwright, open the page in the browser and let the agent use `sat_issues` and `sat_recheck`.
+
+### "sat_check needs the Chromium of Playwright"
+
+**Why.** Playwright is installed, its browser isn't, or it is for another version of Playwright.
+
+**Fix.** `npx playwright install chromium` in the project. In CI or a container, `npx playwright install --with-deps chromium` adds the system libraries too.
+
+### "redirected to /login" with `sat_check`
+
+**Why.** `sat_check` opens the route in a fresh browser, without your cookies: a route behind a login sends it to the login page, and SAT checks that page.
+
+**Fix.** Open the route in your browser, logged in, and ask the agent to use `sat_issues` and `sat_recheck`, which read the page as you see it.
+
+### "The page at … did not load within 15 seconds" or "answered HTTP 404"
+
+**Why.** The route doesn't exist on the dev server, or the first load is slow while Vite optimizes the dependencies.
+
+**Fix.** Check the path; call `sat_check` again after the first load. For content that comes later (data from an API), pass `waitFor` with a selector of that content.
+
+### "sat_check opens only the pages of this dev server"
+
+**Why.** The `url` points to another host or port. `sat_check` is not a proxy: it opens only the dev server's own origin.
+
+**Fix.** Pass a path (`/cart`) or the address Vite prints. To check a deployed site, use [`sat-check`](../../README.md#cli-and-ci).
+
 ### "No page has sent SAT results yet" or "No page of the app is open in the browser"
 
 **Why.** The agent sees only the pages open in the browser during this run of `vite dev`. Results stay in memory: a restart of the dev server forgets them.
 
-**Fix.** Open the page in the browser and keep it open; then ask the agent again, or let it call `sat_recheck`, which turns SAT on in the page if it was off.
+**Fix.** Let the agent call `sat_check` with the route instead (with Playwright installed), or open the page in the browser and keep it open; then ask the agent again, or let it call `sat_recheck`, which turns SAT on in the page if it was off.
 
 ### "No open page answered within 10 seconds"
 

@@ -1,4 +1,5 @@
 import type { Issue } from '../sat/issue';
+import { reactSource } from './reactSource';
 
 export interface FixPromptContext {
     /** Address of the checked page. Defaults to the URL of the issues' document. */
@@ -24,11 +25,15 @@ interface SvelteElement {
 }
 
 /**
- * Source file of the component that renders `element`, from what Vue and Svelte attach to
- * elements in development (closest element that has it). React 19 exposes nothing similar.
+ * Source file of the component that renders `element`, from what Vue, Svelte and React attach to
+ * elements in development (closest element that has it), with the line when known.
+ * For React 19 the line comes after `prepareReactSources`, which `seoAccessibilityTool` runs.
  */
 export function componentSource(element: Element): string | undefined {
     for (let node: Element | null = element; node; node = node.parentElement) {
+        const react = reactSource(node);
+        if (react) return react;
+
         const vueFile = (node as Element & VueElement).__vueParentComponent?.type?.__file;
         if (vueFile) return vueFile;
 

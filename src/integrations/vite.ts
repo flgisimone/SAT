@@ -5,13 +5,15 @@ import { join } from 'node:path';
 import type { Plugin, ViteDevServer } from 'vite';
 import type { SATOptions } from '../sat/satOptions';
 import { fixMiddleware } from './fixServer';
+import { headlessChecker } from './headlessCheck';
 import { mcpMiddleware, resultsMiddleware, resultsStore } from './mcpServer';
 
 /**
  * The SAT options that fit in JSON, plus:
  * - `axe`: runs axe-core too; on by default when `axe-core` is installed in the project, `false` turns it off;
  * - `ai: true` for "Fix with AI", which runs Claude Code (`claude -p`) in the project;
- * - `mcp: true` for the MCP server at `/__sat/mcp`, which gives the issues of the open pages to any AI agent.
+ * - `mcp: true` for the MCP server at `/__sat/mcp`, which gives the issues to any AI agent: of the open pages,
+ *   and of any route checked in headless Chromium when Playwright is installed (`sat_check`).
  */
 export type SATViteOptions = Omit<Partial<SATOptions>, 'engines' | 'enabled' | 'aiFix' | 'mcp'> & { axe?: boolean; ai?: boolean; mcp?: boolean };
 
@@ -61,12 +63,20 @@ function serverPort(server: ViteDevServer): number | undefined {
 }
 
 /** Adds the MCP endpoint and the endpoint the pages send their results to; prints the URL for the agents. */
-function addMCP(server: ViteDevServer, token: string): void {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function addMCP(server: ViteDevServer, token: string, { axe, ai, mcp, observeDom, ...options }: SATViteOptions): void {
     const store = resultsStore();
     const origins = () => serverOrigins(server);
+    const checker = headlessChecker({
+        from: [join(server.config.root, 'package.json'), import.meta.url],
+        options: { ...options, axe },
+        block: (url) => url.pathname.endsWith(`/@id/${MODULE_ID}`),
+    });
+    server.httpServer?.once('close', () => void checker.close());
     server.middlewares.use(RESULTS_PATH, resultsMiddleware(store, token, origins));
     server.middlewares.use(MCP_PATH, mcpMiddleware({
         store,
+        check: (url, args) => checker.check(url, args),
         recheck: () => {
             server.ws.send('sat:run');
             return server.ws.clients.size;
@@ -108,7 +118,7 @@ export function sat(options: SATViteOptions = {}): Plugin {
         transformIndexHtml: () => [{ tag: 'script', attrs: { type: 'module', src: `/@id/${MODULE_ID}` }, injectTo: 'body' }],
         configureServer(server) {
             if (options.ai) server.middlewares.use(FIX_PATH, fixMiddleware(server.config.root, token, () => serverOrigins(server)));
-            if (options.mcp) addMCP(server, token);
+            if (options.mcp) addMCP(server, token, settings);
         },
     };
 }

@@ -86,31 +86,55 @@ url = "http://localhost:5173/__sat/mcp"
 
 These follow each agent's documentation as of October 2026; the server was tried with Claude Code 2.1 and with the client of the official MCP TypeScript SDK (1.32), the one Gemini CLI uses. If an agent's format has changed, its documentation wins: SAT's server is a plain Streamable HTTP endpoint without authentication.
 
-### 3. Ask
+### 3. Let the agent check on its own (Playwright)
 
-Open the app in the browser and keep the page open, then ask the agent, for example:
+`sat_check` opens a route in headless Chromium, so the agent can check what it wrote without you opening the page. It needs Playwright in the project:
 
-- *"Fix the SAT issues on this page."*
-- *"Use sat_issues for /checkout and fix the accessibility errors, then check again."*
+```bash
+npm install -D playwright
+npx playwright install chromium
+```
+
+`@playwright/test`, if the project has it for its tests, works as well. Without Playwright, `sat_check` answers with these two commands and the agent can still use the pages you open in the browser.
+
+### 4. Ask
+
+For example:
+
+- *"Check /checkout with SAT and fix the accessibility errors, then check again."*
+- *"Check / and /cart on a phone (375×667) and in dark mode, and fix the contrast issues."*
+- *"Fix the SAT issues on the page I have open."* (the page in your browser, with your login: `sat_issues`)
 - *"Fix the image-alt issues SAT reports, one component at a time."*
 
 ### The tools
 
 | Tool | Arguments | Returns |
 |---|---|---|
-| `sat_issues` | `url` (optional): an address or a path, e.g. `/cart` | The last results of each open page |
-| `sat_recheck` | `url` (optional) | The pages check again; the results that come back |
+| `sat_check` | `url`: a path or an address of the dev server, e.g. `/cart`; `viewport` (`{ "width": 375, "height": 667 }`), `colorScheme` (`"light"`, `"dark"`), `waitFor` (a CSS selector to wait for), `screenshots` (`true`), all optional | The route checked in headless Chromium, with what changed since the last check |
+| `sat_issues` | `url` (optional): an address or a path | The last results of each page open in the browser |
+| `sat_recheck` | `url` (optional) | The open pages check again; the results that come back, with what changed |
 
 For each page the agent gets:
 
-- a text with the page's title, URL, the counts and a prompt to fix all the issues, the same as **Copy prompt for all**: each rule with its severity, WCAG criterion or source and documentation link; each issue with its message, selector, the element's HTML (up to about 2 KB) and, with Vue and Svelte in development, the component file. The prompt asks for the smallest fix in the source and declares the quoted page as data, not instructions;
-- the same issues as a list (`structuredContent`): `ruleId`, `severity`, `title`, `message`, `selector`, `component`, `help`.
+- with `sat_check` and `sat_recheck`, first what changed since the agent last looked at that page (with any of the three tools): *"/cart: 2 fixed (image-alt [id="photo"]; form-label [id="email"]), 1 new (link-text [id="more"]), 3 remaining."*;
+- a text with the page's title, URL, the counts and a prompt to fix all the issues, the same as **Copy prompt for all**: each rule with its severity, WCAG criterion or source and documentation link; each issue with its message, selector, the element's HTML (up to about 2 KB) and, in development, the component file: with Vue the file, with Svelte and React the file and line. The prompt asks for the smallest fix in the source and declares the quoted page as data, not instructions;
+- the same issues as a list (`structuredContent`): `id`, `ruleId`, `severity`, `title`, `message`, `selector`, `component`, `help`, and `changes` with the ids `fixed`, `new` and `remaining`;
+- with `sat_check` and `screenshots: true`, a PNG of the element and the space around it for each issue of `color-contrast`, `target-size` and `h1-visible`, up to 5, each after a line that names its issue. Pictures cost the model more tokens: ask for them when the text isn't enough.
 
-`sat_recheck` waits a second, so Vite can apply the files the agent just edited, then asks the open pages to run the checks again and waits for their results, up to 10 seconds. If SAT was off in a page, it turns it on.
+The `id` of an issue is its rule and selector, e.g. `image-alt [id="photo"]`, with ` #2`, ` #3` when the same element has the same issue more than once: it stays the same between checks, as long as the element keeps its selector.
+
+`sat_check` waits a second, so Vite can apply the files the agent just edited, then loads the page, waits up to 5 seconds for its requests to end (and for `waitFor`, if given) and runs the checks with the plugin's options, axe-core included. The first call starts Chromium (about half a second); the next ones reuse it, each in a fresh context with no cookies. Chromium closes with the dev server.
+
+`sat_recheck` waits a second too, then asks the open pages to run the checks again and waits for their results, up to 10 seconds. If SAT was off in a page, it turns it on.
+
+### File and line with React
+
+With React in development (`@vitejs/plugin-react` or `@vitejs/plugin-react-swc`), SAT finds the JSX that rendered the element: React 19 keeps the stack of each element's creation, and SAT maps it to the line of the source with the module's source map, which it reads once from the dev server. React 18 has the position on the element already. Nothing is added to your code or to the page, and production builds have none of it.
 
 ### What the agent sees, and what it doesn't
 
-- Only the pages open in the browser during this run of `vite dev`, each with the results of its last run. They stay in the dev server's memory: nothing is written to disk, and a restart forgets them.
+- With `sat_check`, any route of the dev server, as a new visitor sees it: no login, no cookies, no data of yours. A route that redirects to a login page is checked there, and the answer says so: for those pages, use the page open in the browser.
+- With `sat_issues` and `sat_recheck`, the pages open in the browser during this run of `vite dev`, each with the results of its last run. They stay in the dev server's memory: nothing is written to disk, and a restart forgets them.
 - A single-page app sends new results at each route change; the results of the routes visited before stay until the dev server restarts.
 - The page as it is: open menus, dialogs and other states need to be on the screen when SAT runs (see [Single-page apps](spa.md)).
 
@@ -122,7 +146,8 @@ SAT sends nothing anywhere. The MCP server is off until you set `mcp: true`; the
 
 - The endpoint answers only connections from this computer, with a `localhost`, `127.0.0.1` or `[::1]` host name and the dev server's port. A web page that renames its domain to `127.0.0.1` (DNS rebinding) gets a 403; so does a request with an `Origin` other than the dev server's.
 - It has no token, because the agent's configuration is a fixed URL. Any program on your computer can read the issues, as it can read the project's files.
-- It only reads results and asks the pages to check again: it changes no files and runs no commands. The agent edits the code with its own tools, under the permissions you gave it.
+- `sat_check` opens only the dev server's own pages: a path, or an address on the dev server's origin. Any other host is refused, so the server is never a proxy to other sites or to your network.
+- It reads results, asks the pages to check again and opens the dev server's pages in headless Chromium: it changes no files and runs no commands. The agent edits the code with its own tools, under the permissions you gave it.
 - `vite build` and `vite preview` contain neither the endpoint nor SAT.
 
 More in [SECURITY.md](../../SECURITY.md).
@@ -141,4 +166,4 @@ Everywhere, with every integration: **Copy fix prompt** on an issue, or **Copy p
 
 ## Problems
 
-[Troubleshooting](troubleshooting.md#the-agent-doesnt-see-sat-mcp-server): the agent can't connect, the port changed, no page has sent results, a client with stdio only.
+[Troubleshooting](troubleshooting.md#the-agent-doesnt-see-sat-mcp-server): the agent can't connect, the port changed, Playwright is missing, a route behind a login, no page has sent results, a client with stdio only.

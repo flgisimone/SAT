@@ -4,6 +4,7 @@
       "url": "http://localhost:4173/",
       "issues": [
         {
+          "id": "heading-levels [id=\"returns\"]",
           "ruleId": "heading-levels",
           "severity": "warning",
           "category": "a11y",
@@ -16,6 +17,7 @@
           "help": "https://github.com/flgisimone/SAT/blob/develop/docs/rules/heading-levels.md"
         },
         {
+          "id": "color-contrast [id=\"fine-print\"]",
           "ruleId": "color-contrast",
           "severity": "error",
           "category": "a11y",
@@ -28,6 +30,7 @@
           "help": "https://github.com/flgisimone/SAT/blob/develop/docs/rules/color-contrast.md"
         },
         {
+          "id": "form-label [id=\"email\"]",
           "ruleId": "form-label",
           "severity": "error",
           "category": "a11y",
@@ -41,6 +44,7 @@
           "help": "https://github.com/flgisimone/SAT/blob/develop/docs/rules/form-label.md"
         },
         {
+          "id": "image-alt [id=\"photo\"]",
           "ruleId": "image-alt",
           "severity": "error",
           "category": "a11y",
@@ -53,6 +57,7 @@
           "help": "https://github.com/flgisimone/SAT/blob/develop/docs/rules/image-alt.md"
         },
         {
+          "id": "link-text [id=\"click-here\"]",
           "ruleId": "link-text",
           "severity": "warning",
           "category": "a11y",
@@ -65,6 +70,7 @@
           "help": "https://github.com/flgisimone/SAT/blob/develop/docs/rules/link-text.md"
         },
         {
+          "id": "html-lang",
           "ruleId": "html-lang",
           "severity": "error",
           "category": "a11y",
@@ -76,6 +82,7 @@
           "help": "https://github.com/flgisimone/SAT/blob/develop/docs/rules/html-lang.md"
         },
         {
+          "id": "seo-meta",
           "ruleId": "seo-meta",
           "severity": "error",
           "category": "seo",
@@ -85,6 +92,7 @@
           "help": "https://github.com/flgisimone/SAT/blob/develop/docs/rules/seo-meta.md"
         },
         {
+          "id": "canonical",
           "ruleId": "canonical",
           "severity": "warning",
           "category": "seo",
