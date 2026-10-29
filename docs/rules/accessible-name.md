@@ -6,7 +6,7 @@
 
 ## What it checks
 
-Buttons, links, menu items, tabs and the `<summary>` of a `<details>` have an accessible name: visible text, `aria-label`, `aria-labelledby`, `title` or a labelled image or icon inside. Text inside `aria-hidden="true"` doesn't count; text of a hidden element pointed to by `aria-labelledby` does.
+Buttons, links, menu items, tabs and the `<summary>` of a `<details>` have an accessible name: visible text, `aria-label`, `aria-labelledby`, a `<label>` (for a `<button>`, e.g. `<button role="checkbox">` with `<label for>` in shadcn/ui and Radix), `title` or a labelled image or icon inside. Text inside `aria-hidden="true"` doesn't count; text of a hidden element pointed to by `aria-labelledby` does.
 
 Headings (`<h1>`–`<h6>`, `role="heading"`) are not empty: WAI-ARIA requires a name for the heading role, so an empty heading is an error with no WCAG criterion attached.
 

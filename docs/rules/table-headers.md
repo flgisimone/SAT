@@ -9,7 +9,7 @@
 In data tables (`<table>`, `role="table"`, `grid` or `treegrid`):
 
 - every ID in a `headers` attribute is another cell of the same table;
-- every header cell (`<th>`, `role="columnheader"` or `rowheader`) has cells in its column or row, or cells that point to it with `headers`.
+- every header cell (`<th>`, `role="columnheader"` or `rowheader`) has cells in its column or row, or cells that point to it with `headers`. A row group header (`scope="rowgroup"`) covers the rows below it in its `<tbody>`; a header with a collapsed disclosure (`aria-expanded="false"`) is skipped, because its rows appear when it opens.
 
 Tables with `role="presentation"` and hidden tables or headers are skipped.
 

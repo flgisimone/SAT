@@ -6,7 +6,7 @@
 
 ## What it checks
 
-Visible native controls (links, buttons, fields, `summary`) with `tabindex="-1"`. On non-interactive elements (modals, skip-link targets, headings focused by code) `tabindex="-1"` is correct and not reported.
+Visible native controls (links, buttons, fields, `summary`) with `tabindex="-1"`. On non-interactive elements (modals, skip-link targets, headings focused by code) `tabindex="-1"` is correct and not reported. So are the items of a tab list, radio group, menu, listbox, tree, grid or toolbar that the keyboard reaches through another item of the same widget: the roving tabindex of the [WAI-ARIA Authoring Practices](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/#kbd_roving_tabindex), used by Radix, shadcn/ui and most component libraries.
 
 ## Why
 

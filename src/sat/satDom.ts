@@ -127,16 +127,26 @@ export function getExplicitName(el: Element): string {
 
 /**
  * Text alternative of a node, after the accessible name computation (accname 1.2): aria-labelledby,
- * aria-label, alt of images (none for presentational ones), <title> of an SVG, the content, title.
+ * aria-label, the <label> elements of a labelable element (HTML-AAM, e.g. <button role="checkbox">
+ * with <label for>), alt of images (none for presentational ones), <title> of an SVG, the content, title.
  * Content hidden from assistive technologies is skipped, except inside an aria-labelledby target.
+ * `named` holds the elements whose name is being computed, so a label that contains its control
+ * doesn't loop.
  */
-function textAlternative(el: Element, inLabelledBy: boolean): string {
+function textAlternative(el: Element, inLabelledBy: boolean, named: Set<Element> = new Set()): string {
     if (!inLabelledBy) {
         const labelled = labelledByText(el);
         if (labelled) return labelled;
     }
     const label = normalizeSpace(el.getAttribute('aria-label') ?? '');
     if (label) return label;
+
+    const labels = (el as HTMLButtonElement).labels;
+    if (labels?.length) {
+        named.add(el);
+        const text = normalizeSpace(Array.from(labels, (labelEl) => textAlternative(labelEl, inLabelledBy, named)).join(' '));
+        if (text) return text;
+    }
 
     const tag = el.tagName.toLowerCase();
     const role = el.getAttribute('role')?.trim().toLowerCase().split(/\s+/)[0];
@@ -152,8 +162,8 @@ function textAlternative(el: Element, inLabelledBy: boolean): string {
             if (node.nodeType === 3) return node.textContent ?? '';
             if (node.nodeType !== 1) return '';
             const child = node as Element;
-            if (!inLabelledBy && isHiddenFromAssistiveTech(child)) return '';
-            return ` ${textAlternative(child, inLabelledBy)} `;
+            if (named.has(child) || (!inLabelledBy && isHiddenFromAssistiveTech(child))) return '';
+            return ` ${textAlternative(child, inLabelledBy, named)} `;
         }).join(''));
         if (content) return content;
     }
@@ -162,7 +172,7 @@ function textAlternative(el: Element, inLabelledBy: boolean): string {
 
 /**
  * Accessible name of an element whose role takes its name from the content (buttons, links,
- * headings, menu items, summary): aria-labelledby, aria-label, the visible content with image
+ * headings, menu items, summary): aria-labelledby, aria-label, <label>, the visible content with image
  * alternatives, title. Whitespace is collapsed.
  */
 export function getAccessibleName(el: Element): string {

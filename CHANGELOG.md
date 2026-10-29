@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.0.1 — 2026-10-29
+
+Fewer false positives on apps built with component libraries (shadcn/ui, Radix), found by running SAT on a real React app next to axe-core: errors went from 446 to 188 on 44 pages, and the ones left are confirmed by axe.
+
+### Fixed
+- **`accessible-name`**: a `<label>` names a `<button>` (HTML-AAM), so `<button role="checkbox">` and `<button role="radio">` with `<label for>` or inside a `<label>` are no longer reported. The fix is in the shared name computation, so `label-in-name` gets it too.
+- **`tabindex-negative`**: items of a tab list, radio group, menu, listbox, tree, grid or toolbar with `tabindex="-1"` are not reported when the keyboard reaches the widget through another item (roving tabindex).
+- **`table-headers`**: a `<th scope="rowgroup">` covers the rows below it in its `<tbody>`; a header with a collapsed disclosure (`aria-expanded="false"`) is skipped.
+- **`aria-attributes`**: `aria-label` on `<audio>` and `<video>` is allowed: ARIA in HTML gives them the global attributes and those of the `application` role.
+- **`focus-management`**: elements that can't take focus (`display: none`, `hidden`, `visibility: hidden`, disabled, `inert`) are no longer reported, whatever their `tabindex`; scroll containers with `tabindex="0"` are fine.
+
+### Changed
+- **`focus-management`** reports warnings only (default `warning`): an invisible element in the tab order may be a focus guard that moves the focus on with a script, which SAT can't see.
+- **`aria-hidden-focus`**: behind an open modal dialog (`<dialog>` opened with `showModal()`, or a visible `role="dialog"` outside `aria-hidden`) the issue is a warning: the dialog may keep the focus inside, as Radix does.
+
 ## 2.0.0 — 2026-10-28
 
 SAT is one thing: the accessibility and SEO panel in `vite dev` that gives the issues to your AI agent. This version removes the 1.x options deprecated since 1.8.0 and the parts outside that job.

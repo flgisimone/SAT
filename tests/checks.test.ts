@@ -130,6 +130,16 @@ describe('accessible names', () => {
         const r = await runOnly(['form-label']);
         expect(errorsOf(r).join()).not.toContain('internal error');
     });
+
+    it('a <label> names a button, also with role checkbox or radio (HTML-AAM, shadcn/Radix)', async () => {
+        render(`
+            <button id="c" role="checkbox" aria-checked="false"></button><label for="c">I agree</label>
+            <label><button role="radio" aria-checked="true"></button> Demo</label>
+            <button id="e"></button><label for="e"> </label>`);
+        const r = await runOnly(['accessible-name']);
+        expect(errorsOf(r)).toHaveLength(1);
+        expect(errorsOf(r)[0]).toContain('id="e"');
+    });
 });
 
 describe('hidden elements', () => {
@@ -466,7 +476,8 @@ describe('aria-attributes (ACT 5f99a7, 6a7281, 4e8ab6, 5c01ea, kb1m8s)', () => {
             <img src="a.png" alt="" aria-label="Logo">
             <section role="doc-chapter" aria-posinset="1">e</section>
             <table role="grid"><tr><td aria-selected="true">f</td></tr></table>
-            <button role="none" aria-label="Close">x</button>`);
+            <button role="none" aria-label="Close">x</button>
+            <video aria-label="Product tour"></video><audio aria-label="Jingle"></audio>`);
         expect((await runOnly(['aria-attributes'])).issues.map((i) => i.message)).toEqual([]);
     });
 
@@ -509,6 +520,17 @@ describe('aria-hidden-focus (ACT 6cfa84)', () => {
             </div>
             <button aria-hidden="false">d</button><button aria-hidden>e</button>`);
         expect((await runOnly(['aria-hidden-focus'])).issues).toEqual([]);
+    });
+
+    it('behind an open modal dialog it is a warning: the dialog may keep the focus inside', async () => {
+        render(`
+            <span aria-hidden="true" tabindex="0" id="guard"></span>
+            <div aria-hidden="true"><a href="/" id="a">a</a></div>
+            <div role="dialog"><button>Close</button></div>`);
+        const r = await runOnly(['aria-hidden-focus']);
+        expect(r.errors).toBe(0);
+        expect(r.issues.map((i) => i.element?.id)).toEqual(['guard', 'a']);
+        expect(warningsOf(r)[0]).toContain('behind the open modal dialog');
     });
 });
 
@@ -609,6 +631,19 @@ describe('table-headers (ACT a25f45, d0f69e)', () => {
             <table><tr><th>Day</th><th>Morning</th></tr><tr><th>Mon</th><td>8-12</td></tr></table>
             <table role="presentation"><tr><th>Layout</th></tr></table>`);
         expect((await runOnly(['table-headers'])).issues).toEqual([]);
+    });
+
+    it('a row group header (scope="rowgroup") covers the rows of its group', async () => {
+        render(`
+            <table>
+                <thead><tr><th>Name</th><th>Total</th></tr></thead>
+                <tbody><tr><th scope="rowgroup" colspan="2">Alfa S.r.l.</th></tr><tr><td>Case 1</td><td>10</td></tr></tbody>
+                <tbody><tr><th scope="rowgroup" colspan="2">Empty group</th></tr></tbody>
+                <tbody><tr><th scope="rowgroup" colspan="2"><button aria-expanded="false">Beta S.p.A.</button></th></tr></tbody>
+            </table>`);
+        const r = await runOnly(['table-headers']);
+        expect(errorsOf(r)).toHaveLength(1);
+        expect(errorsOf(r)[0]).toContain('Empty group');
     });
 
     it('reports headers pointing elsewhere and a header with an empty column', async () => {
