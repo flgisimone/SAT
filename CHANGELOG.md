@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.2 — 2026-10-29
+
+### Changed
+- **Package homepage**: it points to the README on GitHub instead of the live demo, so search results that cite the package show what SAT is. The demo stays linked from the README.
+- **Live demo**: the page has a title that names SAT ("SAT demo: Example Shop") and a favicon.
+
 ## 2.0.1 — 2026-10-29
 
 Fewer false positives on apps built with component libraries (shadcn/ui, Radix), found by running SAT on a real React app next to axe-core: errors went from 446 to 188 on 44 pages, and the ones left are confirmed by axe.
