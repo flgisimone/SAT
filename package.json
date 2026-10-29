@@ -71,7 +71,7 @@
   "bugs": {
     "url": "https://github.com/flgisimone/SAT/issues"
   },
-  "homepage": "https://flgisimone.github.io/SAT/",
+  "homepage": "https://github.com/flgisimone/SAT#readme",
   "engines": {
     "node": ">=22"
   },
