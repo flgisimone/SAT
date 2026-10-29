@@ -182,11 +182,12 @@ const PRESENTATIONAL = ['none', 'presentation'];
 
 /**
  * Elements with no implicit role in `implicitRole` whose HTML-AAM role is known: generic containers,
- * text-level roles, and media without controls (no role, so only global attributes apply).
+ * text-level roles. <audio> and <video> have no role, but ARIA in HTML allows on them the global
+ * attributes (aria-label included) and those of the application role: they take its attribute set.
  */
 const OTHER_IMPLICIT_ROLES: Record<string, string> = {
     div: 'generic', span: 'generic', b: 'generic', i: 'generic', u: 'generic', s: 'generic', small: 'generic',
-    audio: 'generic', video: 'generic',
+    audio: 'application', video: 'application',
     p: 'paragraph', code: 'code', del: 'deletion', ins: 'insertion', em: 'emphasis', strong: 'strong',
     sub: 'subscript', sup: 'superscript', mark: 'mark',
 };

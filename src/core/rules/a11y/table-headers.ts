@@ -79,10 +79,13 @@ function headerScope(slot: Slot, slots: Slot[]): HeaderScope {
  */
 function hasAssignedCells(header: Slot, scope: Exclude<HeaderScope, null>, slots: Slot[]): boolean {
     const id = header.cell.id;
+    // scope="rowgroup": the header covers its row and the rows below it in the same row group (HTML "row group header").
+    const group = header.cell.getAttribute('scope')?.trim().toLowerCase() === 'rowgroup' ? header.cell.closest('thead, tbody, tfoot') : null;
     return slots.some((other) => {
         if (other === header) return false;
         const headers = other.cell.getAttribute('headers')?.trim();
         if (headers) return !!id && headers.split(/\s+/).includes(id);
+        if (group && other.row >= header.row && other.cell.closest('thead, tbody, tfoot') === group) return true;
         return scope === 'column'
             ? other.col < header.col + header.cols && header.col < other.col + other.cols
             : other.row < header.row + header.rows && header.row < other.row + other.rows;
@@ -92,7 +95,9 @@ function hasAssignedCells(header: Slot, scope: Exclude<HeaderScope, null>, slots
 /**
  * Data tables relate cells and headers (WCAG 1.3.1):
  * - ACT a25f45: every ID in a headers attribute is another cell of the same table;
- * - ACT d0f69e: every header cell has cells assigned to it (no empty column or row under a header).
+ * - ACT d0f69e: every header cell has cells assigned to it (no empty column or row under a header);
+ *   a row group header (scope="rowgroup") covers the rows of its group, and a header with a collapsed
+ *   disclosure (aria-expanded="false") is skipped, its rows appear when it opens.
  * Tables with role="presentation" (or another non-table role) and hidden tables or headers are skipped.
  */
 export const tableHeaders: Rule = {
@@ -124,6 +129,8 @@ export const tableHeaders: Rule = {
                 if (!isHeaderCell(slot.cell) || isHiddenFromAssistiveTech(slot.cell)) return;
                 const scope = headerScope(slot, slots);
                 if (!scope || hasAssignedCells(slot, scope, slots)) return;
+                // A collapsed group (a disclosure with aria-expanded="false" in the header) has its rows only once opened.
+                if (slot.cell.querySelector('[aria-expanded="false" i]')) return;
                 report({
                     element: slot.cell,
                     message: `Header cell ${describeElement(slot.cell)} has no cells in its ${scope}. Add the data cells, or make it a normal cell if it isn't a header.`,

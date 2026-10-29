@@ -87,14 +87,31 @@ test.describe('visibility', () => {
         expect(visible.warnings).toBe(0);
     });
 
-    test('position:fixed controls are treated as visible', async ({ page }) => {
+    test('focus-management: only transparent tab stops are reported; what is not rendered or disabled takes no focus', async ({ page }) => {
         const r = await run(
             page,
-            '<button style="position:fixed;top:0" tabindex="0">Fixed</button><div style="visibility:hidden"><button tabindex="0">Hidden</button></div>',
+            `<button style="position:fixed;top:0" tabindex="0">Fixed</button>
+            <div style="visibility:hidden"><button tabindex="0">Hidden</button></div>
+            <div role="tabpanel" hidden tabindex="0">Inactive panel</div>
+            <button disabled tabindex="0">Off</button>
+            <div style="overflow-x:auto" tabindex="0">Wide table</div>
+            <span tabindex="0" style="opacity:0;position:fixed">Guard</span>`,
             'focus-management'
         );
-        expect(r.errors).toBe(1);
-        expect(r.errorTexts[0]).toContain('Hidden');
+        expect(r.errors).toBe(0);
+        expect(r.warnings).toBe(1);
+    });
+
+    test('tabindex-negative: roving tabindex in tab lists and radio groups is fine', async ({ page }) => {
+        const r = await run(
+            page,
+            `<div role="tablist"><button role="tab" tabindex="0">A</button><button role="tab" tabindex="-1">B</button></div>
+            <div role="radiogroup"><button role="radio" aria-checked="true">X</button><button role="radio" aria-checked="false" tabindex="-1">Y</button></div>
+            <div role="tablist"><button role="tab" tabindex="-1">Unreachable</button></div>
+            <button tabindex="-1">Mouse only</button>`,
+            'tabindex-negative'
+        );
+        expect(r.warnings).toBe(2);
     });
 });
 

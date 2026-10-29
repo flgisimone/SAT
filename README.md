@@ -240,15 +240,15 @@ Each rule follows an official source, cited on its page in [`docs/rules/`](docs/
 | `accessible-name`   | a11y     | Buttons, links, menu items, `<summary>`, headings, `svg[role="img"]` and `<object>` have an accessible name | error |
 | `aria-roles`        | a11y     | Invalid `role` values (error), redundant roles (warning)                  | error      |
 | `aria-attributes`   | a11y     | Unknown `aria-*` attributes, invalid values, missing required states, attributes the role doesn't support or prohibits | error |
-| `aria-hidden-focus` | a11y     | Elements reachable with Tab inside `aria-hidden="true"`                   | error      |
+| `aria-hidden-focus` | a11y     | Elements reachable with Tab inside `aria-hidden="true"` (warning behind an open modal dialog) | error |
 | `landmarks`         | a11y     | Several visible `<main>` (error); no main, several page-level header/footer, unlabelled repeated navs (warning) | error |
 | `color-contrast`    | a11y     | WCAG text contrast: below AA (error), below AAA with `wcagLevel: "AAA"` (warning) | error |
 | `form-label`        | a11y     | Form fields have a label (placeholder is not enough)                      | error      |
-| `focus-management`  | a11y     | Hidden focusable elements (error), positive tabindex and non-interactive tab stops (warning) | error |
+| `focus-management`  | a11y     | Invisible tab stops, positive tabindex and non-interactive tab stops       | warning    |
 | `image-alt`         | a11y     | `<img>` without `alt` (error), alt text that looks like a file name (warning) | error  |
 | `link-href`         | a11y     | `href=""`, `#` or `javascript:`                                           | error      |
 | `link-target-blank` | seo      | `target="_blank"` with `rel="opener"` (HTML already implies noopener)    | off        |
-| `tabindex-negative` | a11y     | Visible native controls removed from the tab order with `tabindex="-1"`   | warning    |
+| `tabindex-negative` | a11y     | Visible native controls removed from the tab order with `tabindex="-1"` (roving tabindex excepted) | warning |
 | `link-text`         | a11y     | Vague link texts ("click here", "more")                                    | off        |
 | `html-lang`         | a11y     | `<html>` has a `lang`; every `lang` is a valid language tag               | error      |
 | `iframe-name`       | a11y     | `<iframe>` has a `title`, `aria-label` or `aria-labelledby`               | error      |

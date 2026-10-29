@@ -8,6 +8,8 @@
 
 Elements reachable with Tab inside `aria-hidden="true"` (or with it themselves). `aria-hidden="false"` on a descendant doesn't undo it. Elements with `tabindex="-1"`, `disabled`, inside `inert`, or not rendered are fine.
 
+While a modal dialog is open (a `<dialog>` opened with `showModal()`, or a visible `role="dialog"` outside `aria-hidden`) the content behind it is hidden on purpose, as the WAI-ARIA dialog pattern asks, and libraries such as Radix keep the focus in the dialog with a script that SAT can't see: there the issue is a warning. Making the background `inert` removes it.
+
 ## Why
 
 Keyboard users land on an element that screen readers don't announce: the focus seems to disappear.

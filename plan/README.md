@@ -17,6 +17,7 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 
 | Tema | Decisione | Motivo |
 |---|---|---|
+| Precisione sulle app reali | Prima di regole o funzioni nuove, SAT si prova su un'app vera accanto ad axe; quello che SAT non può decidere (focus trap, sentinelle) è un avviso | La prova su oneoffice: 258 errori su 446 erano falsi positivi su pattern di Radix e shadcn (F22) |
 | Cutover 2.0 | **2.0.0**, pubblicata una volta alla fine di F21: via API legacy (`enableCheck*`, `errorMessages`/`warningMessages`, `satReset`), estensione, crawler della CLI con `link-broken`, wrapper React e Vue | 1.19.0 appena pubblicata e quasi nessun utente: rompere ora costa meno; il messaggio è il pannello in `vite dev` con l'agente (analisi del 28/10/2026, F18) |
 | L'IA nello sviluppo | Oltre la correzione: l'agente controlla da solo in headless (`sat_check`), conosce le regole via MCP, riceve i problemi nuovi da un hook, la CI blocca le regressioni con una baseline; dal pannello «Send to agent» per qualsiasi agente MCP, «Fix with AI» resta per Claude Code | L'agente diventa autonomo nel ciclo scrivi → controlla → correggi (F19–F21, 28/10/2026) |
 | Sorgente per React | Prima `_debugStack` delle fiber con le source map, senza trasformazioni; se non regge, `data-sat-source` opt-in solo sugli elementi HTML | Il codice dell'app non si tocca finché si può (F19-02) |
@@ -81,6 +82,7 @@ SAT resta uno **strumento di sviluppo**: gira nel browser dello sviluppatore, no
 | F19 | [19-ciclo-agente.md](19-ciclo-agente.md) | Ciclo dell'agente: `sat_check` headless, ID stabili e differenze, immagini degli elementi, file e riga per React | F18 |
 | F20 | [20-prevenzione.md](20-prevenzione.md) | Prevenzione: regole e prompt via MCP, `sat-check init`, skill e hook per Claude Code, baseline in CI | F19 |
 | F21 | [21-pannello-agente.md](21-pannello-agente.md) | «Send to agent» dal pannello, stato dell'agente, demo e lancio, 2.0.0 | F19 (meglio dopo F20) |
+| F22 | [22-precisione.md](22-precisione.md) | Falsi positivi su shadcn/Radix trovati su oneoffice: nome dai `<label>`, roving tabindex, intestazioni di gruppo, modali, 2.0.1 | F21 |
 
 ```
 F1 ─► F2 ─┬─► F3 ──────────┬─► F6
